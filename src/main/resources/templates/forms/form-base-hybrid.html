@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Title</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
+          crossorigin="anonymous">
+
+</head>
+<body class="container">
+
+<div th:fragment="Generic" class="container-md" th:remove="tag">
+    <h2>Editeur</h2>
+    <form th:object="${formData}" method="post" class="">
+
+        <div th:each="field : ${fields}"  th:remove="tag" >
+
+            <div th:switch="${field.type.name()}" th:remove="tag">
+                <div th:case="'TEXT'" th:insert="~{forms/fields2/text-fieldnew :: text-field(${field})}"></div>
+                <div th:case="'SELECT'" th:insert="~{forms/fields2/select-field :: select-field(${field})}"></div>
+                <div th:case="'CHECKBOX'" th:insert="~{forms/fields2/checkbox-field :: checkbox-field(${field})}"></div>
+                <div th:case="'PHONE'" th:insert="~{forms/fields2/phone-field :: phone-field(${field})}"></div>
+                <div th:case="'URL'" th:insert="~{forms/fields2/url-field :: url-field(${field})}"></div>
+                <div th:case="'TEXTAREA'" th:insert="~{forms/fields2/textarea-field :: textarea-field(${field})}"></div>
+                <div th:case="'RADIO'" th:insert="~{forms/fields2/radio-field :: radio-field(${field})}"></div>
+                <div th:case="'NUMBER'" th:insert="~{forms/fields2/number-field :: number-field(${field})}"></div>
+                <div th:case="'EMAIL'" th:insert="~{forms/fields2/email-field :: email-field(${field})}"></div>
+                <div th:case="'PASSWORD'" th:insert="~{forms/fields2/password-field :: password-field(${field})}"></div>
+                <div th:case="'DATE'" th:insert="~{forms/fields2/date-field :: date-field(${field})}"></div>
+                <div th:case="'HIDDEN'" th:insert="~{forms/fields2/hidden-field :: hidden-field(${field})}"></div>
+
+            </div>
+
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const editorId = [[${editorId}]];
+
+        fetch(`/api/editors/${editorId}`)
+            .then(res => res.json())
+            .then(data => {
+                // Parcours de toutes les propriétés du DTO
+                Object.entries(data).forEach(([fieldName, fieldValue]) => {
+                    // On récupère tous les éléments avec ce nom
+                    const elements = document.querySelectorAll(`[name="${fieldName}"]`);
+
+                    if (elements.length === 0) return;
+
+                    // Cas particulier pour les radios (un seul à sélectionner)
+                    if (elements[0].type === 'radio') {
+                        elements.forEach(radio => {
+                            radio.checked = (radio.value === fieldValue.toString());
+                        });
+                    }
+                    // Cas particulier pour les checkboxes (valeurs multiples)
+                    else if (elements[0].type === 'checkbox') {
+                        const values = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
+                        elements.forEach(checkbox => {
+                            checkbox.checked = values.includes(checkbox.value);
+                        });
+                    }
+                    // Cas particulier pour les selects
+                    else if (elements[0].tagName === 'SELECT') {
+                        const select = elements[0];
+                        if (select.multiple) {
+                            // Select multiple
+                            Array.from(select.options).forEach(option => {
+                                option.selected = fieldValue.includes(option.value);
+                            });
+                        } else {
+                            // Select simple
+                            select.value = fieldValue || '';
+                        }
+                    }
+                    // Cas par défaut (input, textarea)
+                    else {
+                        elements.forEach(el => {
+                            if (el.type !== 'file') { // On ignore les fichiers
+                                el.value = fieldValue || '';
+                            }
+                        });
+                    }
+                });
+            });
+
+        /*]]>*/
+    </script>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+</body>
+</html>

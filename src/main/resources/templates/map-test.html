@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="input(field)">
+    <label th:for="${field.name}" th:text="${field.label}"></label>
+    <input type="text"
+           th:name="${field.name}"
+           th:value="${field.defaultValue}"
+           th:placeholder="${field.placeholder}"
+           th:utext="${field.extraAttributesAsHtml}" />
+</div>
+</body>
+</html>

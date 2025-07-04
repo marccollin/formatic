@@ -1,0 +1,49 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="checkbox-field(field)" th:remove="tag">
+
+    <div class="row mb-3">
+
+        <th:block th:if="${field.multiple}">
+            <legend th:text="${field.label} "
+                    class="col-form-label col-sm-2 pt-0"
+                    th:classappend="${field.required} ? 'required' : ''"></legend>
+
+            <div class="col-sm-10">
+
+                <div th:each="option : ${field.options}" class="mb-3 form-check">
+                    <input type="checkbox"
+                           th:id="${field.name + '_' + option.value}"
+                           th:field="*{__${field.name}__}"
+                           class="form-check-input"
+                           th:classappend="${field.cssClass}"
+                           th:required="${field.required}"
+                           th:value="${option.value}"
+                    />
+                    <label th:for="${field.name + '_' + option.value}"
+                           th:text="${option.label}"
+                           class="form-check-label me-2"></label>
+                </div>
+            </div>
+        </th:block>
+
+        <!-- Checkbox simple (boolean) -->
+        <div class="col-sm-10 offset-sm-2" th:unless="${field.multiple}">
+
+            <div class="form-check">
+                <input type="checkbox"
+                       th:id="${field.name}"
+                       th:name="${field.name}"
+                       th:required="${field.required}"
+                       class="form-check-input"
+                       th:classappend="${field.cssClass}"
+                       th:checked="*{__${field.name}__}"
+                       th:value="*{__${field.name}__}"/>
+                <label th:for="${field.name}" th:text="${field.label}"
+                       class="form-check-label"
+                       th:classappend="${field.required} ? 'required' : ''"></label>
+            </div>
+            <small th:if="${field.helpText}" th:text="${field.helpText}" class="help-text"></small>
+        </div>
+    </div>
+</div>
+</html>

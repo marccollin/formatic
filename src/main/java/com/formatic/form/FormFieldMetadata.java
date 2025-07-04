@@ -12,6 +12,7 @@ public class FormFieldMetadata {
     private String name;
     private FormFieldType type;
     private String label;
+    private boolean readonly;
     private boolean required;
     private String placeholder;
     private List<SelectRadioOption> options;
@@ -24,8 +25,15 @@ public class FormFieldMetadata {
     private String pattern;
     private String errorMessage;
     private String defaultValue;
+
+    private String title;
+
+
+    private boolean readOnly;
     private double min;
     private double max;
+
+    private double step;
     private int minLength;
     private int maxLength;
     private int rows;
@@ -33,11 +41,50 @@ public class FormFieldMetadata {
     private boolean multiple;
     private String helpText;
 
+    Map<String, Object> extraProperties;
 
     private String htmlAttributesString;
 
+    public Map<String, Object> getExtraProperties() {
+
+        if(extraProperties==null){
+            extraProperties=new HashMap<>();
+        }
+
+        return extraProperties;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
+    public String getExtraAttributesAsHtml() {
+        if (extraProperties == null || extraProperties.isEmpty()) return "";
+        return extraProperties.entrySet().stream()
+                .map(e -> e.getKey() + "=\"" + e.getValue() + "\"")
+                .collect(Collectors.joining(" "));
+    }
+
+
+    public void setExtraProperties(Map<String, Object> extraProperties) {
+
+        if(extraProperties==null){
+            extraProperties=new HashMap<>();
+        }
+
+        this.extraProperties = extraProperties;
+    }
+
     public String getHtmlAttributesString() {
         return this.htmlAttributesString;
+    }
+
+    public void setHtmlAttributesString(String htmlAttributesString) {
+        this.htmlAttributesString = htmlAttributesString;
     }
 
     public void setHtmlAttributesString(String[] htmlAttributes) {
@@ -72,6 +119,14 @@ public class FormFieldMetadata {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public boolean isReadonly() {
+        return readonly;
+    }
+
+    public void setReadonly(boolean readonly) {
+        this.readonly = readonly;
     }
 
     public boolean isRequired() {
@@ -187,6 +242,14 @@ public class FormFieldMetadata {
         this.defaultValue = defaultValue;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public double getMin() {
         return min;
     }
@@ -201,6 +264,14 @@ public class FormFieldMetadata {
 
     public void setMax(double max) {
         this.max = max;
+    }
+
+    public double getStep() {
+        return step;
+    }
+
+    public void setStep(double step) {
+        this.step = step;
     }
 
     public int getMinLength() {
