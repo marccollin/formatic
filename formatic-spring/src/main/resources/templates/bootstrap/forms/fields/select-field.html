@@ -1,0 +1,27 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="select-field(field)" th:remove="tag">
+
+    <div class="row mb-3">
+
+        <label class="col-sm-2 col-form-label" th:classappend="${field.required} ? 'required' : ''"
+               th:for="${field.name}"
+               th:text="${field.label}"></label>
+
+        <div class="col-sm-10">
+
+            <select class="form-select"
+                    th:classappend="${field.cssClass}"
+                    th:field="*{__${field.name}__}"
+                    th:multiple="${field.multiple}"
+                    th:required="${field.required}">
+                <option th:unless="${field.required}" value="">Sélectionnez...</option>
+                <option th:disabled="${option.disabled}"
+                        th:each="option : ${field.options}"
+                        th:text="${option.label}"
+                        th:value="${option.value}"></option>
+            </select>
+            <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
+        </div>
+    </div>
+</div>
+</html>

@@ -1,0 +1,25 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="date-field(field)" th:remove="tag">
+
+    <div class="row mb-3">
+
+        <label class="col-sm-2 col-form-label" th:classappend="${field.required} ? 'required' : ''"
+               th:for="${field.name}"
+               th:text="${field.label}"></label>
+
+        <div class="col-sm-10">
+
+            <input class="form-control"
+                   th:classappend="${field.cssClass}"
+                   th:id="${field.name}"
+                   th:max="${field.maxDate != null} ? ${field.maxDate} : null"
+                   th:min="${field.minDate != null} ? ${field.minDate} : null"
+                   th:name="${field.name}"
+                   th:placeholder="${field.placeholder}"
+                   th:required="${field.required}"
+                   th:value="*{__${field.name}__}"
+                   type="date"/>
+            <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
+        </div>
+    </div>
+</th:block>

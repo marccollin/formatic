@@ -1,2 +1,5 @@
 rootProject.name = "formatic"
 
+include 'formatic-core'
+include 'formatic-spring'
+include 'formatic-example'

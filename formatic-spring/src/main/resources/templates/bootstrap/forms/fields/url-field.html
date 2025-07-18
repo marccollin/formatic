@@ -1,0 +1,26 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="url-field(field)" th:remove="tag">
+
+    <div class="row mb-3">
+
+        <label class="col-sm-2 col-form-label" th:classappend="${field.required} ? 'required' : ''"
+               th:for="${field.name}"
+               th:text="${field.label}"></label>
+
+        <div class="col-sm-10">
+            <input class="form-control"
+                   th:classappend="${field.cssClass}"
+                   th:id="${field.name}"
+                   th:maxlength="${(field.maxLength > 0 && field.maxLength < 2147483647) ? field.maxLength : null}"
+                   th:minlength="${field.minLength > 0} ? ${field.minLength} : null"
+                   th:name="${field.name}"
+                   th:pattern="${field.pattern}"
+                   th:placeholder="${field.placeholder}"
+                   th:required="${field.required}"
+                   th:value="*{__${field.name}__}"
+                   type="url"/>
+            <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
+        </div>
+    </div>
+</div>
+

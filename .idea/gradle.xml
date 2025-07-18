@@ -9,6 +9,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/formatic-core" />
+            <option value="$PROJECT_DIR$/formatic-example" />
+            <option value="$PROJECT_DIR$/formatic-spring" />
           </set>
         </option>
       </GradleProjectSettings>

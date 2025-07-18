@@ -1,8 +1,0 @@
-<html xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="hidden-field(field)" th:remove="tag">
-    <input type="hidden"
-           th:id="${field.name}"
-           th:name="${field.name}"
-           th:value="*{__${field.name}__}"
-    />
-</div>
