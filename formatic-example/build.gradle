@@ -1,0 +1,53 @@
+plugins {
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+    id 'application'
+}
+
+description = 'Formatic Examples and Demos'
+
+dependencies {
+    // Dependencies for all modules
+    implementation project(':formatic-core')
+    implementation project(':formatic-spring')
+
+    // Spring Boot for Spring examples
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // Helper utilities for examples
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+
+    // Logging
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    runtimeOnly 'ch.qos.logback:logback-classic:1.5.13'
+
+    // Tests
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+
+// Configuration used for testing
+test {
+    useJUnitPlatform()
+
+    // Test profile configuration
+    systemProperty 'spring.profiles.active', 'test'
+
+    // Increase memory for integration tests
+    maxHeapSize = '512m'
+}
+
+processResources {
+    // Only extend specific configuration files
+    filesMatching(['**/*.properties', '**/*.yml', '**/*.yaml']) {
+        expand(project.properties)
+    }
+
+    // Copy resources from other modules for the examples
+    from(project(':formatic-spring').file('src/main/resources')) {
+        include 'templates/**'
+        into 'spring-templates'
+    }
+}

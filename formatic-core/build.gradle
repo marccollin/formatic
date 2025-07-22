@@ -1,0 +1,46 @@
+description = 'Formatic Core - Framework agnostic core library'
+
+dependencies {
+    // Logging (optionnel, interface seulement)
+    compileOnly "org.slf4j:slf4j-api:${slf4jVersion}"
+
+    // Annotations pour la documentation et validation
+    compileOnly 'org.jetbrains:annotations:24.0.1'
+
+    // Validation (optionnel)
+    compileOnly 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    // BOMs pour la gestion des versions de test
+    testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
+    testImplementation platform("org.mockito:mockito-bom:${mockitoBomVersion}")
+
+    // Tests spécifiques au core
+    testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Dépendances de test (versions gérées par les BOMs)
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+
+}
+
+// Configuration spécifique pour le module core
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': 'Formatic  Core',
+                'Implementation-Version': project.version,
+        )
+    }
+}
+
+// Documentation
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+}

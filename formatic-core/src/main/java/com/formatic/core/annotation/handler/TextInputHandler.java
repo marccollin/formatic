@@ -1,0 +1,40 @@
+package com.formatic.core.annotation.handler;
+
+import com.formatic.core.annotation.PhoneInput;
+import com.formatic.core.annotation.TextInput;
+import com.formatic.core.annotation.TextareaInput;
+import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.FormFieldType;
+
+import java.lang.reflect.Field;
+
+/**
+ * Handler for fields annotated with {@link TextInput}.
+ *
+ * This class processes metadata for text  input fields in dynamic form generation.
+ * It extracts and sets text-specific properties such as input pattern, placeholder,
+ * min/max length, default value, read-only status, CSS class, and error message.
+ *
+ * Maps the {@code @TextInput} annotation to a {@link FormFieldMetadata} structure.
+ */
+public class TextInputHandler extends BaseFormFieldHandler<TextInput> {
+
+    public TextInputHandler() {
+        super(TextInput.class);
+    }
+
+    @Override
+    protected void processSpecificAttributes(TextInput annotation, FormFieldMetadata metadata, Field field) {
+        metadata.setType(FormFieldType.TEXT);
+        metadata.setCssClass(annotation.cssClass());
+        metadata.setPlaceholder(annotation.placeholder());
+        metadata.setDefaultValue(annotation.defaultValue());
+        metadata.setPattern(annotation.pattern());
+        metadata.setReadonly(annotation.readonly());
+        metadata.setMinLength(annotation.minLength());
+        metadata.setMaxLength(annotation.maxLength());
+        metadata.setErrorMessage(annotation.errorMessage());
+        metadata.setTitle(annotation.title());
+    }
+
+}

@@ -1,0 +1,95 @@
+plugins {
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+
+description = 'Formatic Spring Boot Integration'
+
+// Appliquer la gestion des dépendances Spring Boot
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+
+dependencies {
+    // Dépendance vers le module core
+    api project(':formatic-core')
+
+    // Spring Boot dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // Thymeleaf pour le templating
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // Auto-configuration
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.springframework.boot:spring-boot-autoconfigure-processor'
+
+    // Tests Spring Boot
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
+
+    // Test containers pour tests d'intégration (optionnel)
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+    testImplementation 'org.testcontainers:testcontainers:1.19.3'
+}
+
+// Configuration pour ne pas créer un fat jar par défaut
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+// Configuration du bootJar (optionnel, pour les tests)
+bootJar {
+    enabled = false
+}
+
+// Configuration pour les tests
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+
+    // Configuration pour les tests d'intégration
+    systemProperty 'spring.profiles.active', 'test'
+}
+
+// Configuration pour exclure les tests d'intégration des tests unitaires
+test {
+    exclude '**/*IntegrationTest*'
+}
+
+// Tâche séparée pour les tests d'intégration
+task integrationTest(type: Test) {
+    useJUnitPlatform()
+    include '**/*IntegrationTest*'
+    mustRunAfter test
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+// Configuration des resources - NE PAS étendre les templates Thymeleaf
+processResources {
+    // Traiter tous les fichiers normalement (copie simple)
+    // Étendre seulement les fichiers de configuration spécifiques
+    filesMatching(['**/*.properties', '**/*.yml', '**/*.yaml']) {
+        expand(project.properties)
+    }
+    // Les templates HTML ne sont pas traités par filesMatching donc copiés tels quels
+}
+
+// Configuration spécifique Spring Boot
+compileJava {
+    options.compilerArgs << '-parameters'
+}
