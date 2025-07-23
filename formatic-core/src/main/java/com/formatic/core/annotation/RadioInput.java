@@ -9,6 +9,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface RadioInput {
+    String cssClass() default "";
+
     String name() default "";
 
     String label() default "";

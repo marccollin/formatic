@@ -19,15 +19,17 @@ public @interface DateInput {
 
     boolean required() default false;
 
-    String min() default ""; // format ISO 8601
-
-    String max() default "";
-
     String placeholder() default "";
 
     String defaultValue() default "";
 
     boolean readonly() default false;
+
+    String min() default ""; // format ISO 8601
+
+    String max() default "";
+
+    String step() default "";
 
     String[] htmlAttributes() default {};
 }

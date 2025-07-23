@@ -11,15 +11,16 @@
             <input class="form-control"
                    th:classappend="${field.cssClass}"
                    th:id="${field.name}"
-                   th:maxlength="${field.maxLength}"
-                   th:minlength="${field.minLength}"
+                   th:maxlength="${field.maxLength < 2147483647} ? ${field.maxLength} : null"
+                   th:minlength="${field.minLength > 0} ? ${field.minLength} : null"
                    th:name="${field.name}"
                    th:pattern="${field.pattern}"
                    th:placeholder="${field.placeholder}"
                    th:readonly="${field.readOnly}"
                    th:required="${field.required}"
                    th:title="${field.title}"
-                   th:value="*{__${field.name}__}"
+                   th:value="*{__${field.name}__} ?: ${field.defaultValue}"
+                   th:de
                    type="text"
             />
 

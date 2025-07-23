@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
 public @interface HiddenInput {
     String name() default "";
 
-    String value() default "";
+    String defaultValue() default "";
 }

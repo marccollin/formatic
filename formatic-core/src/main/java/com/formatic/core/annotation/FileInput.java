@@ -9,6 +9,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface FileInput {
+    String cssClass() default "";
+
     String name() default "";
 
     String label() default "";
@@ -20,6 +22,8 @@ public @interface FileInput {
     String accept() default ""; // ex: image/png,image/jpeg
 
     boolean multiple() default false;
+
+    String errorMessage() default "";
 
     String[] htmlAttributes() default {};
 }

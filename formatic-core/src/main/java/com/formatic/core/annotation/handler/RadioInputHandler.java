@@ -47,10 +47,9 @@ public class RadioInputHandler extends BaseFormFieldHandler<RadioInput> {
             metadata.setOptions(dynamicOptions);
         }
 
-//        metadata.setCssClass(annotation.cssClass());
+        metadata.setCssClass(annotation.cssClass());
 
         metadata.setDefaultValue(annotation.defaultValue());
-
     }
 
     private List<SelectRadioOption> parseStaticOptions(String[] optionsArray) {

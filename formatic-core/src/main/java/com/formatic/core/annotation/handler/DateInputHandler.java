@@ -38,8 +38,6 @@ public class DateInputHandler extends BaseFormFieldHandler<DateInput> {
         metadata.setReadonly(annotation.readonly());
         metadata.setMinDate(annotation.min());
         metadata.setMaxDate(annotation.max());
-        // metadata.setErrorMessage(annotation.errorMessage());
-        // metadata.setTitle(annotation.title());
     }
 
 }

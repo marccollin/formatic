@@ -74,6 +74,9 @@ public abstract class BaseFormFieldHandler<T extends Annotation>
 
         // Other common attributes
         metadata.setRequired(common.required());
+
+        metadata.setDisabled(common.disabled());
+
         //metadata.setHtmlAttributes(common.htmlAttributes());
     }
 

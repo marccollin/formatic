@@ -1,6 +1,5 @@
 package com.formatic.core.annotation.handler;
 
-import com.formatic.core.annotation.TextInput;
 import com.formatic.core.annotation.UrlInput;
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldType;
@@ -32,7 +31,6 @@ public class UrlInputHandler extends BaseFormFieldHandler<UrlInput> {
         metadata.setReadonly(annotation.readonly());
         metadata.setMinLength(annotation.minLength());
         metadata.setMaxLength(annotation.maxLength());
-        metadata.setPattern(annotation.pattern());
         metadata.setErrorMessage(annotation.errorMessage());
         metadata.setTitle(annotation.title());
     }

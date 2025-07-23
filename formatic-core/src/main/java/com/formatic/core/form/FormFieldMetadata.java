@@ -33,8 +33,12 @@ public class FormFieldMetadata {
 
     private String title;
 
+    private String accept;
+
     private String minDate;
     private String maxDate;
+
+    private boolean disabled;
 
     private boolean readOnly;
     private double min;
@@ -344,4 +348,19 @@ public class FormFieldMetadata {
         this.maxDate = maxDate;
     }
 
+    public String getAccept() {
+        return accept;
+    }
+
+    public void setAccept(String accept) {
+        this.accept = accept;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
 }

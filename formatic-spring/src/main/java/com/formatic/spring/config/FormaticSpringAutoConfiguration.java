@@ -86,6 +86,31 @@ public class FormaticSpringAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    public EmailInputHandler emailInputHandler() {
+        return new EmailInputHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public FileInputHandler fileInputHandler() {
+        return new FileInputHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PasswordInputHandler passwordInputHandler() {
+        return new PasswordInputHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public HiddenInputHandler hiddenInputHandler() {
+        return new HiddenInputHandler();
+    }
+
+
+    @Bean
     public OptionsProviderRegistry optionsProviderRegistry(ApplicationContext applicationContext) {
         // Spring will automatically inject the ApplicationContext
         return new SpringOptionsProviderRegistry(applicationContext);

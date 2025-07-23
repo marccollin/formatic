@@ -5,6 +5,8 @@ import com.formatic.core.annotation.TextInput;
 import com.formatic.core.annotation.TextareaInput;
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 
@@ -18,6 +20,8 @@ import java.lang.reflect.Field;
  * Maps the {@code @TextInput} annotation to a {@link FormFieldMetadata} structure.
  */
 public class TextInputHandler extends BaseFormFieldHandler<TextInput> {
+
+    private static final Logger logger = LoggerFactory.getLogger(CheckBoxHandler.class);
 
     public TextInputHandler() {
         super(TextInput.class);

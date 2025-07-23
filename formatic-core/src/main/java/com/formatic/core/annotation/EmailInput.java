@@ -9,6 +9,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface EmailInput {
+
+    String cssClass() default "";
+
     String name() default "";
 
     String label() default "";
@@ -19,7 +22,15 @@ public @interface EmailInput {
 
     String placeholder() default "";
 
+    String defaultValue() default "";
+
+    boolean readonly() default false;
+
+    int minLength() default -1;
+
     int maxLength() default -1;
+
+    String pattern()  default "";
 
     String errorMessage() default "";
 

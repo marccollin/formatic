@@ -19,17 +19,17 @@ public @interface NumberInput {
 
     boolean required() default false;
 
-    double min() default Double.NaN;
-
-    double max() default Double.NaN;
-
-    double step() default Double.NaN;
-
     String placeholder() default "";
 
     String defaultValue() default "";
 
     boolean readonly() default false;
+
+    double min() default Double.NaN;
+
+    double max() default Double.NaN;
+
+    double step() default Double.NaN;
 
     String errorMessage() default "";
 

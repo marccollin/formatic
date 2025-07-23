@@ -21,17 +21,17 @@ public @interface TextareaInput {
 
     String placeholder() default "";
 
-    int rows() default 4;
+    String defaultValue() default "";
 
-    int cols() default 40;
+    boolean readonly() default false;
 
     int minLength() default -1;
 
     int maxLength() default -1;
 
-    String defaultValue() default "";
+    int rows() default 4;
 
-    boolean readonly() default false;
+    int cols() default 40;
 
     String wrap() default "soft"; // soft | hard | off
 

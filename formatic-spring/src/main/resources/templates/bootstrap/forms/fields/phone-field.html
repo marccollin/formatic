@@ -11,13 +11,14 @@
             <input class="form-control"
                    th:classappend="${field.cssClass}"
                    th:id="${field.name}"
-                   th:maxlength="${(field.maxLength > 0 && field.maxLength < 2147483647) ? field.maxLength : null}"
+                   th:maxlength="${field.maxLength < 2147483647} ? ${field.maxLength} : null"
                    th:minlength="${field.minLength > 0} ? ${field.minLength} : null"
                    th:name="${field.name}"
                    th:pattern="${field.pattern}"
                    th:placeholder="${field.placeholder}"
+                   th:readonly="${field.readOnly}"
                    th:required="${field.required}"
-                   th:value="*{__${field.name}__}"
+                   th:value="*{__${field.name}__} ?: ${field.defaultValue}"
                    type="tel"/>
             <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
         </div>

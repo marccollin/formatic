@@ -9,6 +9,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface PasswordInput {
+    String cssClass() default "";
+
     String name() default "";
 
     String label() default "";
@@ -18,6 +20,12 @@ public @interface PasswordInput {
     boolean required() default false;
 
     String placeholder() default "";
+
+    boolean readonly() default false;
+
+    String defaultValue() default "";
+
+    int minLength() default -1;
 
     int maxLength() default -1;
 

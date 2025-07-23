@@ -20,6 +20,7 @@
         <div th:each="field : ${fields}" th:remove="tag">
 
             <div th:remove="tag" th:switch="${field.type.name()}">
+                <div th:case="'HIDDEN'" th:insert="~{bootstrap/forms/fields/hidden-field :: hidden-field(${field})}"></div>
                 <div th:case="'TEXT'" th:insert="~{bootstrap/forms/fields/text-field :: text-field(${field})}"></div>
                 <div th:case="'SELECT'" th:insert="~{bootstrap/forms/fields/select-field :: select-field(${field})}"></div>
                 <div th:case="'CHECKBOX'" th:insert="~{bootstrap/forms/fields/checkbox-field :: checkbox-field(${field})}"></div>

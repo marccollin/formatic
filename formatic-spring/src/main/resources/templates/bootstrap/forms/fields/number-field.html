@@ -16,8 +16,9 @@
                    th:min="${field.min != -1.7976931348623157E308} ? ${field.min} : null"
                    th:name="${field.name}"
                    th:placeholder="${field.placeholder}"
+                   th:readonly="${field.readOnly}"
                    th:required="${field.required}"
-                   th:value="*{__${field.name}__}"
+                   th:value="*{__${field.name}__} ?: ${field.defaultValue}"
                    type="number"/>
             <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
 

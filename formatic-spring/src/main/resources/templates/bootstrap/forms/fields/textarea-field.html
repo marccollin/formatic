@@ -17,9 +17,12 @@
                       th:minlength="${field.minLength > 0} ? ${field.minLength} : null"
                       th:name="${field.name}"
                       th:placeholder="${field.placeholder}"
+                      th:readonly="${field.readOnly}"
                       th:required="${field.required}"
                       th:rows="${field.rows}"
-                      th:value="*{__${field.name}__}"></textarea>
+                      th:value="*{__${field.name}__} ?: ${field.defaultValue}">
+
+            </textarea>
             <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
         </div>
     </div>

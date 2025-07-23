@@ -31,7 +31,6 @@ public class PhoneInputHandler extends BaseFormFieldHandler<PhoneInput> {
         metadata.setReadonly(annotation.readonly());
         metadata.setMinLength(annotation.minLength());
         metadata.setMaxLength(annotation.maxLength());
-        metadata.setPattern(annotation.pattern());
         metadata.setErrorMessage(annotation.errorMessage());
     }
 }
