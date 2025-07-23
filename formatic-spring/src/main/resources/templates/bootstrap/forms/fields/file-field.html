@@ -1,5 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="password-field(field)" th:remove="tag">
+<div th:fragment="file-field(field)" th:remove="tag">
 
     <div class="row mb-3">
 
@@ -8,20 +8,14 @@
                th:text="${field.label}"></label>
 
         <div class="col-sm-10">
-
             <input class="form-control"
                    th:classappend="${field.cssClass}"
                    th:id="${field.name}"
-                   th:maxlength="${field.maxLength < 2147483647} ? ${field.maxLength} : null"
-                   th:minlength="${field.minLength > 0} ? ${field.minLength} : null"
                    th:name="${field.name}"
-                   th:pattern="${field.pattern}"
-                   th:placeholder="${field.placeholder}"
-                   th:readonly="${field.readOnly}"
                    th:required="${field.required}"
                    th:disabled="${field.disabled}"
                    th:value="*{__${field.name}__} ?: ${field.defaultValue}"
-                   type="password"/>
+                   type="url"/>
             <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
         </div>
     </div>

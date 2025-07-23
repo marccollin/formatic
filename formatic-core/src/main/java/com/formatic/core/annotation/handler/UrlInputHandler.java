@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 /**
  * Handler for fields annotated with {@link UrlInput}.
  *
- * This class processes metadata for url  input fields in dynamic form generation.
+ * This class processes metadata for url input fields in dynamic form generation.
  * It extracts and sets url-specific properties such as input pattern, placeholder,
  * min/max length, default value, read-only status, CSS class, and error message.
  *

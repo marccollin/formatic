@@ -20,19 +20,19 @@
         <div th:each="field : ${fields}" th:remove="tag">
 
             <div th:remove="tag" th:switch="${field.type.name()}">
-                <div th:case="'TEXT'" th:insert="~{forms/fields2/text-fieldnew :: text-field(${field})}"></div>
-                <div th:case="'SELECT'" th:insert="~{forms/fields2/select-field :: select-field(${field})}"></div>
-                <div th:case="'CHECKBOX'" th:insert="~{forms/fields2/checkbox-field :: checkbox-field(${field})}"></div>
-                <div th:case="'PHONE'" th:insert="~{forms/fields2/phone-field :: phone-field(${field})}"></div>
-                <div th:case="'URL'" th:insert="~{forms/fields2/url-field :: url-field(${field})}"></div>
-                <div th:case="'TEXTAREA'" th:insert="~{forms/fields2/textarea-field :: textarea-field(${field})}"></div>
-                <div th:case="'RADIO'" th:insert="~{forms/fields2/radio-field :: radio-field(${field})}"></div>
-                <div th:case="'NUMBER'" th:insert="~{forms/fields2/number-field :: number-field(${field})}"></div>
-                <div th:case="'EMAIL'" th:insert="~{forms/fields2/email-field :: email-field(${field})}"></div>
-                <div th:case="'PASSWORD'" th:insert="~{forms/fields2/password-field :: password-field(${field})}"></div>
-                <div th:case="'DATE'" th:insert="~{forms/fields2/date-field :: date-field(${field})}"></div>
-                <div th:case="'HIDDEN'" th:insert="~{forms/fields2/hidden-field :: hidden-field(${field})}"></div>
-
+                <div th:case="'TEXT'" th:insert="~{bootstrap/forms/fields/text-field :: text-field(${field})}"></div>
+                <div th:case="'FILE'" th:insert="~{bootstrap/forms/fields/file-field :: file-field(${field})}"></div>
+                <div th:case="'SELECT'" th:insert="~{bootstrap/forms/fields/select-field :: select-field(${field})}"></div>
+                <div th:case="'CHECKBOX'" th:insert="~{bootstrap/forms/fields/checkbox-field :: checkbox-field(${field})}"></div>
+                <div th:case="'PHONE'" th:insert="~{bootstrap/forms/fields/phone-field :: phone-field(${field})}"></div>
+                <div th:case="'URL'" th:insert="~{bootstrap/forms/fields/url-field :: url-field(${field})}"></div>
+                <div th:case="'TEXTAREA'" th:insert="~{bootstrap/forms/fields/textarea-field :: textarea-field(${field})}"></div>
+                <div th:case="'RADIO'" th:insert="~{bootstrap/forms/fields/radio-field :: radio-field(${field})}"></div>
+                <div th:case="'NUMBER'" th:insert="~{bootstrap/forms/fields/number-field :: number-field(${field})}"></div>
+                <div th:case="'EMAIL'" th:insert="~{bootstrap/forms/fields/email-field :: email-field(${field})}"></div>
+                <div th:case="'PASSWORD'" th:insert="~{bootstrap/forms/fields/password-field :: password-field(${field})}"></div>
+                <div th:case="'DATE'" th:insert="~{bootstrap/forms/fields/date-field :: date-field(${field})}"></div>
+                <div th:case="'HIDDEN'" th:insert="~{bootstrap/forms/fields/hidden-field :: hidden-field(${field})}"></div>
             </div>
 
         </div>

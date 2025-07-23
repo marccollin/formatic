@@ -18,6 +18,7 @@
                    th:placeholder="${field.placeholder}"
                    th:readonly="${field.readOnly}"
                    th:required="${field.required}"
+                   th:disabled="${field.disabled}"
                    th:value="*{__${field.name}__}"
                    type="date"/>
             <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>

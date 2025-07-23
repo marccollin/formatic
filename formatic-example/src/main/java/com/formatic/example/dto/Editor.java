@@ -26,7 +26,7 @@ public class Editor {
     @SelectInput(optionsProvider = "getProvinces", required = true)
     private String provinceState;
 
-    @TextInput(defaultValue = "Canada")
+    @TextInput(defaultValue = "Canada", disabled = true)
     private String country;
 
     @TextInput(pattern = "[A-Za-z][0-9][A-Za-z] [0-9][A-Za-z][0-9]", maxLength = 7, placeholder = "A1A 1A1", title = "Enter a valid Canadian postal code (e.g., A1A 1A1)")
