@@ -1,7 +1,6 @@
 package com.formatic.core.annotation.handler;
 
 import com.formatic.core.annotation.HiddenInput;
-import com.formatic.core.annotation.UrlInput;
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldType;
 
@@ -9,10 +8,9 @@ import java.lang.reflect.Field;
 
 /**
  * Handler for fields annotated with {@link HiddenInput}.
- *
+ * <p>
  * This class processes metadata for hidden  input fields in dynamic form generation.
- *
- *
+ * <p>
  * Maps the {@code @HiddenInput} annotation to a {@link FormFieldMetadata} structure.
  */
 public class HiddenInputHandler implements FormFieldAnnotationHandler<HiddenInput> {

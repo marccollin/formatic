@@ -9,10 +9,8 @@ import java.lang.reflect.Field;
 
 /**
  * Abstract base class for handling form field annotations.
- *
  * This class provides a generic framework for extracting metadata from annotated fields
  * and populating {@link FormFieldMetadata} objects.
- *
  * Key responsibilities:
  * <ul>
  *   <li>Checks if a field is supported based on a specific annotation type.</li>
@@ -23,7 +21,6 @@ import java.lang.reflect.Field;
  *
  * Subclasses are responsible for implementing {@link #processSpecificAttributes}
  * to handle annotation-specific logic (e.g., for text inputs, selects, checkboxes, etc.).
- *
  * This base class ensures consistent handling of field names, labels,
  * and other shared properties across all form field types.
  */

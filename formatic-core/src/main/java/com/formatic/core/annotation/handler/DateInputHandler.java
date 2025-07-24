@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 
 /**
  * Form field handler for fields annotated with {@link DateInput}.
- *
+ * <p>
  * This class extends {@link BaseFormFieldHandler} to process metadata specific to
  * date input fields. It maps the annotation properties to the corresponding
  * fields in {@link FormFieldMetadata}, such as:

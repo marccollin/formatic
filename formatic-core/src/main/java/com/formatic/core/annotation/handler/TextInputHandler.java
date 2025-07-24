@@ -1,8 +1,6 @@
 package com.formatic.core.annotation.handler;
 
-import com.formatic.core.annotation.PhoneInput;
 import com.formatic.core.annotation.TextInput;
-import com.formatic.core.annotation.TextareaInput;
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldType;
 import org.slf4j.Logger;
@@ -12,16 +10,16 @@ import java.lang.reflect.Field;
 
 /**
  * Handler for fields annotated with {@link TextInput}.
- *
+ * <p>
  * This class processes metadata for text  input fields in dynamic form generation.
  * It extracts and sets text-specific properties such as input pattern, placeholder,
  * min/max length, default value, read-only status, CSS class, and error message.
- *
+ * <p>
  * Maps the {@code @TextInput} annotation to a {@link FormFieldMetadata} structure.
  */
 public class TextInputHandler extends BaseFormFieldHandler<TextInput> {
 
-    private static final Logger logger = LoggerFactory.getLogger(CheckBoxHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(TextInputHandler.class);
 
     public TextInputHandler() {
         super(TextInput.class);

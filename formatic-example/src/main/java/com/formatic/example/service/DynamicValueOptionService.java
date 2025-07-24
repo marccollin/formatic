@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * Service providing dynamic option lists for select and radio inputs.
- *
+ * <p>
  * Currently supplies hardcoded lists of cities and provinces used in form fields.
  */
 @Service

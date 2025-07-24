@@ -235,9 +235,7 @@ public class SpringOptionsProviderRegistryTest {
         assertTrue(result.isPresent());
 
         // Verify that invoking the provider throws RuntimeException
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            result.get().getOptions();
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> result.get().getOptions());
 
         assertTrue(exception.getMessage().contains("Error while invoking  " + methodName));
         assertNotNull(exception.getCause());

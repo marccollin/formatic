@@ -8,11 +8,11 @@ import java.lang.reflect.Field;
 
 /**
  * Handler for fields annotated with {@link EmailInput}.
- *
+ * <p>
  * This class processes metadata for email  input fields in dynamic form generation.
  * It extracts and sets email-specific properties such as input pattern, placeholder,
  * min/max length, default value, read-only status, CSS class, and error message.
- *
+ * <p>
  * Maps the {@code @UrlInput} annotation to a {@link FormFieldMetadata} structure.
  */
 public class EmailInputHandler extends BaseFormFieldHandler<EmailInput> {

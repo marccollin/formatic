@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 /**
  * Handler for fields annotated with {@code @CheckboxInput}.
- *
+ * <p>
  * This class determines how to interpret and configure a field based on its Java type:
  *
  * <ul>

@@ -8,12 +8,12 @@ import java.lang.reflect.Field;
 
 /**
  * Handler for fields annotated with {@link NumberInput}.
- *
+ * <p>
  * This class is responsible for extracting metadata from fields annotated
  * with {@code @NumberInput} and mapping it to a {@link FormFieldMetadata}
  * instance. It sets properties specific to number inputs, such as min, max,
  * step, default value, placeholder, and CSS class.
- *
+ * <p>
  * Used in dynamic form generation to support number-type fields.
  */
 public class NumberInputHandler extends BaseFormFieldHandler<NumberInput> {

@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 
 /**
  * Handler for fields annotated with {@link RadioInput}.
- *
+ * <p>
  * This class is responsible for mapping {@code @RadioInput}-annotated fields to
  * {@link FormFieldMetadata} by handling radio-specific attributes such as static or
  * dynamic options and default values.
- *
+ * <p>
  * If static options are provided via the annotation, they are parsed directly.
  * If a dynamic options provider is specified, options are loaded using the
  * {@link OptionsProviderService}.

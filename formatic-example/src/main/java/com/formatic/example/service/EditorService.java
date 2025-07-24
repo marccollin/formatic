@@ -10,10 +10,10 @@ import java.util.Optional;
 
 /**
  * Service providing editor-related operations.
- *
+ * <p>
  * This implementation currently uses a hardcoded list of Editor objects
  * to simulate a data source. It supports retrieving editors by their ID.
- *
+ * <p>
  * Intended for demonstration or testing purposes and should be replaced
  * with a real data source integration in production.
  */
@@ -53,7 +53,7 @@ public class EditorService {
         editor2.setWebSite("https://www.artisticcreations.ca");
         editor2.setBirthDate(LocalDate.of(1985, 10, 20));
         editor2.setComment("Focuses on art and design publications.");
-        editor2.setInterest(Arrays.asList("lectureCheck"));
+        editor2.setInterest(List.of("lectureCheck"));
         editor2.setPaymentMethod("paypal");
 
         Editor editor3 = new Editor();

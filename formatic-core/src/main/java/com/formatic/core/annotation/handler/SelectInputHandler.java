@@ -14,11 +14,10 @@ import java.util.stream.Collectors;
 
 /**
  * Handler for fields annotated with {@link SelectInput}.
- *
+ * <p>
  * This class maps {@code @SelectInput}-annotated fields to {@link FormFieldMetadata},
  * configuring select-specific attributes such as static or dynamic options and the
  * multiple-selection flag.
- *
  * - If static options are defined in the annotation, they are parsed and applied.
  * - If a dynamic options provider is specified, options are loaded using
  *   {@link OptionsProviderService}.

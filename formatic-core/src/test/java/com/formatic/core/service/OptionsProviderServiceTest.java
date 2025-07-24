@@ -203,7 +203,7 @@ class OptionsProviderServiceTest {
     void loadOptions_CachesResults() {
         // Given
         String providerMethodName = "cachedProvider";
-        List<SelectRadioOption> expectedOptions = Arrays.asList(
+        List<SelectRadioOption> expectedOptions = List.of(
                 new SelectRadioOption("1", "Option 1")
         );
 
@@ -250,8 +250,8 @@ class OptionsProviderServiceTest {
         // Given
         String provider1 = "provider1";
         String provider2 = "provider2";
-        List<SelectRadioOption> options1 = Arrays.asList(new SelectRadioOption("1", "Option 1"));
-        List<SelectRadioOption> options2 = Arrays.asList(new SelectRadioOption("2", "Option 2"));
+        List<SelectRadioOption> options1 = List.of(new SelectRadioOption("1", "Option 1"));
+        List<SelectRadioOption> options2 = List.of(new SelectRadioOption("2", "Option 2"));
 
         OptionsProvider mockProvider2 = mock(OptionsProvider.class);
 

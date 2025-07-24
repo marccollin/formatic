@@ -4,7 +4,7 @@ import java.util.Objects;
 
 /**
  * Represents an option item for select or radio input elements.
- *
+ * <p>
  * Each option has a value and a label displayed to the user.
  * Additional attributes control selection, disabled state, and grouping.
  */

@@ -4,7 +4,6 @@ import com.formatic.core.form.SelectRadioOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -12,10 +11,10 @@ import java.util.stream.Collectors;
 /**
  * Service responsible for loading and caching dynamic options
  * provided by registered OptionsProvider implementations.
- *
+ * <p>
  * Options can be returned as lists or maps and are converted into
  * a unified List of SelectRadioOption objects for use in form fields.
- *
+ * <p>
  * Results are cached for performance, with methods to clear the cache selectively.
  */
 public class OptionsProviderService {
@@ -62,30 +61,6 @@ public class OptionsProviderService {
         return Collections.emptyList();
     }
 
-    private Method findMethodByName(Class<?> clazz, String methodName) {
-        return Arrays.stream(clazz.getMethods())
-                .filter(method -> method.getName().equals(methodName))
-                .filter(method -> method.getParameterCount() == 0)
-                .filter(method -> List.class.isAssignableFrom(method.getReturnType()) ||
-                        Map.class.isAssignableFrom(method.getReturnType()))
-                .findFirst()
-                .orElse(null);
-    }
-
-    private List<SelectRadioOption> invokeOptionsProvider(Object bean, Method method)
-            throws ReflectiveOperationException {
-        Object result = method.invoke(bean);
-
-        return switch (result) {
-            case List<?> list -> convertToSelectOptions(list);
-            case Map<?, ?> map -> convertMapToSelectOptions((Map<String, String>) map);
-            case null -> Collections.emptyList();
-            default -> {
-                logger.warn("Unsupported return type for options: {}", result.getClass().getSimpleName());
-                yield Collections.emptyList();
-            }
-        };
-    }
 
     private List<SelectRadioOption> convertToSelectOptions(Object result) {
         return switch (result) {
@@ -105,13 +80,6 @@ public class OptionsProviderService {
                 .collect(Collectors.toList());
     }
 
-
-    @SuppressWarnings("unchecked")
-    private List<SelectRadioOption> convertToSelectOptions(List<?> list) {
-        return list.stream()
-                .map(this::convertItemToSelectOption)
-                .collect(Collectors.toList());
-    }
 
     private SelectRadioOption convertItemToSelectOption(Object item) {
         return switch (item) {

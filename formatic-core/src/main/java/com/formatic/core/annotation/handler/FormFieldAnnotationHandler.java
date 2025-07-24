@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 
 /**
  * Interface for handling custom form field annotations.
- *
+ * <p>
  * Implementations of this interface are responsible for:
  * <ul>
  *   <li>Determining whether a given field is supported via {@link #supports(Field)}</li>

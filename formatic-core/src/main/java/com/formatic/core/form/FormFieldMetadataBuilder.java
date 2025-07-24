@@ -4,17 +4,19 @@ import com.formatic.core.annotation.handler.FormFieldAnnotationHandler;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Builder class responsible for creating form field metadata from a given class.
- *
+ * <p>
  * This class scans the declared fields of the target class and applies a list of
  * {@link FormFieldAnnotationHandler} instances to generate corresponding
  * {@link FormFieldMetadata} objects for fields supported by the handlers.
- *
+ * <p>
  * Metadata results are cached per class to optimize repeated metadata retrievals.
  */
 public class FormFieldMetadataBuilder {
@@ -41,6 +43,12 @@ public class FormFieldMetadataBuilder {
                         if (m != null) result.add(m);
                     });
         }
-        return result;
+
+        //sort
+        return result.stream()
+                .sorted(Comparator.comparingInt((FormFieldMetadata m) ->
+                        m.getOrder() == 0 ? Integer.MAX_VALUE : m.getOrder()))
+                .collect(Collectors.toList());
+
     }
 }

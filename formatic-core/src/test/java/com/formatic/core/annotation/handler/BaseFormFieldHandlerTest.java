@@ -1,6 +1,5 @@
 package com.formatic.core.annotation.handler;
 
-import com.formatic.core.annotation.CommonFieldAttributes;
 import com.formatic.core.form.FormFieldMetadata;
 import org.junit.jupiter.api.Test;
 

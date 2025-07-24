@@ -8,10 +8,9 @@ import java.lang.reflect.Field;
 
 /**
  * Handler for fields annotated with {@link TextareaInput}.
- *
+ * <p>
  * Maps {@code @TextareaInput}-annotated fields to {@link FormFieldMetadata},
  * setting attributes specific to multi-line text inputs such as:
- *
  * - CSS class, placeholder, default value
  * - Required and readonly flags
  * - Minimum and maximum length

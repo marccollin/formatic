@@ -18,11 +18,11 @@ import java.util.List;
 
 /**
  * Spring auto-configuration for the Formatic library.
- *
+ * <p>
  * This class registers default beans (form field input handlers, services, and registries)
  * only if no other user-defined beans of the same type are found in the Spring context.
  * It also scans the base package to discover other Formatic components.
- *
+ * <p>
  * The configuration is conditionally activated only if the class
  * `com.formatic.core.form.FormFieldMetadataBuilder` is present on the classpath.
  */

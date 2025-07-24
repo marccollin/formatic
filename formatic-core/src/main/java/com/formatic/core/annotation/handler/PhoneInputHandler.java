@@ -8,11 +8,11 @@ import java.lang.reflect.Field;
 
 /**
  * Handler for fields annotated with {@link PhoneInput}.
- *
+ * <p>
  * This class processes metadata for phone number input fields in dynamic form generation.
  * It extracts and sets phone-specific properties such as input pattern, placeholder,
  * min/max length, default value, read-only status, CSS class, and error message.
- *
+ * <p>
  * Maps the {@code @PhoneInput} annotation to a {@link FormFieldMetadata} structure.
  */
 public class PhoneInputHandler extends BaseFormFieldHandler<PhoneInput> {

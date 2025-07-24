@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 /**
  * Represents metadata for a form field used to generate HTML inputs dynamically.
- *
+ * <p>
  * This class stores common HTML input attributes as well as additional properties
  * specific to different input types (e.g., text, select, date).
  */

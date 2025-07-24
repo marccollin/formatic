@@ -2,7 +2,7 @@ package com.formatic.core.utils;
 
 /**
  * Utility class for common String operations.
- *
+ * <p>
  * Currently provides methods to check if a string contains non-blank text.
  * Avoid to add external dependencies
  */
