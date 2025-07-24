@@ -154,7 +154,7 @@ Thymeleaf template use actually boostrap and horizontal form. Other library and 
 
 Result of processing Editeur class
 
-![Formatic editor example process](https://github.com/marccollin/formatic/formatic_formnew.jpg)
+![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_formnew.jpg)
 
 ### DataSource for RadioInput, CheckBoxInput and SelectInput
 
