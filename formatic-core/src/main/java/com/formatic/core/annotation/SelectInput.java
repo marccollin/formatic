@@ -29,5 +29,4 @@ public @interface SelectInput {
 
     String defaultValue() default "";
 
-    String[] htmlAttributes() default {};
 }

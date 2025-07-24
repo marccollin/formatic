@@ -25,5 +25,4 @@ public @interface CheckboxInput {
 
     boolean defaultChecked() default false;
 
-    String[] htmlAttributes() default {};
 }

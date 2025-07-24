@@ -34,5 +34,4 @@ public @interface EmailInput {
 
     String errorMessage() default "";
 
-    String[] htmlAttributes() default {};
 }

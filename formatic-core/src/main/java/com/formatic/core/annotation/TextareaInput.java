@@ -35,5 +35,4 @@ public @interface TextareaInput {
 
     String wrap() default "soft"; // soft | hard | off
 
-    String[] htmlAttributes() default {};
 }

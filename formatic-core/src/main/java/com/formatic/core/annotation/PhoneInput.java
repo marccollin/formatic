@@ -32,6 +32,4 @@ public @interface PhoneInput {
     String pattern() default "";
 
     String errorMessage() default "";
-
-    String[] htmlAttributes() default {};
 }

@@ -25,5 +25,4 @@ public @interface RadioInput {
 
     String defaultValue() default "";
 
-    String[] htmlAttributes() default {};
 }

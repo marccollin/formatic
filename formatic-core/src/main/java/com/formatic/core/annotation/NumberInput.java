@@ -32,6 +32,4 @@ public @interface NumberInput {
     double step() default Double.NaN;
 
     String errorMessage() default "";
-
-    String[] htmlAttributes() default {};
 }

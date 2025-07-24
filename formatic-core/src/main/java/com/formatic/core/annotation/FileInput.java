@@ -25,5 +25,4 @@ public @interface FileInput {
 
     String errorMessage() default "";
 
-    String[] htmlAttributes() default {};
 }

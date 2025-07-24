@@ -33,5 +33,4 @@ public @interface PasswordInput {
 
     String errorMessage() default "";
 
-    String[] htmlAttributes() default {};
 }

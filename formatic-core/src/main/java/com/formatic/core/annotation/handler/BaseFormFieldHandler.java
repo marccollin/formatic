@@ -83,7 +83,6 @@ public abstract class BaseFormFieldHandler<T extends Annotation>
             String label = (String) annotation.getClass().getMethod("label").invoke(annotation);
             boolean required = (Boolean) annotation.getClass().getMethod("required").invoke(annotation);
             boolean disabled = (Boolean) annotation.getClass().getMethod("disabled").invoke(annotation);
-            String[] htmlAttributes = (String[]) annotation.getClass().getMethod("htmlAttributes").invoke(annotation);
 
             return new CommonFieldAttributes() {
                 @Override
@@ -106,10 +105,6 @@ public abstract class BaseFormFieldHandler<T extends Annotation>
                     return disabled;
                 }
 
-                @Override
-                public String[] htmlAttributes() {
-                    return htmlAttributes;
-                }
             };
         } catch (Exception e) {
             throw new RuntimeException("Error while extracting common attributes", e);

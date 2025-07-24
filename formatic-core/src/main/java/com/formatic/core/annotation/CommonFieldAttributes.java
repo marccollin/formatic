@@ -9,5 +9,4 @@ public interface CommonFieldAttributes {
 
     boolean disabled();
 
-    String[] htmlAttributes();
 }

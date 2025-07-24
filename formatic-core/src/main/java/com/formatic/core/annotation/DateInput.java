@@ -31,5 +31,4 @@ public @interface DateInput {
 
     String step() default "";
 
-    String[] htmlAttributes() default {};
 }

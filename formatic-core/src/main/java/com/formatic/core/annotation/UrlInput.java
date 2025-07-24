@@ -33,7 +33,5 @@ public @interface UrlInput {
 
     String errorMessage() default "";
 
-    String[] htmlAttributes() default {};
-
     String title() default "";
 }

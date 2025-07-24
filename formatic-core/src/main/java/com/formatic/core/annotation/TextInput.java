@@ -33,7 +33,5 @@ public @interface TextInput {
 
     String errorMessage() default "";
 
-    String[] htmlAttributes() default {};
-
     String title() default "";
 }
