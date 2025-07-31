@@ -150,7 +150,7 @@ public class Editor {
 }
 ```
 
-Thymeleaf template use actually boostrap and horizontal form. Other library and style can be created
+Thymeleaf template use actually boostrap and tailwind css library. Bootstrap have vertical and horizontal form. Tailwind have vertical form.
 
 Result of processing Editeur class
 
