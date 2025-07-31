@@ -152,7 +152,7 @@ public class Editor {
 
 Thymeleaf template use actually boostrap and tailwind css library. Bootstrap have vertical and horizontal form. Tailwind have vertical form.
 
-Result of processing Editeur class
+Result of processing Editeur class with boostrap horizontal form
 
 ![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_formnew.jpg)
 
