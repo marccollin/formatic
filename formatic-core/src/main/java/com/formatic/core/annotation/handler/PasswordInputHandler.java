@@ -24,7 +24,6 @@ public class PasswordInputHandler extends BaseFormFieldHandler<PasswordInput> {
     @Override
     protected void processSpecificAttributes(PasswordInput annotation, FormFieldMetadata metadata, Field field) {
         metadata.setType(FormFieldType.PASSWORD);
-        metadata.setCssClass(annotation.cssClass());
         metadata.setPlaceholder(annotation.placeholder());
         metadata.setPattern(annotation.pattern());
         metadata.setReadonly(annotation.readonly());

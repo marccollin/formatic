@@ -1,0 +1,40 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="radio-field(field)" th:remove="tag">
+
+    <div th:class="${field.outerCssClass}">
+
+        <legend class="form-label"
+                th:classappend="${field.required} ? 'required' : ''"
+                th:text="${field.label}"></legend>
+
+        <div class="form-check form-check-inline" th:each="option : ${field.options}">
+            <input class="form-check-input"
+                   th:checked="${option.selected}"
+                   th:disabled="${option.disabled}"
+                   th:field="*{__${field.name}__}"
+                   th:id="${field.name + '_' + option.value}"
+                   th:name="${field.name}"
+                   th:required="${field.required}"
+                   th:value="${option.value}"
+                   type="radio"/>
+
+            <label class="form-check-label"
+                   th:classappend="${option.disabled} ? 'disabled' : ''"
+                   th:for="${field.name + '_' + option.value}"
+                   th:text="${option.label}"></label>
+        </div>
+
+
+        <!-- Message d'aide -->
+        <small class="help-text radio-help"
+               th:if="${field.helpText}"
+               th:text="${field.helpText}"></small>
+
+        <!-- Message d'erreur (si validation côté client) -->
+        <div class="error-message radio-error"
+             style="display: none;"
+             th:if="${field.errorMessage}"
+             th:text="${field.errorMessage}"></div>
+    </div>
+</div>
+</html>

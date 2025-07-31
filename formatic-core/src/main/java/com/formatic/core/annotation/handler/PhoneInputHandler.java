@@ -24,7 +24,6 @@ public class PhoneInputHandler extends BaseFormFieldHandler<PhoneInput> {
     @Override
     protected void processSpecificAttributes(PhoneInput annotation, FormFieldMetadata metadata, Field field) {
         metadata.setType(FormFieldType.PHONE);
-        metadata.setCssClass(annotation.cssClass());
         metadata.setPlaceholder(annotation.placeholder());
         metadata.setDefaultValue(annotation.defaultValue());
         metadata.setPattern(annotation.pattern());

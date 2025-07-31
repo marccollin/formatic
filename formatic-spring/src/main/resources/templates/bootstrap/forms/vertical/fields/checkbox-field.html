@@ -1,0 +1,48 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="checkbox-field(field)" th:remove="tag">
+
+    <div th:class="${field.outerCssClass}">
+
+        <th:block th:if="${field.multiple}">
+            <legend class="form-label"
+                    th:classappend="${field.required} ? 'required' : ''"
+                    th:text="${field.label} "></legend>
+
+
+            <div class="mb-3 form-check" th:each="option : ${field.options}">
+                <input class="form-check-input"
+                       th:classappend="${field.cssClass}"
+                       th:field="*{__${field.name}__}"
+                       th:id="${field.name + '_' + option.value}"
+                       th:required="${field.required}"
+                       th:value="${option.value}"
+                       type="checkbox"
+                />
+                <label class="form-check-label me-2"
+                       th:for="${field.name + '_' + option.value}"
+                       th:text="${option.label}"></label>
+            </div>
+
+        </th:block>
+
+        <!-- Checkbox simple (boolean) -->
+        <th:block th:unless="${field.multiple}">
+
+            <div class="form-check">
+                <input class="form-check-input"
+                       th:checked="*{__${field.name}__}"
+                       th:classappend="${field.cssClass}"
+                       th:id="${field.name}"
+                       th:name="${field.name}"
+                       th:required="${field.required}"
+                       th:value="*{__${field.name}__}"
+                       type="checkbox"/>
+                <label class="form-check-label" th:classappend="${field.required} ? 'required' : ''"
+                       th:for="${field.name}"
+                       th:text="${field.label}"></label>
+            </div>
+            <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
+        </th:block>
+    </div>
+</div>
+</html>

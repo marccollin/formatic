@@ -9,4 +9,8 @@ public interface CommonFieldAttributes {
 
     boolean disabled();
 
+    String cssClass();
+
+    String outerCssClass();
+
 }

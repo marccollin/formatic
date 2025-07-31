@@ -24,6 +24,7 @@ public class FormFieldMetadata {
     private String optionsProvider;
     private int order;
     private String cssClass;
+    private String outerCssClass;
     private Map<String, String> htmlAttributes = new HashMap<>();
     private String group;
     private String displayCondition;
@@ -185,6 +186,14 @@ public class FormFieldMetadata {
 
     public void setCssClass(String cssClass) {
         this.cssClass = cssClass;
+    }
+
+    public String getOuterCssClass() {
+        return outerCssClass;
+    }
+
+    public void setOuterCssClass(String outerCssClass) {
+        this.outerCssClass = outerCssClass;
     }
 
     public Map<String, String> getHtmlAttributes() {

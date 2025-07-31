@@ -1,0 +1,49 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="checkbox-field(field)" th:remove="tag">
+
+    <div class="mb-4">
+
+        <th:block th:if="${field.multiple}">
+            <fieldset>
+            <legend class="text-sm font-medium text-gray-700 mb-3"
+                    th:classappend="${field.required} ? 'required' : ''"
+                    th:text="${field.label} "></legend>
+
+            <div class="space-y-2">
+
+                <div class="flex items-center" th:each="option : ${field.options}">
+                    <input class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                           th:classappend="${field.cssClass}"
+                           th:field="*{__${field.name}__}"
+                           th:id="${field.name + '_' + option.value}"
+                           th:required="${field.required}"
+                           th:value="${option.value}"
+                           type="checkbox"
+                    />
+                    <label class="ml-2 block text-sm text-gray-700"
+                           th:for="${field.name + '_' + option.value}"
+                           th:text="${option.label}"></label>
+                </div>
+            </div>
+            </fieldset>
+    </th:block>
+
+    <!-- Checkbox simple (boolean) -->
+    <div class="flex items-center" th:unless="${field.multiple}">
+
+        <input class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+               th:checked="*{__${field.name}__}"
+               th:classappend="${field.cssClass}"
+               th:id="${field.name}"
+               th:name="${field.name}"
+               th:required="${field.required}"
+               th:value="*{__${field.name}__}"
+               type="checkbox"/>
+        <label class="ml-2 block text-sm text-gray-700" th:classappend="${field.required} ? 'required' : ''"
+               th:for="${field.name}"
+               th:text="${field.label}"></label>
+        <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
+    </div>
+</div>
+</div>
+</html>

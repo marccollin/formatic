@@ -24,7 +24,6 @@ public class EmailInputHandler extends BaseFormFieldHandler<EmailInput> {
     @Override
     protected void processSpecificAttributes(EmailInput annotation, FormFieldMetadata metadata, Field field) {
         metadata.setType(FormFieldType.EMAIL);
-        metadata.setCssClass(annotation.cssClass());
         metadata.setPlaceholder(annotation.placeholder());
         metadata.setMinLength(annotation.minLength());
         metadata.setMaxLength(annotation.maxLength());

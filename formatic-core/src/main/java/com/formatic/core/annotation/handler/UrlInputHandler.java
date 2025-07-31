@@ -23,7 +23,6 @@ public class UrlInputHandler extends BaseFormFieldHandler<UrlInput> {
     @Override
     protected void processSpecificAttributes(UrlInput annotation, FormFieldMetadata metadata, Field field) {
         metadata.setType(FormFieldType.URL);
-        metadata.setCssClass(annotation.cssClass());
         metadata.setPlaceholder(annotation.placeholder());
         metadata.setDefaultValue(annotation.defaultValue());
         metadata.setPattern(annotation.pattern());

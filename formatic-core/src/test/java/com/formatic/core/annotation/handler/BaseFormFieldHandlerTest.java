@@ -50,6 +50,8 @@ class BaseFormFieldHandlerTest {
         String label() default "";
         boolean required() default false;
         boolean disabled() default false;
+        String cssClass() default "";
+        String outerCssClass() default "";
         String[] htmlAttributes() default {};
     }
 

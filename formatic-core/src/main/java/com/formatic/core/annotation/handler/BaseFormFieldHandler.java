@@ -74,6 +74,10 @@ public abstract class BaseFormFieldHandler<T extends Annotation>
 
         metadata.setDisabled(common.disabled());
 
+        metadata.setCssClass(common.cssClass());
+
+        metadata.setOuterCssClass(common.outerCssClass());
+
         //metadata.setHtmlAttributes(common.htmlAttributes());
     }
 
@@ -83,6 +87,9 @@ public abstract class BaseFormFieldHandler<T extends Annotation>
             String label = (String) annotation.getClass().getMethod("label").invoke(annotation);
             boolean required = (Boolean) annotation.getClass().getMethod("required").invoke(annotation);
             boolean disabled = (Boolean) annotation.getClass().getMethod("disabled").invoke(annotation);
+
+            String cssClass = (String) annotation.getClass().getMethod("cssClass").invoke(annotation);
+            String outerCssClass = (String) annotation.getClass().getMethod("outerCssClass").invoke(annotation);
 
             return new CommonFieldAttributes() {
                 @Override
@@ -103,6 +110,16 @@ public abstract class BaseFormFieldHandler<T extends Annotation>
                 @Override
                 public boolean disabled() {
                     return disabled;
+                }
+
+                @Override
+                public String cssClass(){
+                    return cssClass;
+                }
+
+                @Override
+                public String outerCssClass(){
+                    return outerCssClass;
                 }
 
             };

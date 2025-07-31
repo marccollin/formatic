@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Title</title>
+
+    <!-- tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+</head>
+<body class="bg-gray-50 py-8">
+
+<div class="container-md" th:fragment="Generic" th:remove="tag">
+    <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-8">
+        <form class="space-y-6" method="post" th:object="${formData}">
+
+        <div th:each="field : ${fields}" th:remove="tag">
+
+            <div th:remove="tag" th:switch="${field.type.name()}">
+                <div th:case="'TEXT'" th:insert="~{tailwind/forms/fields/text-field :: text-field(${field})}"></div>
+                <div th:case="'SELECT'" th:insert="~{tailwind/forms/fields/select-field :: select-field(${field})}"></div>
+                <div th:case="'CHECKBOX'" th:insert="~{tailwind/forms/fields/checkbox-field :: checkbox-field(${field})}"></div>
+                <div th:case="'PHONE'" th:insert="~{tailwind/forms/fields/phone-field :: phone-field(${field})}"></div>
+                <div th:case="'URL'" th:insert="~{tailwind/forms/fields/url-field :: url-field(${field})}"></div>
+                <div th:case="'TEXTAREA'" th:insert="~{tailwind/forms/fields/textarea-field :: textarea-field(${field})}"></div>
+                <div th:case="'RADIO'" th:insert="~{tailwind/forms/fields/radio-field :: radio-field(${field})}"></div>
+                <div th:case="'NUMBER'" th:insert="~{tailwind/forms/fields/number-field :: number-field(${field})}"></div>
+                <div th:case="'EMAIL'" th:insert="~{tailwind/forms/fields/email-field :: email-field(${field})}"></div>
+                <div th:case="'PASSWORD'" th:insert="~{tailwind/forms/fields/password-field :: password-field(${field})}"></div>
+                <div th:case="'DATE'" th:insert="~{tailwind/forms/fields/date-field :: date-field(${field})}"></div>
+                <div th:case="'HIDDEN'" th:insert="~{tailwind/forms/fields/hidden-field :: hidden-field(${field})}"></div>
+            </div>
+
+        </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button
+                        type="submit"
+                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+                >
+                    Submit
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

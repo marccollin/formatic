@@ -23,7 +23,7 @@ Responsibilities:
 
 Spring Boot auto-configuration (FormaticSpringAutoConfiguration)  
 Automatic bean registration (handlers, builders)  
-Thymeleaf templates for form rendering  
+Thymeleaf templates for form rendering with boostrap, tailwind css
 Automatic component scanning
 
 

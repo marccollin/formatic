@@ -11,6 +11,8 @@ import java.lang.annotation.Target;
 public @interface RadioInput {
     String cssClass() default "";
 
+    String outerCssClass() default "";
+
     String name() default "";
 
     String label() default "";

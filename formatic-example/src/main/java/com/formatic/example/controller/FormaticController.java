@@ -1,8 +1,10 @@
 package com.formatic.example.controller;
 
+import com.formatic.example.dto.CssLibrary;
 import com.formatic.example.dto.Editor;
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldMetadataBuilder;
+import com.formatic.example.dto.Form;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -26,14 +28,20 @@ public class FormaticController {
         this.formFieldMetadataBuilder = formFieldMetadataBuilder;
     }
 
-    @GetMapping("/formnew")
-    public String showFormNew(@RequestParam("class") String className, Model model) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    @GetMapping("/form")
+    public String showFormNew(@RequestParam("class") String className, @RequestParam("cssLibrary") CssLibrary cssLibrary, Form form, Model model) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Class<?> formClass = Class.forName(className);
 
         List<FormFieldMetadata> formMetadata = formFieldMetadataBuilder.buildMetadata(formClass);
         model.addAttribute("fields", formMetadata);
+        model.addAttribute("formName", formClass.getSimpleName());
         model.addAttribute("formData", formClass.getDeclaredConstructor().newInstance());
-        return "bootstrap/forms/form-basenew";
+
+        if(form==Form.HORIZONTAL){
+            return cssLibrary.name().toLowerCase() + "/forms/horizontal/form-base";
+        }
+
+        return cssLibrary.name().toLowerCase() + "/forms/vertical/form-base";
     }
 
     @GetMapping("/formhybrid/{id}")
@@ -68,7 +76,7 @@ public class FormaticController {
             model.addAttribute("formData", editorDto);
             model.addAttribute("formTitle", "Form " + Editor.class.getSimpleName());
 
-            return "bootstrap/forms/form-basenew";
+            return "bootstrap/forms/form-base";
         } catch (Exception e) {
             logger.error("Error while generating the form for the class {}: {}",
                     Editor.class.getSimpleName(), e.getMessage());

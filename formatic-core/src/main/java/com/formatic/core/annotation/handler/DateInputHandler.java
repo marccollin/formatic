@@ -32,7 +32,6 @@ public class DateInputHandler extends BaseFormFieldHandler<DateInput> {
     @Override
     protected void processSpecificAttributes(DateInput annotation, FormFieldMetadata metadata, Field field) {
         metadata.setType(FormFieldType.DATE);
-        metadata.setCssClass(annotation.cssClass());
         metadata.setPlaceholder(annotation.placeholder());
         metadata.setDefaultValue(annotation.defaultValue());
         metadata.setReadonly(annotation.readonly());

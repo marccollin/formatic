@@ -28,7 +28,6 @@ public class TextInputHandler extends BaseFormFieldHandler<TextInput> {
     @Override
     protected void processSpecificAttributes(TextInput annotation, FormFieldMetadata metadata, Field field) {
         metadata.setType(FormFieldType.TEXT);
-        metadata.setCssClass(annotation.cssClass());
         metadata.setPlaceholder(annotation.placeholder());
         metadata.setDefaultValue(annotation.defaultValue());
         metadata.setPattern(annotation.pattern());

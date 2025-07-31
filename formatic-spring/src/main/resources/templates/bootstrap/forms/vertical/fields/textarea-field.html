@@ -1,0 +1,28 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="textarea-field(field)" th:remove="tag">
+
+    <div th:class="${field.outerCssClass}">
+
+        <label class="form-label" th:classappend="${field.required} ? 'required' : ''"
+               th:for="${field.name}"
+               th:text="${field.label}"></label>
+
+        <textarea class="form-control"
+                  th:classappend="${field.cssClass}"
+                  th:cols="${field.cols}"
+                  th:id="${field.name}"
+                  th:maxlength="${field.maxLength < 2147483647} ? ${field.maxLength} : null"
+                  th:minlength="${field.minLength > 0} ? ${field.minLength} : null"
+                  th:name="${field.name}"
+                  th:placeholder="${field.placeholder}"
+                  th:readonly="${field.readOnly}"
+                  th:required="${field.required}"
+                  th:disabled="${field.disabled}"
+                  th:rows="${field.rows}"
+                  th:value="*{__${field.name}__} ?: ${field.defaultValue}">
+
+            </textarea>
+        <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
+    </div>
+</div>
+</html>

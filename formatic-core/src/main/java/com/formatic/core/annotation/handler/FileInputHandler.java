@@ -24,7 +24,6 @@ public class FileInputHandler extends BaseFormFieldHandler<FileInput> {
     @Override
     protected void processSpecificAttributes(FileInput annotation, FormFieldMetadata metadata, Field field) {
         metadata.setType(FormFieldType.FILE);
-        metadata.setCssClass(annotation.cssClass());
         metadata.setAccept(annotation.accept());
         metadata.setMultiple(annotation.multiple());
         metadata.setErrorMessage(annotation.errorMessage());
