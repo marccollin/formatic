@@ -156,6 +156,10 @@ Result of processing Editeur class with boostrap horizontal form
 
 ![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_formnew.jpg)
 
+Result of processing Editeur class with tailwind vertical form
+![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_thymeleaf_vertical_tailwind.jpg)
+
+
 ### DataSource for RadioInput, CheckBoxInput and SelectInput
 
 Static or dynamic source can be provided, in the example both way are shown.  
