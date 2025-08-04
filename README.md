@@ -165,6 +165,26 @@ Result of processing Editeur class with tailwind vertical form
 Static or dynamic source can be provided, in the example both way are shown.  
 Dynamic source search in the classpath the method name provided.
 
+#### Dynamic 
+
+Method name to call must be specified in the optionsProvider attribute
+
+```java
+    @SelectInput(optionsProvider = "getCities", required = true)
+    private String city;
+```
+
+#### Static
+
+Values must be specified in the options attribute
+
+```java
+    @CheckboxInput(options = {"sportCheck:Sport", "musiqueCheck:Musique", "lectureCheck:Lecture"})
+    private List<String> interest;
+```
+
+
+
 ## Thank You!
 Please ⭐️ this repo and share it with others
 
