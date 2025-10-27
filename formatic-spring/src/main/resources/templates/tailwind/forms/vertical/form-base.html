@@ -18,18 +18,18 @@
         <div th:each="field : ${fields}" th:remove="tag">
 
             <div th:remove="tag" th:switch="${field.type.name()}">
-                <div th:case="'TEXT'" th:insert="~{tailwind/forms/fields/text-field :: text-field(${field})}"></div>
-                <div th:case="'SELECT'" th:insert="~{tailwind/forms/fields/select-field :: select-field(${field})}"></div>
-                <div th:case="'CHECKBOX'" th:insert="~{tailwind/forms/fields/checkbox-field :: checkbox-field(${field})}"></div>
-                <div th:case="'PHONE'" th:insert="~{tailwind/forms/fields/phone-field :: phone-field(${field})}"></div>
-                <div th:case="'URL'" th:insert="~{tailwind/forms/fields/url-field :: url-field(${field})}"></div>
-                <div th:case="'TEXTAREA'" th:insert="~{tailwind/forms/fields/textarea-field :: textarea-field(${field})}"></div>
-                <div th:case="'RADIO'" th:insert="~{tailwind/forms/fields/radio-field :: radio-field(${field})}"></div>
-                <div th:case="'NUMBER'" th:insert="~{tailwind/forms/fields/number-field :: number-field(${field})}"></div>
-                <div th:case="'EMAIL'" th:insert="~{tailwind/forms/fields/email-field :: email-field(${field})}"></div>
-                <div th:case="'PASSWORD'" th:insert="~{tailwind/forms/fields/password-field :: password-field(${field})}"></div>
-                <div th:case="'DATE'" th:insert="~{tailwind/forms/fields/date-field :: date-field(${field})}"></div>
-                <div th:case="'HIDDEN'" th:insert="~{tailwind/forms/fields/hidden-field :: hidden-field(${field})}"></div>
+                <div th:case="'TEXT'" th:insert="~{tailwind/forms/vertical/fields/text-field :: text-field(${field})}"></div>
+                <div th:case="'SELECT'" th:insert="~{tailwind/forms/vertical/fields/select-field :: select-field(${field})}"></div>
+                <div th:case="'CHECKBOX'" th:insert="~{tailwind/forms/vertical/fields/checkbox-field :: checkbox-field(${field})}"></div>
+                <div th:case="'PHONE'" th:insert="~{tailwind/forms/vertical/fields/phone-field :: phone-field(${field})}"></div>
+                <div th:case="'URL'" th:insert="~{tailwind/forms/vertical/fields/url-field :: url-field(${field})}"></div>
+                <div th:case="'TEXTAREA'" th:insert="~{tailwind/forms/vertical/fields/textarea-field :: textarea-field(${field})}"></div>
+                <div th:case="'RADIO'" th:insert="~{tailwind/forms/vertical/fields/radio-field :: radio-field(${field})}"></div>
+                <div th:case="'NUMBER'" th:insert="~{tailwind/forms/vertical/fields/number-field :: number-field(${field})}"></div>
+                <div th:case="'EMAIL'" th:insert="~{tailwind/forms/vertical/fields/email-field :: email-field(${field})}"></div>
+                <div th:case="'PASSWORD'" th:insert="~{tailwind/forms/vertical/fields/password-field :: password-field(${field})}"></div>
+                <div th:case="'DATE'" th:insert="~{tailwind/forms/vertical/fields/date-field :: date-field(${field})}"></div>
+                <div th:case="'HIDDEN'" th:insert="~{tailwind/forms/vertical/fields/hidden-field :: hidden-field(${field})}"></div>
             </div>
 
         </div>
