@@ -10,6 +10,8 @@ dependencies {
     // Validation (optionnel)
     compileOnly 'jakarta.validation:jakarta.validation-api:3.0.2'
 
+    implementation 'net.bytebuddy:byte-buddy:1.18.2'
+
     // BOMs pour la gestion des versions de test
     testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
     testImplementation platform("org.mockito:mockito-bom:${mockitoBomVersion}")

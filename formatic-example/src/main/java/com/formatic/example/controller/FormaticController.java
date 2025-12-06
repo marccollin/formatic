@@ -1,9 +1,11 @@
 package com.formatic.example.controller;
 
+import com.formatic.core.form.BytecodeFormFieldMetadataBuilder;
+import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.ReflectionFormFieldMetadataBuilder;
+import com.formatic.example.dto.BuilderMode;
 import com.formatic.example.dto.CssLibrary;
 import com.formatic.example.dto.Editor;
-import com.formatic.core.form.FormFieldMetadata;
-import com.formatic.core.form.FormFieldMetadataBuilder;
 import com.formatic.example.dto.Form;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,22 +24,34 @@ public class FormaticController {
 
     private static final Logger logger = LoggerFactory.getLogger(FormaticController.class);
 
-    private final FormFieldMetadataBuilder formFieldMetadataBuilder;
+    private final BytecodeFormFieldMetadataBuilder bytecodeBuilder;
+    private final ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder;
 
-    FormaticController(FormFieldMetadataBuilder formFieldMetadataBuilder) {
-        this.formFieldMetadataBuilder = formFieldMetadataBuilder;
+    FormaticController(BytecodeFormFieldMetadataBuilder bytecodeBuilder, ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder) {
+        this.bytecodeBuilder = bytecodeBuilder;
+        this.reflectionFormFieldMetadataBuilder = reflectionFormFieldMetadataBuilder;
     }
 
     @GetMapping("/form")
-    public String showFormNew(@RequestParam("class") String className, @RequestParam("cssLibrary") CssLibrary cssLibrary, Form form, Model model) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public String showFormNew(@RequestParam("class") String className, @RequestParam("cssLibrary") CssLibrary cssLibrary,
+                              @RequestParam(required = false) BuilderMode mode, Form form, Model model)
+            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
+            InstantiationException, IllegalAccessException {
         Class<?> formClass = Class.forName(className);
 
-        List<FormFieldMetadata> formMetadata = formFieldMetadataBuilder.buildMetadata(formClass);
+        List<FormFieldMetadata> formMetadata = null;
+
+        if (mode == null || mode == BuilderMode.BYTECODE) {
+            formMetadata = bytecodeBuilder.buildMetadata(formClass);
+        } else {
+            formMetadata = reflectionFormFieldMetadataBuilder.buildMetadata(formClass);
+        }
+
         model.addAttribute("fields", formMetadata);
         model.addAttribute("formName", formClass.getSimpleName());
         model.addAttribute("formData", formClass.getDeclaredConstructor().newInstance());
 
-        if(form==Form.HORIZONTAL){
+        if (form == Form.HORIZONTAL) {
             return cssLibrary.name().toLowerCase() + "/forms/horizontal/form-base";
         }
 
@@ -48,7 +62,7 @@ public class FormaticController {
     public String showFormHybrid(@RequestParam("class") String className, Model model, @PathVariable Long id) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Class<?> formClass = Class.forName(className);
 
-        List<FormFieldMetadata> formMetadata = formFieldMetadataBuilder.buildMetadata(formClass);
+        List<FormFieldMetadata> formMetadata = reflectionFormFieldMetadataBuilder.buildMetadata(formClass);
         model.addAttribute("fields", formMetadata);
         model.addAttribute("formData", formClass.getDeclaredConstructor().newInstance());
         model.addAttribute("editorId", id);
@@ -60,7 +74,7 @@ public class FormaticController {
     public String showFormValue(Model model) {
         try {
 
-            List<FormFieldMetadata> formMetadata = formFieldMetadataBuilder.buildMetadata(Editor.class);
+            List<FormFieldMetadata> formMetadata = reflectionFormFieldMetadataBuilder.buildMetadata(Editor.class);
 
             Editor editorDto = new Editor();
 

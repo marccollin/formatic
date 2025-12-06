@@ -51,3 +51,7 @@ processResources {
         into 'spring-templates'
     }
 }
+
+bootBuildImage {
+    imageName = "formatic-example:latest" // Replace with your desired image name
+}

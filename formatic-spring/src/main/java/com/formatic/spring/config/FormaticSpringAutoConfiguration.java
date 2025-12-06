@@ -1,7 +1,8 @@
 package com.formatic.spring.config;
 
 import com.formatic.core.annotation.handler.*;
-import com.formatic.core.form.FormFieldMetadataBuilder;
+import com.formatic.core.form.BytecodeFormFieldMetadataBuilder;
+import com.formatic.core.form.ReflectionFormFieldMetadataBuilder;
 import com.formatic.core.service.OptionsProviderRegistry;
 import com.formatic.core.service.OptionsProviderService;
 import com.formatic.spring.registry.SpringOptionsProviderRegistry;
@@ -28,13 +29,13 @@ import java.util.List;
  */
 @AutoConfiguration
 @ComponentScan(basePackages = "com.formatic")
-@ConditionalOnClass(name = "com.formatic.core.form.FormFieldMetadataBuilder")
+@ConditionalOnClass(name = "com.formatic.core.form.ReflectionFormFieldMetadataBuilder")
 public class FormaticSpringAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(FormaticSpringAutoConfiguration.class);
 
     public FormaticSpringAutoConfiguration() {
-        logger.info("🚀 FormaticSpringAutoConfiguration is being loaded!");
+        logger.info("FormaticSpringAutoConfiguration is being loaded!");
     }
 
     @Bean
@@ -109,16 +110,15 @@ public class FormaticSpringAutoConfiguration {
         return new HiddenInputHandler();
     }
 
-
     @Bean
     public OptionsProviderRegistry optionsProviderRegistry(ApplicationContext applicationContext) {
-        // Spring will automatically inject the ApplicationContext
+        //Spring will automatically inject the ApplicationContext
         return new SpringOptionsProviderRegistry(applicationContext);
     }
 
     @Bean
     public OptionsProviderService optionsProviderService(OptionsProviderRegistry registry) {
-        // Spring will inject the OptionsProviderRegistry bean we just defined (or another if present)
+        //Spring will inject the OptionsProviderRegistry bean we just defined (or another if present)
         return new OptionsProviderService(registry);
     }
 
@@ -128,12 +128,19 @@ public class FormaticSpringAutoConfiguration {
         return new CheckBoxHandler(optionsProviderService);
     }
 
-
     @Bean
     @ConditionalOnMissingBean
-    public FormFieldMetadataBuilder formFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers) {
-        logger.info("🔧 Creating FormFieldMetadataBuilder with {} handlers", handlers.size());
+    public ReflectionFormFieldMetadataBuilder formFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers) {
+        logger.info("Creating FormFieldMetadataBuilder with {} handlers", handlers.size());
 
-        return new FormFieldMetadataBuilder(handlers);
+        return new ReflectionFormFieldMetadataBuilder(handlers);
     }
+
+    @Bean
+    @ConditionalOnClass(name = "net.bytebuddy.ByteBuddy")
+    public BytecodeFormFieldMetadataBuilder bytecodeFormFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers) {
+        logger.info("Creating BytecodeFormFieldMetadataBuilder with {} handlers", handlers.size());
+        return new BytecodeFormFieldMetadataBuilder(handlers);
+    }
+
 }

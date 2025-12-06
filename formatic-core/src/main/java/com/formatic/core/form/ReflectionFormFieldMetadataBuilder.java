@@ -19,12 +19,11 @@ import java.util.stream.Collectors;
  * <p>
  * Metadata results are cached per class to optimize repeated metadata retrievals.
  */
-public class FormFieldMetadataBuilder {
-
+public class ReflectionFormFieldMetadataBuilder  {
     private final List<FormFieldAnnotationHandler<?>> handlers;
     private final Map<Class<?>, List<FormFieldMetadata>> cache = new ConcurrentHashMap<>();
 
-    public FormFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers) {
+    public ReflectionFormFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers) {
         this.handlers = handlers;
     }
 
