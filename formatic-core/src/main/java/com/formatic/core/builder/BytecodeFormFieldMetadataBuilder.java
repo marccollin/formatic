@@ -1,6 +1,10 @@
-package com.formatic.core.form;
+package com.formatic.core.builder;
 
 import com.formatic.core.annotation.handler.FormFieldAnnotationHandler;
+import com.formatic.core.form.BytecodeAccessor;
+import com.formatic.core.form.CachedFormMetadata;
+import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.ReflectionFallback;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
 
@@ -17,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class BytecodeFormFieldMetadataBuilder {
+public class BytecodeFormFieldMetadataBuilder implements FormFieldMetadataBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(BytecodeFormFieldMetadataBuilder.class);
 
@@ -32,7 +36,8 @@ public class BytecodeFormFieldMetadataBuilder {
     }
 
     /**
-     * Point d'entrée principal - identique à la version réflexion
+     *
+     * Main entry point - identical to the reflection version
      */
     public List<FormFieldMetadata> buildMetadata(Class<?> clazz) {
         CachedFormMetadata cached = cache.computeIfAbsent(clazz, this::generateBytecodeAccessor);
@@ -40,12 +45,10 @@ public class BytecodeFormFieldMetadataBuilder {
     }
 
     /**
-     * Génère un accesseur bytecode optimisé pour la classe
-     *
+     * Generates a bytecode accessor optimized for the class
      * Processus:
-     * 1. Analyse la classe avec réflexion (UNE SEULE FOIS)
-     * 2. Génère une classe Java dynamique contenant les métadonnées
-     * 3. Les accès suivants lisent directement la constante
+     * Analyze class
+     * Generate dynamically a java class with metadata
      */
     private CachedFormMetadata generateBytecodeAccessor(Class<?> clazz) {
         long startTime = System.nanoTime();
@@ -53,26 +56,26 @@ public class BytecodeFormFieldMetadataBuilder {
         try {
             List<FormFieldMetadata> metadata = analyzeWithReflection(clazz);
 
-            //Création du nom de la classe unique
+            //Create unique class name
             String accessorClassName = String.format(
                     "%s$FormaticAccessor$%08x",
                     clazz.getName(),
                     System.identityHashCode(clazz)
             );
 
-            //Génération de bytecode avec ByteBuddy
-            //Cette classe sera chargée une seule fois et réutilisée
+            //ByteCode generation
+            //Class loaded once and reuse
             Class<?> accessorClass = byteBuddy
                     .subclass(Object.class)
                     .name(accessorClassName)
-                    // Définit une méthode qui retourne les métadonnées
+                    //Defines a method that returns metadata
                     .defineMethod("getMetadata", List.class, Visibility.PUBLIC)
                     .intercept(FixedValue.reference(metadata))
                     .make()
                     .load(clazz.getClassLoader())
                     .getLoaded();
 
-            //Crée une instance de l'accesseur
+            //Create a instance
             Object accessor = accessorClass.getDeclaredConstructor().newInstance();
 
             long duration = System.nanoTime() - startTime;
@@ -83,13 +86,13 @@ public class BytecodeFormFieldMetadataBuilder {
 
         } catch (Exception e) {
             log.error("Failed to generate bytecode for {}, using fallback", clazz.getSimpleName(), e);
-            //Fallback: version réflexion simple
+            //Fallback: only reflexion version
             return new ReflectionFallback(analyzeWithReflection(clazz));
         }
     }
 
     /**
-     * Analyse une classe avec réflexion
+     * Analyze class with reflection
      */
     private List<FormFieldMetadata> analyzeWithReflection(Class<?> clazz) {
         List<FormFieldMetadata> result = new ArrayList<>();

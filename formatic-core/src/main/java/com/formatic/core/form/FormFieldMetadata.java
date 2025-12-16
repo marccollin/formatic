@@ -1,9 +1,6 @@
 package com.formatic.core.form;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,7 +38,6 @@ public class FormFieldMetadata {
 
     private boolean disabled;
 
-    private boolean readOnly;
     private double min;
     private double max;
     private double step;
@@ -56,6 +52,79 @@ public class FormFieldMetadata {
 
     private String htmlAttributesString;
 
+    public FormFieldMetadata(String name, FormFieldType type, String label, int order) {
+        this.name = name;
+        this.type = type;
+        this.label = label;
+        this.order = order;
+    }
+
+    // Ajoutez un constructeur par défaut si nécessaire pour la désérialisation
+    public FormFieldMetadata() {
+    }
+
+    public FormFieldMetadata(FormFieldMetadata source) {
+// Copie des primitives et des String (qui sont immuables)
+        this.name = source.name;
+        this.type = source.type;
+        this.label = source.label;
+        this.readonly = source.readonly;
+        this.required = source.required;
+        this.placeholder = source.placeholder;
+        this.optionsProvider = source.optionsProvider;
+        this.order = source.order;
+        this.cssClass = source.cssClass;
+        this.outerCssClass = source.outerCssClass;
+        this.group = source.group;
+        this.displayCondition = source.displayCondition;
+        this.pattern = source.pattern;
+        this.errorMessage = source.errorMessage;
+        this.defaultValue = source.defaultValue;
+        this.title = source.title;
+        this.accept = source.accept;
+        this.minDate = source.minDate;
+        this.maxDate = source.maxDate;
+        this.disabled = source.disabled;
+        this.min = source.min;
+        this.max = source.max;
+        this.step = source.step;
+        this.minLength = source.minLength;
+        this.maxLength = source.maxLength;
+        this.rows = source.rows;
+        this.cols = source.cols;
+        this.multiple = source.multiple;
+        this.helpText = source.helpText;
+        this.htmlAttributesString = source.htmlAttributesString;
+
+        // Copie des Collections (Deep Copy pour les collections)
+
+        // 1. options (List<SelectRadioOption>)
+        if (source.options != null) {
+            // Créer une nouvelle liste et ajouter les éléments de l'ancienne liste.
+            // Si SelectRadioOption est mutable, il faudrait aussi faire une deep copy de ses éléments.
+            // On suppose ici que SelectRadioOption est immuable ou que la shallow copy est suffisante.
+            this.options = new ArrayList<>(source.options);
+        } else {
+            this.options = null;
+        }
+
+        // 2. htmlAttributes (Map<String, String>)
+        if (source.htmlAttributes != null) {
+            // Créer une nouvelle HashMap contenant toutes les paires clé-valeur de l'originale.
+            this.htmlAttributes = new HashMap<>(source.htmlAttributes);
+        } else {
+            this.htmlAttributes = new HashMap<>(); // S'assurer qu'elle n'est jamais nulle
+        }
+
+        // 3. extraProperties (Map<String, Object>)
+        if (source.extraProperties != null) {
+            this.extraProperties = new HashMap<>(source.extraProperties);
+        } else {
+            this.extraProperties = null;
+        }
+    }
+
+
     public Map<String, Object> getExtraProperties() {
 
         if(extraProperties==null){
@@ -65,13 +134,6 @@ public class FormFieldMetadata {
         return extraProperties;
     }
 
-    public boolean isReadOnly() {
-        return readOnly;
-    }
-
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
-    }
 
     public String getExtraAttributesAsHtml() {
         if (extraProperties == null || extraProperties.isEmpty()) return "";

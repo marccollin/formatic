@@ -1,8 +1,9 @@
 package com.formatic.spring.config;
 
 import com.formatic.core.annotation.handler.*;
-import com.formatic.core.form.BytecodeFormFieldMetadataBuilder;
-import com.formatic.core.form.ReflectionFormFieldMetadataBuilder;
+import com.formatic.core.builder.BytecodeFormFieldMetadataBuilder;
+import com.formatic.core.builder.ReflectionFormFieldMetadataBuilder;
+import com.formatic.core.builder.CompileTimeFormFieldMetadataBuilder;
 import com.formatic.core.service.OptionsProviderRegistry;
 import com.formatic.core.service.OptionsProviderService;
 import com.formatic.spring.registry.SpringOptionsProviderRegistry;
@@ -25,11 +26,11 @@ import java.util.List;
  * It also scans the base package to discover other Formatic components.
  * <p>
  * The configuration is conditionally activated only if the class
- * `com.formatic.core.form.FormFieldMetadataBuilder` is present on the classpath.
+ * `com.formatic.core.builder.FormFieldMetadataBuilder` is present on the classpath.
  */
 @AutoConfiguration
 @ComponentScan(basePackages = "com.formatic")
-@ConditionalOnClass(name = "com.formatic.core.form.ReflectionFormFieldMetadataBuilder")
+@ConditionalOnClass(name = "com.formatic.core.builder.ReflectionFormFieldMetadataBuilder")
 public class FormaticSpringAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(FormaticSpringAutoConfiguration.class);
@@ -141,6 +142,13 @@ public class FormaticSpringAutoConfiguration {
     public BytecodeFormFieldMetadataBuilder bytecodeFormFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers) {
         logger.info("Creating BytecodeFormFieldMetadataBuilder with {} handlers", handlers.size());
         return new BytecodeFormFieldMetadataBuilder(handlers);
+    }
+
+    @Bean
+    @ConditionalOnClass
+    public CompileTimeFormFieldMetadataBuilder compileTimeFormFieldMetadataBuilder(OptionsProviderService optionsProviderService) {
+        logger.info("Creating CompileTimeFormFieldMetadataBuilder");
+        return new CompileTimeFormFieldMetadataBuilder(optionsProviderService);
     }
 
 }
