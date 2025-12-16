@@ -391,8 +391,8 @@ public class FormMetadataProcessor extends AbstractProcessor {
 
                     ClassName selectOptionClass = ClassName.get("com.formatic.core.form", "SelectRadioOption");
 
-                    // Démarrage de la construction de la liste dans le code généré
-                    // Exemple : List<SelectOption> optionsList = new ArrayList<>();
+                    // Starting the list construction in the generated code
+                    // Example : List<SelectOption> optionsList = new ArrayList<>();
                     String optionsListName = metaObjectName + "Options";
                     buildMethodBuilder.addStatement("$T<$T> $N = new $T<>()", listClass, selectOptionClass, optionsListName, arrayListClass);
 
