@@ -44,8 +44,7 @@ public class FormaticController {
         Class<?> formClass = Class.forName(className);
 
         List<FormFieldMetadata> formMetadata = null;
-        long start = System.nanoTime();
-        for(int i=0;i<1_000_000;i++){
+
         if (mode == null || mode == BuilderMode.BYTECODE) {
             formMetadata = bytecodeBuilder.buildMetadata(formClass);
         } else if(mode==BuilderMode.REFLECTION){
@@ -53,10 +52,7 @@ public class FormaticController {
         } else{
             formMetadata = compileTimeFormFieldMetadataBuilder.buildMetadata(formClass);
         }
-        }
-            long end = System.nanoTime();
 
-            System.out.println((end - start) / 1_000_000);
         model.addAttribute("fields", formMetadata);
         model.addAttribute("formName", formClass.getSimpleName());
         model.addAttribute("formData", formClass.getDeclaredConstructor().newInstance());
