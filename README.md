@@ -1,7 +1,7 @@
 # Formatic
 
 ## Overview
-Formatic is a Java framework for automatic web form generation based on annotations. It enables the creation of dynamic HTML forms by simply annotating Java class fields, eliminating the need to manually write HTML code. Actually thymeleaf template engine is used. Other can be added.
+Formatic is a Java library for automatic web form generation based on annotations. It enables the creation of dynamic HTML forms by simply annotating Java class fields, eliminating the need to manually write HTML code. Actually thymeleaf template engine is used. Other can be added.
 
 ## Modular Architecture
 ### 🎯 formatic-core - Core Module
