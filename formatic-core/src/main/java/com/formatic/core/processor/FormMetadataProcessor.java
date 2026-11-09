@@ -68,8 +68,6 @@ public class FormMetadataProcessor extends AbstractProcessor {
         ClassName arrayListClass = ClassName.get(ArrayList.class);
         ClassName formFieldMetadataClass = ClassName.get("com.formatic.core.form", "FormFieldMetadata");
 
-        ClassName formFieldTypeClass = ClassName.get("com.formatic.core.form", "FormFieldType");
-
         //Define the TypeSpec of the file to be generated (MyClassFormMetadata)
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(accessorName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
@@ -94,11 +92,9 @@ public class FormMetadataProcessor extends AbstractProcessor {
                         Element annotationElement = a.getAnnotationType().asElement();
 
                         //Only TypeElement and PackageElement have getQualifiedName()
-                        if (!(annotationElement instanceof TypeElement)) {
+                        if (!(annotationElement instanceof TypeElement annotationTypeElement)) {
                             return false;
                         }
-
-                        TypeElement annotationTypeElement = (TypeElement) annotationElement;
 
                         PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(annotationTypeElement);
 
@@ -126,7 +122,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
                 //Initializing annotation values ​​(Map<String, AnnotationValue>)
                 Map<String, AnnotationValue> values = getAnnotationValues(annotationMirror);
 
-                //Label est name of the field if there is not value
+                //Use the field name when no label is provided.
                 String label = getAnnotationValue(values, "label", fieldName);
 
                 //not needed for hiddenInput
@@ -371,8 +367,6 @@ public class FormMetadataProcessor extends AbstractProcessor {
         buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, ClassName.get("com.formatic.core.form", "FormFieldType"), formFieldType);
 
         String optionsProvider = getAnnotationValue(values, "optionsProvider", null);
-
-        System.out.println("generateSelectLikeSetters " + metaObjectName + " " + optionsProvider);
 
         if (optionsProvider != null && !optionsProvider.isEmpty()) {
             //Generate : [field]Meta.setOptionsProvider("getCities");
