@@ -146,9 +146,11 @@ public class FormaticSpringAutoConfiguration {
 
     @Bean
     @ConditionalOnClass
-    public CompileTimeFormFieldMetadataBuilder compileTimeFormFieldMetadataBuilder(OptionsProviderService optionsProviderService) {
+    public CompileTimeFormFieldMetadataBuilder compileTimeFormFieldMetadataBuilder(
+            OptionsProviderService optionsProviderService,
+            ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder) {
         logger.info("Creating CompileTimeFormFieldMetadataBuilder");
-        return new CompileTimeFormFieldMetadataBuilder(optionsProviderService);
+        return new CompileTimeFormFieldMetadataBuilder(optionsProviderService, reflectionFormFieldMetadataBuilder);
     }
 
 }

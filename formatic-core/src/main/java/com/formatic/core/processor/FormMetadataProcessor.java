@@ -3,12 +3,11 @@ package com.formatic.core.processor;
 import com.formatic.core.form.FormFieldMetadata;
 import com.google.auto.service.AutoService;
 import com.palantir.javapoet.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.tools.Diagnostic;
 
 import java.io.IOException;
 import java.util.*;
@@ -23,8 +22,6 @@ public class FormMetadataProcessor extends AbstractProcessor {
 
     //Using a Map to generate the file only once per analyzed class
     private final Map<String, Boolean> generatedClasses = new HashMap<>();
-
-    private static final Logger logger = LoggerFactory.getLogger(FormMetadataProcessor.class);
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -49,7 +46,12 @@ public class FormMetadataProcessor extends AbstractProcessor {
                             generateMetadataAccessor(classElement);
                             generatedClasses.put(className, true);
                         } catch (IOException e) {
-                            logger.error(e.getMessage());                        }
+                            processingEnv.getMessager().printMessage(
+                                    Diagnostic.Kind.ERROR,
+                                    "Failed to generate form metadata for " + className + ": " + e,
+                                    classElement
+                            );
+                        }
                     }
                 }
             }
@@ -119,7 +121,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
                 buildMethodBuilder.addStatement("$N.setName($S)", fieldName + "Meta", fieldName);
                 buildMethodBuilder.addStatement("$N.setOrder($L)", fieldName + "Meta", orderCounter);
 
-                //Initializing annotation values ​​(Map<String, AnnotationValue>)
+                //Initializing annotation values (Map<String, AnnotationValue>)
                 Map<String, AnnotationValue> values = getAnnotationValues(annotationMirror);
 
                 //Use the field name when no label is provided.

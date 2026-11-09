@@ -24,9 +24,12 @@ public class CompileTimeFormFieldMetadataBuilder implements FormFieldMetadataBui
     private final java.util.Map<Class<?>, List<FormFieldMetadata>> cache = new ConcurrentHashMap<>();
 
     private final OptionsProviderService optionsProviderService;
+    private final ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder;
 
-    public CompileTimeFormFieldMetadataBuilder(OptionsProviderService optionsProviderService) {
+    public CompileTimeFormFieldMetadataBuilder(OptionsProviderService optionsProviderService,
+                                              ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder) {
         this.optionsProviderService = optionsProviderService;
+        this.reflectionFormFieldMetadataBuilder = reflectionFormFieldMetadataBuilder;
     }
 
     @Override
