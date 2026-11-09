@@ -162,6 +162,25 @@ Result of processing Editeur class with tailwind vertical form
 ![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_thymeleaf_vertical_tailwind.jpg)
 
 
+### Customizing Thymeleaf templates
+
+In a consuming Spring Boot application, place a customized template under
+`src/main/resources/templates/` at the same relative path as the library template.
+For example, override the Bootstrap vertical text field with:
+
+```text
+src/main/resources/templates/bootstrap/forms/vertical/fields/text-field.html
+```
+
+Keep the fragment signature `th:fragment="text-field(field)"` so the existing form template
+can still include it. With the default Spring Boot Thymeleaf configuration and application
+resources before dependency JARs on the classpath, the application template takes precedence.
+Templates that are not overridden continue to load from the `formatic-spring` JAR.
+Custom template resolvers or a different classpath order may change this behavior.
+
+The example module's `TemplateOverrideIntegrationTest` verifies both local overrides and
+library JAR fallback through a rendered Spring MVC request.
+
 ### Testing the example application
 
 From the project root, start the example application:

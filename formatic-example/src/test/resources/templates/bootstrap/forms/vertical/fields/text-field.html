@@ -1,0 +1,6 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="text-field(field)"
+     class="consumer-custom-field">
+    <label th:for="${field.name}" th:text="${field.label}"></label>
+    <input type="text" th:id="${field.name}" th:name="${field.name}"
+           th:value="*{__${field.name}__}"/>
+</div>
