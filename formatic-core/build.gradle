@@ -2,7 +2,7 @@ description = 'Formatic Core - Framework agnostic core library'
 
 dependencies {
     // Logging (optionnel, interface seulement)
-    compileOnly "org.slf4j:slf4j-api:${slf4jVersion}"
+   compileOnly "org.slf4j:slf4j-api:${slf4jVersion}"
 
     // Annotations pour la documentation et validation
     compileOnly 'org.jetbrains:annotations:24.0.1'
@@ -12,6 +12,10 @@ dependencies {
 
     implementation 'net.bytebuddy:byte-buddy:1.18.2'
 
+    compileOnly 'com.palantir.javapoet:javapoet:0.9.0'
+    compileOnly 'com.google.auto.service:auto-service-annotations:1.1.1'
+    annotationProcessor 'com.google.auto.service:auto-service:1.1.1'
+
     // BOMs pour la gestion des versions de test
     testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
     testImplementation platform("org.mockito:mockito-bom:${mockitoBomVersion}")
@@ -19,6 +23,7 @@ dependencies {
     // Tests spécifiques au core
     testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'com.palantir.javapoet:javapoet:0.9.0'
 
     // Dépendances de test (versions gérées par les BOMs)
     testImplementation 'org.junit.jupiter:junit-jupiter'

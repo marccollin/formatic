@@ -21,7 +21,7 @@ public @interface FileInput {
 
     boolean required() default false;
 
-    String accept() default ""; // ex: image/png,image/jpeg
+    String accept() default ""; //e.g., image/png,image/jpeg
 
     boolean multiple() default false;
 

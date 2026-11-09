@@ -27,10 +27,10 @@ public @interface DateInput {
 
     boolean readonly() default false;
 
-    String min() default ""; // format ISO 8601
+    String min() default ""; //ISO 8601 format
 
     String max() default "";
 
-    String step() default "";
+    String step() default ""; //Interval in days, or "any"; empty uses the browser default.
 
 }

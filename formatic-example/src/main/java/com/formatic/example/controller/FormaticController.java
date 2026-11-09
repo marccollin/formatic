@@ -1,8 +1,9 @@
 package com.formatic.example.controller;
 
-import com.formatic.core.form.BytecodeFormFieldMetadataBuilder;
+import com.formatic.core.builder.BytecodeFormFieldMetadataBuilder;
+import com.formatic.core.builder.CompileTimeFormFieldMetadataBuilder;
 import com.formatic.core.form.FormFieldMetadata;
-import com.formatic.core.form.ReflectionFormFieldMetadataBuilder;
+import com.formatic.core.builder.ReflectionFormFieldMetadataBuilder;
 import com.formatic.example.dto.BuilderMode;
 import com.formatic.example.dto.CssLibrary;
 import com.formatic.example.dto.Editor;
@@ -26,9 +27,12 @@ public class FormaticController {
 
     private final BytecodeFormFieldMetadataBuilder bytecodeBuilder;
     private final ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder;
+    private final CompileTimeFormFieldMetadataBuilder compileTimeFormFieldMetadataBuilder;
 
-    FormaticController(BytecodeFormFieldMetadataBuilder bytecodeBuilder, ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder) {
+    FormaticController(BytecodeFormFieldMetadataBuilder bytecodeBuilder, ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder,
+                       CompileTimeFormFieldMetadataBuilder compileTimeFormFieldMetadataBuilder) {
         this.bytecodeBuilder = bytecodeBuilder;
+        this.compileTimeFormFieldMetadataBuilder=compileTimeFormFieldMetadataBuilder;
         this.reflectionFormFieldMetadataBuilder = reflectionFormFieldMetadataBuilder;
     }
 
@@ -43,8 +47,10 @@ public class FormaticController {
 
         if (mode == null || mode == BuilderMode.BYTECODE) {
             formMetadata = bytecodeBuilder.buildMetadata(formClass);
-        } else {
+        } else if(mode==BuilderMode.REFLECTION){
             formMetadata = reflectionFormFieldMetadataBuilder.buildMetadata(formClass);
+        } else{
+            formMetadata = compileTimeFormFieldMetadataBuilder.buildMetadata(formClass);
         }
 
         model.addAttribute("fields", formMetadata);

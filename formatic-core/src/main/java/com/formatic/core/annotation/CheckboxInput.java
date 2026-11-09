@@ -21,7 +21,7 @@ public @interface CheckboxInput {
 
     boolean required() default false;
 
-    String[] options() default {}; // ex: {"1:Oui", "0:Non"}
+    String[] options() default {}; //e.g., {"1:Yes", "0:No"}
 
     String optionsProvider() default "";
 

@@ -1,6 +1,7 @@
-package com.formatic.core.form;
+package com.formatic.core.builder;
 
 import com.formatic.core.annotation.handler.FormFieldAnnotationHandler;
+import com.formatic.core.form.FormFieldMetadata;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
  * <p>
  * Metadata results are cached per class to optimize repeated metadata retrievals.
  */
-public class ReflectionFormFieldMetadataBuilder  {
+public class ReflectionFormFieldMetadataBuilder  implements FormFieldMetadataBuilder{
     private final List<FormFieldAnnotationHandler<?>> handlers;
     private final Map<Class<?>, List<FormFieldMetadata>> cache = new ConcurrentHashMap<>();
 

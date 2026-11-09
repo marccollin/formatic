@@ -55,11 +55,11 @@ public class CheckBoxHandler extends BaseFormFieldHandler<CheckboxInput> {
     protected void processSpecificAttributes(CheckboxInput annotation, FormFieldMetadata metadata, Field field) {
         metadata.setType(FormFieldType.CHECKBOX);
 
-        // Determine the checkbox type based on the field type
+        //Determine the checkbox type based on the field type
         if (isBooleanField(field)) {
-            configureSimpleCheckbox(metadata, field, annotation);
+            configureSimpleCheckbox(metadata, annotation);
         } else if (isCollectionField(field)) {
-            configureMultiSelectCheckbox(metadata, field, annotation);
+            configureMultiSelectCheckbox(metadata, annotation);
         } else if (isStringField(field)) {
             configureStringBasedCheckbox(metadata, field, annotation);
         }
@@ -70,14 +70,14 @@ public class CheckBoxHandler extends BaseFormFieldHandler<CheckboxInput> {
         return field.getType() == boolean.class || field.getType() == Boolean.class;
     }
 
-    private void configureSimpleCheckbox(FormFieldMetadata metadata, Field field, CheckboxInput annotation) {
-        // For a simple boolean, no options are needed
+    private void configureSimpleCheckbox(FormFieldMetadata metadata, CheckboxInput annotation) {
+        //For a simple boolean, no options are needed
         metadata.setMultiple(false);
 
-        // "If options are defined for a boolean, they can be ignored or an exception can be thrown
+        //"If options are defined for a boolean, they can be ignored or an exception can be thrown
         if (annotation.options().length > 0 || StringUtils.hasText(annotation.optionsProvider())) {
-            // Log warning
-            logger.warn("Warning: Options définies pour un champ boolean simple, ignorées");
+            //Log warning
+            logger.warn("Warning: Options defined for a simple boolean field are ignored");
         }
     }
 
@@ -88,16 +88,16 @@ public class CheckBoxHandler extends BaseFormFieldHandler<CheckboxInput> {
     }
 
 
-    private void configureMultiSelectCheckbox(FormFieldMetadata metadata, Field field, CheckboxInput annotation) {
+    private void configureMultiSelectCheckbox(FormFieldMetadata metadata, CheckboxInput annotation) {
         metadata.setMultiple(true);
 
-        // Options are mandatory for multi-select checkboxes
+        //Options are mandatory for multi-select checkboxes
         if (annotation.options().length > 0) {
-            // Static options
+            //Static options
             List<SelectRadioOption> options = parseStaticOptions(annotation.options());
             metadata.setOptions(options);
         } else if (StringUtils.hasText(annotation.optionsProvider())) {
-            // Dynamic option
+            //Dynamic option
             metadata.setOptionsProvider(annotation.optionsProvider());
             List<SelectRadioOption> dynamicOptions = optionsProviderService.loadOptions(annotation.optionsProvider());
             metadata.setOptions(dynamicOptions);
@@ -120,7 +120,7 @@ public class CheckBoxHandler extends BaseFormFieldHandler<CheckboxInput> {
                             "Use List<String> or Set<String> for multiple checkboxes.", field.getName())
             );
         } else {
-            // String without options = simple checkbox with 'true'/'false' value
+            //String without options = simple checkbox with 'true'/'false' value
             metadata.setMultiple(false);
         }
     }

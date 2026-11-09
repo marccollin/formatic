@@ -1,9 +1,6 @@
 package com.formatic.core.form;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -38,10 +35,10 @@ public class FormFieldMetadata {
 
     private String minDate;
     private String maxDate;
+    private String dateStep;
 
     private boolean disabled;
 
-    private boolean readOnly;
     private double min;
     private double max;
     private double step;
@@ -49,12 +46,88 @@ public class FormFieldMetadata {
     private int maxLength;
     private int rows;
     private int cols;
+    private String wrap;
     private boolean multiple;
     private String helpText;
 
     Map<String, Object> extraProperties;
 
     private String htmlAttributesString;
+
+    public FormFieldMetadata(String name, FormFieldType type, String label, int order) {
+        this.name = name;
+        this.type = type;
+        this.label = label;
+        this.order = order;
+    }
+
+    //Default constructor for deserialization.
+    public FormFieldMetadata() {
+    }
+
+    public FormFieldMetadata(FormFieldMetadata source) {
+        //Copy primitive values and immutable String references.
+        this.name = source.name;
+        this.type = source.type;
+        this.label = source.label;
+        this.readonly = source.readonly;
+        this.required = source.required;
+        this.placeholder = source.placeholder;
+        this.optionsProvider = source.optionsProvider;
+        this.order = source.order;
+        this.cssClass = source.cssClass;
+        this.outerCssClass = source.outerCssClass;
+        this.group = source.group;
+        this.displayCondition = source.displayCondition;
+        this.pattern = source.pattern;
+        this.errorMessage = source.errorMessage;
+        this.defaultValue = source.defaultValue;
+        this.title = source.title;
+        this.accept = source.accept;
+        this.minDate = source.minDate;
+        this.maxDate = source.maxDate;
+        this.dateStep = source.dateStep;
+        this.disabled = source.disabled;
+        this.min = source.min;
+        this.max = source.max;
+        this.step = source.step;
+        this.minLength = source.minLength;
+        this.maxLength = source.maxLength;
+        this.rows = source.rows;
+        this.cols = source.cols;
+        this.wrap = source.wrap;
+        this.multiple = source.multiple;
+        this.helpText = source.helpText;
+        this.htmlAttributesString = source.htmlAttributesString;
+
+        //Copy collection containers without copying their elements.
+
+        //1. options (List<SelectRadioOption>)
+        if (source.options != null) {
+            //Create a new list containing the original elements.
+            //Mutable SelectRadioOption elements would also need a deep copy.
+            //This assumes that the elements are immutable or a shallow copy is sufficient.
+            this.options = new ArrayList<>(source.options);
+        } else {
+            this.options = null;
+        }
+
+        //2. htmlAttributes (Map<String, String>)
+        if (source.htmlAttributes != null) {
+            //Create a new HashMap containing all original key-value pairs.
+            this.htmlAttributes = new HashMap<>(source.htmlAttributes);
+        } else {
+            this.htmlAttributes = new HashMap<>(); //Ensure the map is never null.
+        }
+
+        //3. extraProperties (Map<String, Object>)
+        if (source.extraProperties != null) {
+            this.extraProperties = new HashMap<>(source.extraProperties);
+        } else {
+            this.extraProperties = null;
+        }
+    }
+
 
     public Map<String, Object> getExtraProperties() {
 
@@ -65,13 +138,6 @@ public class FormFieldMetadata {
         return extraProperties;
     }
 
-    public boolean isReadOnly() {
-        return readOnly;
-    }
-
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
-    }
 
     public String getExtraAttributesAsHtml() {
         if (extraProperties == null || extraProperties.isEmpty()) return "";
@@ -325,6 +391,14 @@ public class FormFieldMetadata {
         this.cols = cols;
     }
 
+    public String getWrap() {
+        return wrap;
+    }
+
+    public void setWrap(String wrap) {
+        this.wrap = wrap;
+    }
+
     public boolean isMultiple() {
         return multiple;
     }
@@ -355,6 +429,14 @@ public class FormFieldMetadata {
 
     public void setMaxDate(String maxDate) {
         this.maxDate = maxDate;
+    }
+
+    public String getDateStep() {
+        return dateStep;
+    }
+
+    public void setDateStep(String dateStep) {
+        this.dateStep = dateStep;
     }
 
     public String getAccept() {

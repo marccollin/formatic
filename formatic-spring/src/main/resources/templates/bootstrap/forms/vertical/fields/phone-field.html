@@ -15,7 +15,7 @@
                th:name="${field.name}"
                th:pattern="${field.pattern}"
                th:placeholder="${field.placeholder}"
-               th:readonly="${field.readOnly}"
+               th:readonly="${field.readonly}"
                th:required="${field.required}"
                th:disabled="${field.disabled}"
                th:value="*{__${field.name}__} ?: ${field.defaultValue}"

@@ -15,10 +15,11 @@
                   th:minlength="${field.minLength > 0} ? ${field.minLength} : null"
                   th:name="${field.name}"
                   th:placeholder="${field.placeholder}"
-                  th:readonly="${field.readOnly}"
+                  th:readonly="${field.readonly}"
                   th:required="${field.required}"
                   th:disabled="${field.disabled}"
                   th:rows="${field.rows}"
+                  th:attr="wrap=${field.wrap}"
                   th:value="*{__${field.name}__} ?: ${field.defaultValue}">
 
             </textarea>
