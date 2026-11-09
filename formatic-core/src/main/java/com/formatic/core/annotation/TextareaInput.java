@@ -35,6 +35,6 @@ public @interface TextareaInput {
 
     int cols() default 40;
 
-    String wrap() default "soft"; // soft | hard | off
+    String wrap() default "soft"; //soft | hard | off (non-standard but commonly supported)
 
 }

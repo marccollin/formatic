@@ -17,10 +17,10 @@ class SpringOptionsProviderRegistryIntegrationTest {
 
     @Test
     void integrationTest_WithRealSpringBeans() {
-        // When
+        //When
         Optional<OptionsProvider> provider = registry.getProvider("getCountries");
 
-        // Then
+        //Then
         assertTrue(provider.isPresent());
 
         Object options = provider.get().getOptions();
@@ -31,7 +31,7 @@ class SpringOptionsProviderRegistryIntegrationTest {
         List<SelectRadioOption> optionsList = (List<SelectRadioOption>) options;
         assertEquals(3, optionsList.size());
 
-        // Verify specific options
+        //Verify specific options
         assertTrue(optionsList.stream().anyMatch(o ->
                 "FR".equals(o.getValue()) && "France".equals(o.getLabel())));
         assertTrue(optionsList.stream().anyMatch(o ->
@@ -42,10 +42,10 @@ class SpringOptionsProviderRegistryIntegrationTest {
 
     @Test
     void integrationTest_WithMapProvider() {
-        // When
+        //When
         Optional<OptionsProvider> provider = registry.getProvider("getLanguages");
 
-        // Then
+        //Then
         assertTrue(provider.isPresent());
 
         Object options = provider.get().getOptions();

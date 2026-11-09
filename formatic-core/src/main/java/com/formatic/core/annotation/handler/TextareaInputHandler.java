@@ -33,8 +33,9 @@ public class TextareaInputHandler extends BaseFormFieldHandler<TextareaInput> {
         metadata.setMaxLength(annotation.maxLength());
         metadata.setRows(annotation.rows());
         metadata.setCols(annotation.cols());
+        metadata.setWrap(annotation.wrap());
 
-        // metadata.setErrorMessage(annotation.errorMessage());
+        //metadata.setErrorMessage(annotation.errorMessage());
     }
 
 }

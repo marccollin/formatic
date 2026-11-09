@@ -19,6 +19,7 @@
                       th:required="${field.required}"
                       th:disabled="${field.disabled}"
                       th:rows="${field.rows}"
+                      th:attr="wrap=${field.wrap}"
                       th:value="*{__${field.name}__} ?: ${field.defaultValue}">
 
         </textarea>

@@ -37,11 +37,11 @@ public class RadioInputHandler extends BaseFormFieldHandler<RadioInput> {
         metadata.setType(FormFieldType.RADIO);
 
         if (annotation.options().length > 0) {
-            // Static Options
+            //Static Options
             List<SelectRadioOption> options = parseStaticOptions(annotation.options());
             metadata.setOptions(options);
         } else if (StringUtils.hasText(annotation.optionsProvider())) {
-            // Dynamic Options
+            //Dynamic Options
             metadata.setOptionsProvider(annotation.optionsProvider());
             List<SelectRadioOption> dynamicOptions = optionsProviderService.loadOptions(annotation.optionsProvider());
             metadata.setOptions(dynamicOptions);

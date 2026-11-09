@@ -30,7 +30,7 @@ class OptionsProviderServiceTest {
 
     @Test
     void loadOptions_WithValidProvider_ReturnsOptions() {
-        // Given
+        //Given
         String providerMethodName = "testProvider";
         List<SelectRadioOption> expectedOptions = Arrays.asList(
                 new SelectRadioOption("1", "Option 1"),
@@ -40,10 +40,10 @@ class OptionsProviderServiceTest {
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
         when(optionsProvider.getOptions()).thenReturn(expectedOptions);
 
-        // When
+        //When
         List<SelectRadioOption> result = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertEquals(expectedOptions, result);
         verify(registry).getProvider(providerMethodName);
         verify(optionsProvider).getOptions();
@@ -51,14 +51,14 @@ class OptionsProviderServiceTest {
 
     @Test
     void loadOptions_WithProviderNotFound_ReturnsEmptyList() {
-        // Given
+        //Given
         String providerMethodName = "nonExistentProvider";
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.empty());
 
-        // When
+        //When
         List<SelectRadioOption> result = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertTrue(result.isEmpty());
         verify(registry).getProvider(providerMethodName);
         verifyNoInteractions(optionsProvider);
@@ -66,15 +66,15 @@ class OptionsProviderServiceTest {
 
     @Test
     void loadOptions_WithProviderThrowingException_ReturnsEmptyList() {
-        // Given
+        //Given
         String providerMethodName = "errorProvider";
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
         when(optionsProvider.getOptions()).thenThrow(new RuntimeException("Test exception"));
 
-        // When
+        //When
         List<SelectRadioOption> result = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertTrue(result.isEmpty());
         verify(registry).getProvider(providerMethodName);
         verify(optionsProvider).getOptions();
@@ -82,7 +82,7 @@ class OptionsProviderServiceTest {
 
     @Test
     void loadOptions_WithListOfSelectRadioOptions_ReturnsCorrectOptions() {
-        // Given
+        //Given
         String providerMethodName = "listProvider";
         List<SelectRadioOption> originalOptions = Arrays.asList(
                 new SelectRadioOption("val1", "Label 1"),
@@ -92,10 +92,10 @@ class OptionsProviderServiceTest {
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
         when(optionsProvider.getOptions()).thenReturn(originalOptions);
 
-        // When
+        //When
         List<SelectRadioOption> result = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertEquals(2, result.size());
         assertEquals("val1", result.get(0).getValue());
         assertEquals("Label 1", result.get(0).getLabel());
@@ -105,7 +105,7 @@ class OptionsProviderServiceTest {
 
     @Test
     void loadOptions_WithListOfMaps_ReturnsCorrectOptions() {
-        // Given
+        //Given
         String providerMethodName = "mapListProvider";
         List<Map<String, Object>> mapList = Arrays.asList(
                 Map.of("value", "key1", "label", "Value 1"),
@@ -115,10 +115,10 @@ class OptionsProviderServiceTest {
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
         when(optionsProvider.getOptions()).thenReturn(mapList);
 
-        // When
+        //When
         List<SelectRadioOption> result = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertEquals(2, result.size());
         assertEquals("key1", result.get(0).getValue());
         assertEquals("Value 1", result.get(0).getLabel());
@@ -128,17 +128,17 @@ class OptionsProviderServiceTest {
 
     @Test
     void loadOptions_WithListOfStrings_ReturnsCorrectOptions() {
-        // Given
+        //Given
         String providerMethodName = "stringListProvider";
         List<String> stringList = Arrays.asList("Option A", "Option B", "Option C");
 
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
         when(optionsProvider.getOptions()).thenReturn(stringList);
 
-        // When
+        //When
         List<SelectRadioOption> result = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertEquals(3, result.size());
         assertEquals("Option A", result.get(0).getValue());
         assertEquals("Option A", result.get(0).getLabel());
@@ -150,7 +150,7 @@ class OptionsProviderServiceTest {
 
     @Test
     void loadOptions_WithMap_ReturnsCorrectOptions() {
-        // Given
+        //Given
         String providerMethodName = "mapProvider";
         Map<String, String> optionsMap = Map.of(
                 "key1", "Label 1",
@@ -160,10 +160,10 @@ class OptionsProviderServiceTest {
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
         when(optionsProvider.getOptions()).thenReturn(optionsMap);
 
-        // When
+        //When
         List<SelectRadioOption> result = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertEquals(2, result.size());
         assertTrue(result.stream().anyMatch(option ->
                 "key1".equals(option.getValue()) && "Label 1".equals(option.getLabel())));
@@ -173,35 +173,35 @@ class OptionsProviderServiceTest {
 
     @Test
     void loadOptions_WithNullResult_ReturnsEmptyList() {
-        // Given
+        //Given
         String providerMethodName = "nullProvider";
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
         when(optionsProvider.getOptions()).thenReturn(null);
 
-        // When
+        //When
         List<SelectRadioOption> result = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertTrue(result.isEmpty());
     }
 
     @Test
     void loadOptions_WithUnsupportedType_ReturnsEmptyList() {
-        // Given
+        //Given
         String providerMethodName = "unsupportedProvider";
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
-        when(optionsProvider.getOptions()).thenReturn(42); // Integer not supported
+        when(optionsProvider.getOptions()).thenReturn(42); //Integer not supported
 
-        // When
+        //When
         List<SelectRadioOption> result = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertTrue(result.isEmpty());
     }
 
     @Test
     void loadOptions_CachesResults() {
-        // Given
+        //Given
         String providerMethodName = "cachedProvider";
         List<SelectRadioOption> expectedOptions = List.of(
                 new SelectRadioOption("1", "Option 1")
@@ -210,21 +210,21 @@ class OptionsProviderServiceTest {
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
         when(optionsProvider.getOptions()).thenReturn(expectedOptions);
 
-        // When
+        //When
         List<SelectRadioOption> result1 = service.loadOptions(providerMethodName);
         List<SelectRadioOption> result2 = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertEquals(expectedOptions, result1);
         assertEquals(expectedOptions, result2);
-        assertSame(result1, result2); // Same instance from the cache
-        verify(registry, times(1)).getProvider(providerMethodName); // Call a single time
-        verify(optionsProvider, times(1)).getOptions(); // Call a single time
+        assertSame(result1, result2); //Same instance from the cache
+        verify(registry, times(1)).getProvider(providerMethodName); //Call a single time
+        verify(optionsProvider, times(1)).getOptions(); //Call a single time
     }
 
     @Test
     void clearCache_RemovesAllCachedEntries() {
-        // Given
+        //Given
         String providerMethodName = "testProvider";
         List<SelectRadioOption> expectedOptions = List.of(
                 new SelectRadioOption("1", "Option 1")
@@ -233,21 +233,21 @@ class OptionsProviderServiceTest {
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
         when(optionsProvider.getOptions()).thenReturn(expectedOptions);
 
-        // Populate cache
+        //Populate cache
         service.loadOptions(providerMethodName);
         verify(registry, times(1)).getProvider(providerMethodName);
 
-        // When
+        //When
         service.clearCache();
         service.loadOptions(providerMethodName);
 
-        // Then
-        verify(registry, times(2)).getProvider(providerMethodName); // Called again after clear
+        //Then
+        verify(registry, times(2)).getProvider(providerMethodName); //Called again after clear
     }
 
     @Test
     void clearCache_WithSpecificProvider_RemovesOnlyThatEntry() {
-        // Given
+        //Given
         String provider1 = "provider1";
         String provider2 = "provider2";
         List<SelectRadioOption> options1 = List.of(new SelectRadioOption("1", "Option 1"));
@@ -260,53 +260,53 @@ class OptionsProviderServiceTest {
         when(optionsProvider.getOptions()).thenReturn(options1);
         when(mockProvider2.getOptions()).thenReturn(options2);
 
-        // Populate cache
+        //Populate cache
         service.loadOptions(provider1);
         service.loadOptions(provider2);
 
-        // When
+        //When
         service.clearCache(provider1);
-        service.loadOptions(provider1); // Should reload
-        service.loadOptions(provider2); // Should use cache
+        service.loadOptions(provider1); //Should reload
+        service.loadOptions(provider2); //Should use cache
 
-        // Then
-        verify(registry, times(2)).getProvider(provider1); // Called again after clear
-        verify(registry, times(1)).getProvider(provider2); // Still in cache
+        //Then
+        verify(registry, times(2)).getProvider(provider1); //Called again after clear
+        verify(registry, times(1)).getProvider(provider2); //Still in cache
     }
 
     @Test
     void convertItemToSelectOption_WithMixedTypes() {
-        // Given
+        //Given
         String providerMethodName = "mixedProvider";
         List<Object> mixedList = Arrays.asList(
                 new SelectRadioOption("existing", "Existing Option"),
                 Map.of("value", "mapValue", "label", "Map Label"),
                 "Simple String",
-                123 // Number
+                123 //Number
         );
 
         when(registry.getProvider(providerMethodName)).thenReturn(Optional.of(optionsProvider));
         when(optionsProvider.getOptions()).thenReturn(mixedList);
 
-        // When
+        //When
         List<SelectRadioOption> result = service.loadOptions(providerMethodName);
 
-        // Then
+        //Then
         assertEquals(4, result.size());
 
-        // Existing SelectRadioOption
+        //Existing SelectRadioOption
         assertEquals("existing", result.get(0).getValue());
         assertEquals("Existing Option", result.get(0).getLabel());
 
-        // Map
+        //Map
         assertEquals("mapValue", result.get(1).getValue());
         assertEquals("Map Label", result.get(1).getLabel());
 
-        // String
+        //String
         assertEquals("Simple String", result.get(2).getValue());
         assertEquals("Simple String", result.get(2).getLabel());
 
-        // Number converted to string
+        //Number converted to string
         assertEquals("123", result.get(3).getValue());
         assertEquals("123", result.get(3).getLabel());
     }

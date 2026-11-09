@@ -14,6 +14,7 @@
                    th:id="${field.name}"
                    th:max="${field.maxDate != null} ? ${field.maxDate} : null"
                    th:min="${field.minDate != null} ? ${field.minDate} : null"
+                   th:attr="step=${#strings.isEmpty(field.dateStep) ? null : field.dateStep}"
                    th:name="${field.name}"
                    th:placeholder="${field.placeholder}"
                    th:readonly="${field.readonly}"

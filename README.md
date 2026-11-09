@@ -1,12 +1,12 @@
 # Formatic
 
 ## Overview
-Formatic is a Java framework for automatic web form generation based on annotations. It enables the creation of dynamic HTML forms by simply annotating Java class fields, eliminating the need to manually write HTML code. Actually thymeleaf template engine is used. Other can be added.
+Formatic is a Java library for automatic web form generation based on annotations. It enables the creation of dynamic HTML forms by simply annotating Java class fields, eliminating the need to manually write HTML code. Actually thymeleaf template engine is used. Other can be added.
 
 ## Modular Architecture
 ### 🎯 formatic-core - Core Module
 
-Role: Framework core, independent of any web framework
+Role: Library core, independent of any web framework
 Responsibilities:
 
 Form annotation definitions (@TextInput, @FormInput)  
@@ -35,7 +35,7 @@ Responsibilities:
 
 Spring MVC controller (FormaticController)  
 Example DTOs (Editor)  
-Test endpoints (/formnew, /formhybrid, /formfeeded)  
+Test endpoints (/form, /formhybrid, /formfeeded)
 Can be used with mvc or rest application
 
 
@@ -60,10 +60,10 @@ Lazy initialization of handlers
 
 ### 🔒 Type Safety
 
-Generic handler interfaces  
-Compile-time annotation validation  
-Reflection-based but type-safe processing
-Bytebuddy use 
+Annotation handlers declare their supported annotation type through `FormFieldAnnotationHandler<T extends Annotation>`.  
+Form metadata uses `FormFieldType` and typed properties for input attributes.  
+The annotation processor generates Java metadata classes that are checked by the compiler.  
+Generated metadata does not replace validation of submitted form data.
 
 ### Use Cases
 
@@ -153,13 +153,65 @@ public class Editor {
 
 Thymeleaf template use actually boostrap and tailwind css library. Bootstrap have vertical and horizontal form. Tailwind have vertical form.
 
-Result of processing Editeur class with boostrap horizontal form
+Result of processing Editeur class with boostrap horizontal form parameter
 
-![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_formnew.jpg)
+
+![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_form.jpg)
 
 Result of processing Editeur class with tailwind vertical form
 ![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_thymeleaf_vertical_tailwind.jpg)
 
+
+### Testing the example application
+
+From the project root, start the example application:
+
+```bash
+./gradlew :formatic-example:bootRun
+```
+
+Open `http://localhost:8080/form` with the following query parameters. Enum values are case-sensitive.
+
+| Parameter | Values | Default |
+|---|---|---|
+| `class` | Fully qualified name of an annotated DTO, such as `com.formatic.example.dto.Editor` | Required |
+| `cssLibrary` | `BOOTSTRAP` or `TAILWIND` | Required |
+| `form` | `VERTICAL` or `HORIZONTAL` | `VERTICAL` |
+| `mode` | `BYTECODE`, `REFLECTION`, or `COMPILE_TIME_GENERATION` | `BYTECODE` |
+
+The example module includes these DTOs. Use their fully qualified name as the `class` parameter:
+
+| DTO | `class` value |
+|---|---|
+| `Editor` | `com.formatic.example.dto.Editor` |
+| `User` | `com.formatic.example.dto.User` |
+| `UserBasic` | `com.formatic.example.dto.UserBasic` |
+| `UserClub` | `com.formatic.example.dto.UserClub` |
+
+Bootstrap supports both layouts. Tailwind supports only `VERTICAL`; do not combine `TAILWIND` with `HORIZONTAL`.
+The builder query parameter is named `mode`, not `builderMode`.
+
+Bootstrap horizontal form using the default bytecode builder:
+
+```text
+http://localhost:8080/form?class=com.formatic.example.dto.Editor&cssLibrary=BOOTSTRAP&form=HORIZONTAL
+```
+
+Bootstrap vertical form using reflection:
+
+```text
+http://localhost:8080/form?class=com.formatic.example.dto.Editor&cssLibrary=BOOTSTRAP&form=VERTICAL&mode=REFLECTION
+```
+
+Tailwind vertical form using compile-time generated metadata:
+
+```text
+http://localhost:8080/form?class=com.formatic.example.dto.Editor&cssLibrary=TAILWIND&form=VERTICAL&mode=COMPILE_TIME_GENERATION
+```
+
+To compare builders, keep `class`, `cssLibrary`, and `form` unchanged and vary only `mode`.
+Compile-time mode requires generated metadata for the DTO. The example module configures the annotation processor;
+running it through Gradle generates the metadata during compilation.
 
 ### DataSource for RadioInput, CheckBoxInput and SelectInput
 

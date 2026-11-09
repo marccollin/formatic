@@ -46,7 +46,7 @@ public class BytecodeFormFieldMetadataBuilder implements FormFieldMetadataBuilde
 
     /**
      * Generates a bytecode accessor optimized for the class
-     * Processus:
+     * Process:
      * Analyze class
      * Generate dynamically a java class with metadata
      */

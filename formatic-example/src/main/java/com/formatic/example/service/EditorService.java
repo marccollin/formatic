@@ -79,10 +79,10 @@ public class EditorService {
     public Optional<Editor> getEditorById(Long id) {
         List<Editor> editors = getHardcodedEditors();
 
-        // Iterate through the list to find the editor matching the ID
+        //Iterate through the list to find the editor matching the ID
         for (Editor editor : editors) {
             if (editor.getIdEditeur() != null && editor.getIdEditeur().equals(id)) {
-                return Optional.of(editor); // Returns the found editor wrapped in an Optional
+                return Optional.of(editor); //Returns the found editor wrapped in an Optional
             }
         }
         return Optional.empty();

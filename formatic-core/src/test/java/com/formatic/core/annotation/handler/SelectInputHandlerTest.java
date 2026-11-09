@@ -33,13 +33,13 @@ class SelectInputHandlerTest {
 
     @Test
     void should_handle_select_with_static_options() throws NoSuchFieldException {
-        // Given
+        //Given
         Field field = TestEntity.class.getDeclaredField("country");
 
-        // When
+        //When
         FormFieldMetadata metadata = handler.handle(field);
 
-        // Then
+        //Then
         assertEquals(FormFieldType.SELECT, metadata.getType());
         assertEquals("country", metadata.getName());
         assertEquals("Country", metadata.getLabel());
@@ -57,7 +57,7 @@ class SelectInputHandlerTest {
 
     @Test
     void should_handle_select_with_dynamic_options() throws NoSuchFieldException {
-        // Given
+        //Given
         Field field = TestEntity.class.getDeclaredField("department");
         List<SelectRadioOption> dynamicOptions = Arrays.asList(
                 new SelectRadioOption("it", "IT Department"),
@@ -66,10 +66,10 @@ class SelectInputHandlerTest {
         when(optionsProviderService.loadOptions("departmentProvider"))
                 .thenReturn(dynamicOptions);
 
-        // When
+        //When
         FormFieldMetadata metadata = handler.handle(field);
 
-        // Then
+        //Then
         assertEquals(FormFieldType.SELECT, metadata.getType());
         assertEquals("departmentProvider", metadata.getOptionsProvider());
         assertEquals(2, metadata.getOptions().size());
@@ -78,26 +78,26 @@ class SelectInputHandlerTest {
 
     @Test
     void should_handle_multiple_select() throws NoSuchFieldException {
-        // Given
+        //Given
         Field field = TestEntity.class.getDeclaredField("skills");
 
-        // When
+        //When
         FormFieldMetadata metadata = handler.handle(field);
 
-        // Then
+        //Then
         assertTrue(metadata.isMultiple());
         assertEquals(2, metadata.getOptions().size());
     }
 
     @Test
     void should_parse_option_without_colon() throws NoSuchFieldException {
-        // Given
+        //Given
         Field field = TestEntity.class.getDeclaredField("simpleSelect");
 
-        // When
+        //When
         FormFieldMetadata metadata = handler.handle(field);
 
-        // Then
+        //Then
         List<SelectRadioOption> options = metadata.getOptions();
         assertEquals(2, options.size());
         assertEquals("option1", options.get(0).getValue());

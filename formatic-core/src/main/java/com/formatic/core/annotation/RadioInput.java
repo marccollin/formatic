@@ -21,7 +21,7 @@ public @interface RadioInput {
 
     boolean required() default false;
 
-    String[] options() default {}; // ex: {"M:Masculin", "F:Féminin"}
+    String[] options() default {}; //e.g., {"M:Male", "F:Female"}
 
     String optionsProvider() default "";
 

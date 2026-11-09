@@ -30,15 +30,15 @@ public class SpringOptionsProviderRegistryTest {
 
     @Test
     void registerProvider_AndRetrieve_Success() {
-        // Given
+        //Given
         String methodName = "testMethod";
         OptionsProvider provider = mock(OptionsProvider.class);
 
-        // When
+        //When
         registry.registerProvider(methodName, provider);
         Optional<OptionsProvider> result = registry.getProvider(methodName);
 
-        // Then
+        //Then
         assertTrue(result.isPresent());
         assertEquals(provider, result.get());
         verifyNoInteractions(applicationContext);
@@ -46,20 +46,20 @@ public class SpringOptionsProviderRegistryTest {
 
     @Test
     void getProvider_WithDiscoveredBean_Success() {
-        // Given
+        //Given
         String methodName = "getTestOptions";
         TestOptionsBean testBean = new TestOptionsBean();
         Map<String, Object> beans = Map.of("testBean", testBean);
 
         when(applicationContext.getBeansOfType(Object.class)).thenReturn(beans);
 
-        // When
+        //When
         Optional<OptionsProvider> result = registry.getProvider(methodName);
 
-        // Then
+        //Then
         assertTrue(result.isPresent());
 
-        // Verify the provider works
+        //Verify the provider works
         Object options = result.get().getOptions();
         assertNotNull(options);
         assertInstanceOf(List.class, options);
@@ -73,20 +73,20 @@ public class SpringOptionsProviderRegistryTest {
 
     @Test
     void getProvider_WithDiscoveredBeanMap_Success() {
-        // Given
+        //Given
         String methodName = "getMapOptions";
         TestOptionsBean testBean = new TestOptionsBean();
         Map<String, Object> beans = Map.of("testBean", testBean);
 
         when(applicationContext.getBeansOfType(Object.class)).thenReturn(beans);
 
-        // When
+        //When
         Optional<OptionsProvider> result = registry.getProvider(methodName);
 
-        // Then
+        //Then
         assertTrue(result.isPresent());
 
-        // Verify the provider works
+        //Verify the provider works
         Object options = result.get().getOptions();
         assertNotNull(options);
         assertInstanceOf(Map.class, options);
@@ -100,7 +100,7 @@ public class SpringOptionsProviderRegistryTest {
 
     @Test
     void getProvider_WithMultipleBeans_FindsCorrectMethod() {
-        // Given
+        //Given
         String methodName = "getSpecificOptions";
         TestOptionsBean testBean1 = new TestOptionsBean();
         AnotherOptionsBean testBean2 = new AnotherOptionsBean();
@@ -112,13 +112,13 @@ public class SpringOptionsProviderRegistryTest {
 
         when(applicationContext.getBeansOfType(Object.class)).thenReturn(beans);
 
-        // When
+        //When
         Optional<OptionsProvider> result = registry.getProvider(methodName);
 
-        // Then
+        //Then
         assertTrue(result.isPresent());
 
-        // Verify it found the correct method
+        //Verify it found the correct method
         Object options = result.get().getOptions();
         assertNotNull(options);
         assertInstanceOf(List.class, options);
@@ -133,108 +133,108 @@ public class SpringOptionsProviderRegistryTest {
 
     @Test
     void getProvider_WithMethodNotFound_ReturnsEmpty() {
-        // Given
+        //Given
         String methodName = "nonExistentMethod";
         TestOptionsBean testBean = new TestOptionsBean();
         Map<String, Object> beans = Map.of("testBean", testBean);
 
         when(applicationContext.getBeansOfType(Object.class)).thenReturn(beans);
 
-        // When
+        //When
         Optional<OptionsProvider> result = registry.getProvider(methodName);
 
-        // Then
+        //Then
         assertFalse(result.isPresent());
         verify(applicationContext).getBeansOfType(Object.class);
     }
 
     @Test
     void getProvider_WithEmptyBeans_ReturnsEmpty() {
-        // Given
+        //Given
         String methodName = "getTestOptions";
         Map<String, Object> beans = Collections.emptyMap();
 
         when(applicationContext.getBeansOfType(Object.class)).thenReturn(beans);
 
-        // When
+        //When
         Optional<OptionsProvider> result = registry.getProvider(methodName);
 
-        // Then
+        //Then
         assertFalse(result.isPresent());
         verify(applicationContext).getBeansOfType(Object.class);
     }
 
     @Test
     void getProvider_WithMethodHavingParameters_IgnoresMethod() {
-        // Given
+        //Given
         String methodName = "getOptionsWithParams";
         TestOptionsBean testBean = new TestOptionsBean();
         Map<String, Object> beans = Map.of("testBean", testBean);
 
         when(applicationContext.getBeansOfType(Object.class)).thenReturn(beans);
 
-        // When
+        //When
         Optional<OptionsProvider> result = registry.getProvider(methodName);
 
-        // Then
+        //Then
         assertFalse(result.isPresent());
         verify(applicationContext).getBeansOfType(Object.class);
     }
 
     @Test
     void getProvider_WithMethodHavingWrongReturnType_IgnoresMethod() {
-        // Given
+        //Given
         String methodName = "getStringOptions";
         TestOptionsBean testBean = new TestOptionsBean();
         Map<String, Object> beans = Map.of("testBean", testBean);
 
         when(applicationContext.getBeansOfType(Object.class)).thenReturn(beans);
 
-        // When
+        //When
         Optional<OptionsProvider> result = registry.getProvider(methodName);
 
-        // Then
+        //Then
         assertFalse(result.isPresent());
         verify(applicationContext).getBeansOfType(Object.class);
     }
 
     @Test
     void getProvider_CachesResult() {
-        // Given
+        //Given
         String methodName = "getTestOptions";
         TestOptionsBean testBean = new TestOptionsBean();
         Map<String, Object> beans = Map.of("testBean", testBean);
 
         when(applicationContext.getBeansOfType(Object.class)).thenReturn(beans);
 
-        // When
+        //When
         Optional<OptionsProvider> result1 = registry.getProvider(methodName);
         Optional<OptionsProvider> result2 = registry.getProvider(methodName);
 
-        // Then
+        //Then
         assertTrue(result1.isPresent());
         assertTrue(result2.isPresent());
-        assertSame(result1.get(), result2.get()); // Same instance from cache
+        assertSame(result1.get(), result2.get()); //Same instance from cache
 
-        verify(applicationContext, times(1)).getBeansOfType(Object.class); // Called only once
+        verify(applicationContext, times(1)).getBeansOfType(Object.class); //Called only once
     }
 
     @Test
     void getProvider_WithProviderThrowingException_ThrowsRuntimeException() {
-        // Given
+        //Given
         String methodName = "getErrorOptions";
         TestOptionsBean testBean = new TestOptionsBean();
         Map<String, Object> beans = Map.of("testBean", testBean);
 
         when(applicationContext.getBeansOfType(Object.class)).thenReturn(beans);
 
-        // When
+        //When
         Optional<OptionsProvider> result = registry.getProvider(methodName);
 
-        // Then
+        //Then
         assertTrue(result.isPresent());
 
-        // Verify that invoking the provider throws RuntimeException
+        //Verify that invoking the provider throws RuntimeException
         RuntimeException exception = assertThrows(RuntimeException.class, () -> result.get().getOptions());
 
         assertTrue(exception.getMessage().contains("Error while invoking  " + methodName));
@@ -245,32 +245,32 @@ public class SpringOptionsProviderRegistryTest {
 
     @Test
     void removeProvider_RemovesFromCache() {
-        // Given
+        //Given
         String methodName = "testMethod";
         OptionsProvider provider = mock(OptionsProvider.class);
         registry.registerProvider(methodName, provider);
 
-        // When
+        //When
         registry.removeProvider(methodName);
         Optional<OptionsProvider> result = registry.getProvider(methodName);
 
-        // Then
-        assertFalse(result.isPresent()); // Should rediscover since removed from cache
+        //Then
+        assertFalse(result.isPresent()); //Should rediscover since removed from cache
         verify(applicationContext).getBeansOfType(Object.class);
     }
 
     @Test
     void clear_RemovesAllProviders() {
-        // Given
+        //Given
         OptionsProvider provider1 = mock(OptionsProvider.class);
         OptionsProvider provider2 = mock(OptionsProvider.class);
         registry.registerProvider("method1", provider1);
         registry.registerProvider("method2", provider2);
 
-        // When
+        //When
         registry.clear();
 
-        // Then
+        //Then
         assertFalse(registry.getProvider("method1").isPresent());
         assertFalse(registry.getProvider("method2").isPresent());
         verify(applicationContext, times(2)).getBeansOfType(Object.class);
@@ -278,11 +278,11 @@ public class SpringOptionsProviderRegistryTest {
 
     @Test
     void registryImplementsInterface() {
-        // Then
+        //Then
         assertInstanceOf(OptionsProviderRegistry.class, registry);
     }
 
-    // Classes de test pour simuler des beans Spring
+    //Test classes that simulate Spring beans
     static class TestOptionsBean {
 
         public List<SelectRadioOption> getTestOptions() {

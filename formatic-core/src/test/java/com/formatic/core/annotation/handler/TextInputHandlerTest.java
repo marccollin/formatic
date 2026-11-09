@@ -24,37 +24,37 @@ public class TextInputHandlerTest {
 
     @Test
     void should_support_field_with_text_input_annotation() throws NoSuchFieldException {
-        // Given
+        //Given
         Field field = TestEntity.class.getDeclaredField("username");
 
-        // When
+        //When
         boolean supports = handler.supports(field);
 
-        // Then
+        //Then
         assertTrue(supports);
     }
 
     @Test
     void should_not_support_field_without_text_input_annotation() throws NoSuchFieldException {
-        // Given
+        //Given
         Field field = TestEntity.class.getDeclaredField("age");
 
-        // When
+        //When
         boolean supports = handler.supports(field);
 
-        // Then
+        //Then
         assertFalse(supports);
     }
 
     @Test
     void should_handle_text_input_field_with_default_values() throws NoSuchFieldException {
-        // Given
+        //Given
         Field field = TestEntity.class.getDeclaredField("username");
 
-        // When
+        //When
         FormFieldMetadata metadata = handler.handle(field);
 
-        // Then
+        //Then
         assertNotNull(metadata);
         assertEquals(FormFieldType.TEXT, metadata.getType());
         assertEquals("username", metadata.getName());
@@ -68,20 +68,20 @@ public class TextInputHandlerTest {
 
     @Test
     void should_handle_text_input_field_with_custom_name_and_label() throws NoSuchFieldException {
-        // Given
+        //Given
         Field field = TestEntity.class.getDeclaredField("email");
 
-        // When
+        //When
         FormFieldMetadata metadata = handler.handle(field);
 
-        // Then
+        //Then
         assertEquals("userEmail", metadata.getName());
         assertEquals("Email Address", metadata.getLabel());
         assertEquals("email@example.com", metadata.getPlaceholder());
         assertFalse(metadata.isRequired());
     }
 
-    // Test class to simulate an entity
+    //Test class to simulate an entity
     private static class TestEntity {
         @TextInput(
                 placeholder = "Enter username",
@@ -100,7 +100,7 @@ public class TextInputHandlerTest {
         )
         private String email;
 
-        private Integer age; // No annotation used
+        private Integer age; //No annotation used
     }
 
 }

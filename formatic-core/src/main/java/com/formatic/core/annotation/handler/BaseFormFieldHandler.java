@@ -43,10 +43,10 @@ public abstract class BaseFormFieldHandler<T extends Annotation>
         T annotation = field.getAnnotation(annotationType);
         FormFieldMetadata metadata = new FormFieldMetadata();
 
-        // Processing common attributes
+        //Processing common attributes
         processCommonAttributes(annotation, metadata, field);
 
-        // Processing specific attributes
+        //Processing specific attributes
         processSpecificAttributes(annotation, metadata, field);
 
         return metadata;
@@ -55,21 +55,21 @@ public abstract class BaseFormFieldHandler<T extends Annotation>
     protected void processCommonAttributes(T annotation, FormFieldMetadata metadata, Field field) {
         CommonFieldAttributes common = extractCommonAttributes(annotation);
 
-        // Logic for the name field
+        //Logic for the name field
         if (common.name() == null || common.name().isEmpty()) {
             metadata.setName(field.getName());
         } else {
             metadata.setName(common.name());
         }
 
-        // Logic for the label field
+        //Logic for the label field
         if (common.label() == null || common.label().isEmpty()) {
             metadata.setLabel(capitalizeFirstLetter(field.getName()));
         } else {
             metadata.setLabel(common.label());
         }
 
-        // Other common attributes
+        //Other common attributes
         metadata.setRequired(common.required());
 
         metadata.setDisabled(common.disabled());

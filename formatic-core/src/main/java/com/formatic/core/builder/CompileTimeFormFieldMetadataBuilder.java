@@ -34,7 +34,7 @@ public class CompileTimeFormFieldMetadataBuilder implements FormFieldMetadataBui
 
     @Override
     public List<FormFieldMetadata> buildMetadata(Class<?> clazz) {
-        //La mise en cache garantit que la réflexion n'est utilisée qu'une seule fois par Class<?>
+        //Caching ensures that reflection is used only once per Class<?>
         return cache.computeIfAbsent(clazz, this::loadFromGeneratedClass);
     }
 
@@ -54,7 +54,7 @@ public class CompileTimeFormFieldMetadataBuilder implements FormFieldMetadataBui
             List<FormFieldMetadata> metadata = (List<FormFieldMetadata>) getMetadataMethod.invoke(null);
 
             //Resolve dynamically option value (radio button, select... before caching
-            List<FormFieldMetadata> resolvedMetadata = resolveDynamicOptions(metadata, clazz);
+            List<FormFieldMetadata> resolvedMetadata = resolveDynamicOptions(metadata);
 
             log.info("Loaded metadata for {}... Fields: {}", clazz.getSimpleName(), resolvedMetadata.size());
 
@@ -75,7 +75,7 @@ public class CompileTimeFormFieldMetadataBuilder implements FormFieldMetadataBui
         }
     }
 
-    private List<FormFieldMetadata> resolveDynamicOptions(List<FormFieldMetadata> metadata, Class<?> originalClass) {
+    private List<FormFieldMetadata> resolveDynamicOptions(List<FormFieldMetadata> metadata) {
         List<FormFieldMetadata> resolvedMetadata = new ArrayList<>(metadata.size());
 
         for (FormFieldMetadata fieldMeta : metadata) {

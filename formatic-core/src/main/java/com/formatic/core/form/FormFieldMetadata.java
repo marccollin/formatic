@@ -35,6 +35,7 @@ public class FormFieldMetadata {
 
     private String minDate;
     private String maxDate;
+    private String dateStep;
 
     private boolean disabled;
 
@@ -45,6 +46,7 @@ public class FormFieldMetadata {
     private int maxLength;
     private int rows;
     private int cols;
+    private String wrap;
     private boolean multiple;
     private String helpText;
 
@@ -59,12 +61,12 @@ public class FormFieldMetadata {
         this.order = order;
     }
 
-    // Ajoutez un constructeur par défaut si nécessaire pour la désérialisation
+    //Default constructor for deserialization.
     public FormFieldMetadata() {
     }
 
     public FormFieldMetadata(FormFieldMetadata source) {
-// Copie des primitives et des String (qui sont immuables)
+        //Copy primitive values and immutable String references.
         this.name = source.name;
         this.type = source.type;
         this.label = source.label;
@@ -84,6 +86,7 @@ public class FormFieldMetadata {
         this.accept = source.accept;
         this.minDate = source.minDate;
         this.maxDate = source.maxDate;
+        this.dateStep = source.dateStep;
         this.disabled = source.disabled;
         this.min = source.min;
         this.max = source.max;
@@ -92,31 +95,32 @@ public class FormFieldMetadata {
         this.maxLength = source.maxLength;
         this.rows = source.rows;
         this.cols = source.cols;
+        this.wrap = source.wrap;
         this.multiple = source.multiple;
         this.helpText = source.helpText;
         this.htmlAttributesString = source.htmlAttributesString;
 
-        // Copie des Collections (Deep Copy pour les collections)
+        //Copy collection containers without copying their elements.
 
-        // 1. options (List<SelectRadioOption>)
+        //1. options (List<SelectRadioOption>)
         if (source.options != null) {
-            // Créer une nouvelle liste et ajouter les éléments de l'ancienne liste.
-            // Si SelectRadioOption est mutable, il faudrait aussi faire une deep copy de ses éléments.
-            // On suppose ici que SelectRadioOption est immuable ou que la shallow copy est suffisante.
+            //Create a new list containing the original elements.
+            //Mutable SelectRadioOption elements would also need a deep copy.
+            //This assumes that the elements are immutable or a shallow copy is sufficient.
             this.options = new ArrayList<>(source.options);
         } else {
             this.options = null;
         }
 
-        // 2. htmlAttributes (Map<String, String>)
+        //2. htmlAttributes (Map<String, String>)
         if (source.htmlAttributes != null) {
-            // Créer une nouvelle HashMap contenant toutes les paires clé-valeur de l'originale.
+            //Create a new HashMap containing all original key-value pairs.
             this.htmlAttributes = new HashMap<>(source.htmlAttributes);
         } else {
-            this.htmlAttributes = new HashMap<>(); // S'assurer qu'elle n'est jamais nulle
+            this.htmlAttributes = new HashMap<>(); //Ensure the map is never null.
         }
 
-        // 3. extraProperties (Map<String, Object>)
+        //3. extraProperties (Map<String, Object>)
         if (source.extraProperties != null) {
             this.extraProperties = new HashMap<>(source.extraProperties);
         } else {
@@ -387,6 +391,14 @@ public class FormFieldMetadata {
         this.cols = cols;
     }
 
+    public String getWrap() {
+        return wrap;
+    }
+
+    public void setWrap(String wrap) {
+        this.wrap = wrap;
+    }
+
     public boolean isMultiple() {
         return multiple;
     }
@@ -417,6 +429,14 @@ public class FormFieldMetadata {
 
     public void setMaxDate(String maxDate) {
         this.maxDate = maxDate;
+    }
+
+    public String getDateStep() {
+        return dateStep;
+    }
+
+    public void setDateStep(String dateStep) {
+        this.dateStep = dateStep;
     }
 
     public String getAccept() {

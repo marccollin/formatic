@@ -20,6 +20,9 @@ import java.util.*;
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class FormMetadataProcessor extends AbstractProcessor {
 
+    private static final ClassName FORM_FIELD_TYPE_CLASS =
+            ClassName.get("com.formatic.core.form", "FormFieldType");
+
     //Using a Map to generate the file only once per analyzed class
     private final Map<String, Boolean> generatedClasses = new HashMap<>();
 
@@ -34,7 +37,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
             //Gives you ALL the fields that have THIS annotation  (TextInput, CheckboxInput, etc.).
             for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
 
-                // The encompassing element (the class) remains the same for the field.
+                //The encompassing element (the class) remains the same for the field.
                 if (element.getKind() == ElementKind.FIELD) {
                     TypeElement classElement = (TypeElement) element.getEnclosingElement();
 
@@ -77,7 +80,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
         //Construct the static method 'build()' which creates the List<FormFieldMetadata>
         MethodSpec.Builder buildMethodBuilder = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
-                .returns(ParameterizedTypeName.get(listClass, formFieldMetadataClass)) // use listClass and formFieldMetadataClass
+                .returns(ParameterizedTypeName.get(listClass, formFieldMetadataClass)) //use listClass and formFieldMetadataClass
                 .addStatement("$T<$T> list = new $T<>()", listClass, formFieldMetadataClass, arrayListClass); //use variable
 
         //Collect field metadata
@@ -110,7 +113,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
                 String fieldName = field.getSimpleName().toString();
                 AnnotationMirror annotationMirror = controlAnnotationMirror.get();
 
-                // get name of annotation
+                //get name of annotation
                 String annotationSimpleName = annotationMirror.getAnnotationType().asElement().getSimpleName().toString();
 
                 //Initialization of the generated FormFieldMetadata object
@@ -143,18 +146,18 @@ public class FormMetadataProcessor extends AbstractProcessor {
                     case "EmailInput":
                     case "UrlInput":
                     case "PhoneInput":
-                        // share same setters (minLength, maxLength, pattern, label...)
+                        //share same setters (minLength, maxLength, pattern, label...)
                         generateTextLikeSetters(buildMethodBuilder, fieldName + "Meta", values, annotationSimpleName);
                         break;
 
                     case "SelectInput":
                     case "RadioInput":
-                        // this annotation have 'optionsProvider', 'options', 'multiple'...
+                        //this annotation have 'optionsProvider', 'options', 'multiple'...
                         generateSelectLikeSetters(buildMethodBuilder, fieldName + "Meta", values, annotationSimpleName);
                         break;
 
                     case "DateInput":
-                        // 'minDate', 'maxDate'...
+                        //'minDate', 'maxDate'...
                         generateDateSetters(buildMethodBuilder, fieldName + "Meta", values);
                         break;
                     case "TextareaInput":
@@ -188,18 +191,17 @@ public class FormMetadataProcessor extends AbstractProcessor {
         buildMethodBuilder.addStatement("return $T.unmodifiableList(list)", Collections.class);
 
         //Add the static field and the getMetadata() method
-
-        // Field: private static final List<FormFieldMetadata> METADATA = build();
+        //Field: private static final List<FormFieldMetadata> METADATA = build();
         FieldSpec metadataField = FieldSpec.builder(
                 ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(FormFieldMetadata.class)),
                 "METADATA",
                 Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL
-        ).initializer("$N()", buildMethodBuilder.build()).build(); // initialise avec le résultat de 'build()'
+        ).initializer("$N()", buildMethodBuilder.build()).build(); //Initialize with the result of build().
 
         typeBuilder.addMethod(buildMethodBuilder.build());
         typeBuilder.addField(metadataField);
 
-        // Méthod: public static List<FormFieldMetadata> getMetadata()
+        //Method: public static List<FormFieldMetadata> getMetadata()
         MethodSpec getMetadata = MethodSpec.methodBuilder("getMetadata")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(metadataField.type())
@@ -225,7 +227,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
         Map<String, AnnotationValue> result = new HashMap<>();
 
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : rawValues.entrySet()) {
-            // Key is method annotation (ex: TextInput.label())
+            //Key is method annotation (ex: TextInput.label())
             result.put(entry.getKey().getSimpleName().toString(), entry.getValue());
         }
         return result;
@@ -236,8 +238,8 @@ public class FormMetadataProcessor extends AbstractProcessor {
     private <T> T getAnnotationValue(Map<String, AnnotationValue> values, String key, T defaultValue) {
         AnnotationValue value = values.get(key);
         if (value != null && value.getValue() != null) {
-            // JavaPoet often generates String values ​​as String
-            //and primitive values ​​in the form of their envelope type (Integer, etc.)
+            //JavaPoet often generates String values as String
+            //and primitive values in the form of their envelope type (Integer, etc.)
             return (T) value.getValue();
         }
         return defaultValue;
@@ -248,13 +250,33 @@ public class FormMetadataProcessor extends AbstractProcessor {
                                          Map<String, AnnotationValue> values,
                                          String annotationSimpleName){
 
-        ClassName formFieldTypeClass = ClassName.get("com.formatic.core.form", "FormFieldType");
-
         String formFieldType = annotationSimpleName.toUpperCase().replace("INPUT", "");
 
-        // Use formFieldTypeClass variable
-        buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, formFieldTypeClass, formFieldType);
+        buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, FORM_FIELD_TYPE_CLASS, formFieldType);
 
+        generateCommonTextSetters(buildMethodBuilder, metaObjectName, values);
+        buildMethodBuilder.addStatement("$N.setMinLength($L)", metaObjectName, getAnnotationValue(values, "minLength", -1));
+        buildMethodBuilder.addStatement("$N.setMaxLength($L)", metaObjectName, getAnnotationValue(values, "maxLength", -1));
+        buildMethodBuilder.addStatement("$N.setRows($L)", metaObjectName, getAnnotationValue(values, "rows", 4));
+        buildMethodBuilder.addStatement("$N.setCols($L)", metaObjectName, getAnnotationValue(values, "cols", 40));
+        buildMethodBuilder.addStatement("$N.setWrap($S)", metaObjectName, getAnnotationValue(values, "wrap", "soft"));
+    }
+
+    private void generateCommonTextSetters(MethodSpec.Builder buildMethodBuilder,
+                                           String metaObjectName,
+                                           Map<String, AnnotationValue> values) {
+        String name = getAnnotationValue(values, "name", "");
+        if (!name.isEmpty()) {
+            buildMethodBuilder.addStatement("$N.setName($S)", metaObjectName, name);
+        }
+
+        buildMethodBuilder.addStatement("$N.setCssClass($S)", metaObjectName, getAnnotationValue(values, "cssClass", ""));
+        buildMethodBuilder.addStatement("$N.setOuterCssClass($S)", metaObjectName, getAnnotationValue(values, "outerCssClass", ""));
+        buildMethodBuilder.addStatement("$N.setDisabled($L)", metaObjectName, getAnnotationValue(values, "disabled", false));
+        buildMethodBuilder.addStatement("$N.setPlaceholder($S)", metaObjectName, getAnnotationValue(values, "placeholder", ""));
+        buildMethodBuilder.addStatement("$N.setDefaultValue($S)", metaObjectName, getAnnotationValue(values, "defaultValue", ""));
+        buildMethodBuilder.addStatement("$N.setRequired($L)", metaObjectName, getAnnotationValue(values, "required", false));
+        buildMethodBuilder.addStatement("$N.setReadonly($L)", metaObjectName, getAnnotationValue(values, "readonly", false));
     }
 
     private void generateCheckboxSetters(MethodSpec.Builder buildMethodBuilder,
@@ -262,12 +284,9 @@ public class FormMetadataProcessor extends AbstractProcessor {
                                          Map<String, AnnotationValue> values,
                                          String annotationSimpleName) {
 
-        ClassName formFieldTypeClass = ClassName.get("com.formatic.core.form", "FormFieldType");
-
         //FormFieldType management
         String formFieldType = annotationSimpleName.toUpperCase().replace("INPUT", "");
-        buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, formFieldTypeClass, formFieldType);
-
+        buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, FORM_FIELD_TYPE_CLASS, formFieldType);
 
         //Define type
         ClassName listClass = ClassName.get(List.class);
@@ -322,42 +341,18 @@ public class FormMetadataProcessor extends AbstractProcessor {
                                          Map<String, AnnotationValue> values,
                                          String annotationSimpleName) {
 
-        // Assurez-vous que formFieldTypeClass est accessible ici, soit en le passant
-        // en paramètre, soit en le définissant comme champ de classe.
-
-        // Pour cet exemple, définissons-le ici temporairement pour la correction :
-        ClassName formFieldTypeClass = ClassName.get("com.formatic.core.form", "FormFieldType");
-
         String formFieldType = annotationSimpleName.toUpperCase().replace("INPUT", "");
 
-        // Ligne CORRIGÉE : Utilise la variable formFieldTypeClass
-        buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, formFieldTypeClass, formFieldType);
+        buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, FORM_FIELD_TYPE_CLASS, formFieldType);
 
-        // 2. Gérer les attributs partagés (Label et Required sont souvent gérés par le constructeur initial)
-        // Ici, nous gérons les attributs spécifiques au texte.
-
-        // Utilisation de la méthode utilitaire pour extraire et générer le setter
-
-        // Exemple : Longueur maximale (maxLength)
-        Integer maxLength = getAnnotationValue(values, "maxLength", null);
-        if (maxLength != null && maxLength > 0) {
-            buildMethodBuilder.addStatement("$N.setMaxLength($L)", metaObjectName, maxLength);
+        generateCommonTextSetters(buildMethodBuilder, metaObjectName, values);
+        buildMethodBuilder.addStatement("$N.setMinLength($L)", metaObjectName, getAnnotationValue(values, "minLength", -1));
+        buildMethodBuilder.addStatement("$N.setMaxLength($L)", metaObjectName, getAnnotationValue(values, "maxLength", -1));
+        buildMethodBuilder.addStatement("$N.setPattern($S)", metaObjectName, getAnnotationValue(values, "pattern", ""));
+        buildMethodBuilder.addStatement("$N.setErrorMessage($S)", metaObjectName, getAnnotationValue(values, "errorMessage", ""));
+        if (values.containsKey("title")) {
+            buildMethodBuilder.addStatement("$N.setTitle($S)", metaObjectName, getAnnotationValue(values, "title", ""));
         }
-
-        // Exemple : Pattern (pour PhoneInput, TextInput)
-        String pattern = getAnnotationValue(values, "pattern", null);
-        if (pattern != null) {
-            // Attention aux échappements de chaînes Java !
-            buildMethodBuilder.addStatement("$N.setPattern($S)", metaObjectName, pattern);
-        }
-
-        // Exemple : Placeholder
-        String placeholder = getAnnotationValue(values, "placeholder", null);
-        if (placeholder != null) {
-            buildMethodBuilder.addStatement("$N.setPlaceholder($S)", metaObjectName, placeholder);
-        }
-
-        // Vous devez ajouter la logique pour tous les attributs de ce groupe (minLength, title, defaultValue, etc.)
     }
 
 
@@ -366,7 +361,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
                                            Map<String, AnnotationValue> values,
                                            String annotationSimpleName) {
         String formFieldType = annotationSimpleName.toUpperCase().replace("INPUT", "");
-        buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, ClassName.get("com.formatic.core.form", "FormFieldType"), formFieldType);
+        buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, FORM_FIELD_TYPE_CLASS, formFieldType);
 
         String optionsProvider = getAnnotationValue(values, "optionsProvider", null);
 
@@ -387,8 +382,8 @@ public class FormMetadataProcessor extends AbstractProcessor {
 
                     ClassName selectOptionClass = ClassName.get("com.formatic.core.form", "SelectRadioOption");
 
-                    // Starting the list construction in the generated code
-                    // Example : List<SelectOption> optionsList = new ArrayList<>();
+                    //Starting the list construction in the generated code
+                    //Example : List<SelectOption> optionsList = new ArrayList<>();
                     String optionsListName = metaObjectName + "Options";
                     buildMethodBuilder.addStatement("$T<$T> $N = new $T<>()", listClass, selectOptionClass, optionsListName, arrayListClass);
 
@@ -397,19 +392,19 @@ public class FormMetadataProcessor extends AbstractProcessor {
                     }
 
                     for (AnnotationValue option : rawOptions) {
-                        // Every option is a chain "value:Label"
+                        //Every option is a chain "value:Label"
                         String optionString = (String) option.getValue();
 
                         String[] parts = optionString.split(":", 2);
                         String value = parts[0];
                         String label = (parts.length > 1) ? parts[1] : value;
 
-                        // Generate : optionsList.add(new SelectOption("sportCheck", "Sport"));
+                        //Generate : optionsList.add(new SelectOption("sportCheck", "Sport"));
                         buildMethodBuilder.addStatement("$N.add(new $T($S, $S))",
                                 optionsListName, selectOptionClass, value, label);
                     }
 
-                    // Generate : [field]Meta.setOptions(optionsList);
+                    //Generate : [field]Meta.setOptions(optionsList);
                     buildMethodBuilder.addStatement("$N.setOptions($N)", metaObjectName, optionsListName);
                 }
             }
@@ -430,15 +425,22 @@ public class FormMetadataProcessor extends AbstractProcessor {
     private void generateDateSetters(MethodSpec.Builder buildMethodBuilder,
                                      String metaObjectName,
                                      Map<String, AnnotationValue> values) {
-        buildMethodBuilder.addStatement("$N.setType($T.DATE)", metaObjectName, ClassName.get("com.formatic.core.form", "FormFieldType"));
-
+        buildMethodBuilder.addStatement("$N.setType($T.DATE)", metaObjectName, FORM_FIELD_TYPE_CLASS);
+        generateCommonTextSetters(buildMethodBuilder, metaObjectName, values);
+        buildMethodBuilder.addStatement("$N.setMinDate($S)", metaObjectName, getAnnotationValue(values, "min", ""));
+        buildMethodBuilder.addStatement("$N.setMaxDate($S)", metaObjectName, getAnnotationValue(values, "max", ""));
+        buildMethodBuilder.addStatement("$N.setDateStep($S)", metaObjectName, getAnnotationValue(values, "step", ""));
     }
 
     private void generateHiddenSetters(MethodSpec.Builder buildMethodBuilder,
                                        String metaObjectName,
                                        Map<String, AnnotationValue> values) {
-        buildMethodBuilder.addStatement("$N.setType($T.HIDDEN)", metaObjectName, ClassName.get("com.formatic.core.form", "FormFieldType"));
-
+        buildMethodBuilder.addStatement("$N.setType($T.HIDDEN)", metaObjectName, FORM_FIELD_TYPE_CLASS);
+        String name = getAnnotationValue(values, "name", "");
+        if (!name.isEmpty()) {
+            buildMethodBuilder.addStatement("$N.setName($S)", metaObjectName, name);
+        }
+        buildMethodBuilder.addStatement("$N.setDefaultValue($S)", metaObjectName, getAnnotationValue(values, "defaultValue", ""));
     }
 
 }

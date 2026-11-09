@@ -13,37 +13,37 @@ class BaseFormFieldHandlerTest {
 
     @Test
     void should_use_field_name_when_annotation_name_is_empty() throws NoSuchFieldException {
-        // Given
+        //Given
         TestHandler handler = new TestHandler();
         Field field = TestEntity.class.getDeclaredField("fieldName");
 
-        // When
+        //When
         FormFieldMetadata metadata = handler.handle(field);
 
-        // Then
+        //Then
         assertEquals("fieldName", metadata.getName());
 
-        // If label is not specified in the dto, name is used and first letter is capitalized
+        //If label is not specified in the dto, name is used and first letter is capitalized
         assertEquals("FieldName", metadata.getLabel());
         assertFalse(metadata.isRequired());
     }
 
     @Test
     void should_use_annotation_values_when_provided() throws NoSuchFieldException {
-        // Given
+        //Given
         TestHandler handler = new TestHandler();
         Field field = TestEntity.class.getDeclaredField("customField");
 
-        // When
+        //When
         FormFieldMetadata metadata = handler.handle(field);
 
-        // Then
+        //Then
         assertEquals("custom_name", metadata.getName());
         assertEquals("Custom Label", metadata.getLabel());
         assertTrue(metadata.isRequired());
     }
 
-    // Test annotation
+    //Test annotation
     @Retention(RetentionPolicy.RUNTIME)
     @interface TestAnnotation {
         String name() default "";
@@ -55,7 +55,7 @@ class BaseFormFieldHandlerTest {
         String[] htmlAttributes() default {};
     }
 
-    // Test Handler
+    //Test Handler
     private static class TestHandler extends BaseFormFieldHandler<TestAnnotation> {
         public TestHandler() {
             super(TestAnnotation.class);
@@ -63,11 +63,11 @@ class BaseFormFieldHandlerTest {
 
         @Override
         protected void processSpecificAttributes(TestAnnotation annotation, FormFieldMetadata metadata, Field field) {
-            // No special handling for this test
+            //No special handling for this test
         }
     }
 
-    // Test entity
+    //Test entity
     private static class TestEntity {
         @TestAnnotation
         private String fieldName;
