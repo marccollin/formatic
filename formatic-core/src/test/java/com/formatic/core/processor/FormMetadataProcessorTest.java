@@ -2,6 +2,7 @@ package com.formatic.core.processor;
 
 import com.formatic.core.annotation.TextareaInput;
 import com.formatic.core.annotation.handler.DateInputHandler;
+import com.formatic.core.annotation.handler.NumberInputHandler;
 import com.formatic.core.annotation.handler.EmailInputHandler;
 import com.formatic.core.annotation.handler.PhoneInputHandler;
 import com.formatic.core.annotation.handler.TextInputHandler;
@@ -32,6 +33,36 @@ class FormMetadataProcessorTest {
 
     @TempDir
     Path temporaryDirectory;
+
+    @Test
+    void generatedNumberMetadataMatchesReflection() throws Exception {
+        assertGeneratedMetadataMatchesReflection("NumberForm", """
+                package fixture;
+
+                import com.formatic.core.annotation.NumberInput;
+
+                public class NumberForm {
+                    @NumberInput
+                    private double amount;
+
+                    @NumberInput(name = "price", label = "Price", min = -10.5, max = 100.0,
+                        step = 0.01, placeholder = "Enter price", defaultValue = "1.25",
+                        required = true, disabled = true, readonly = true,
+                        cssClass = "amount", outerCssClass = "group", errorMessage = "Invalid price")
+                    private double custom;
+
+                    @NumberInput(min = 0, max = 0, step = 1)
+                    private int zero;
+
+                    @NumberInput(min = -Double.MAX_VALUE, max = Double.MAX_VALUE,
+                        step = Double.MIN_VALUE)
+                    private double extremes;
+
+                    @NumberInput(min = Double.NEGATIVE_INFINITY, max = Double.POSITIVE_INFINITY)
+                    private double unbounded;
+                }
+                """, new NumberInputHandler(), List.of("amount", "custom", "zero", "extremes", "unbounded"));
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {"TextInput", "EmailInput", "UrlInput", "PhoneInput"})
@@ -199,9 +230,11 @@ class FormMetadataProcessorTest {
                 FormFieldMetadata expected = handler.handle(formClass.getDeclaredField(fieldName));
                 assertThat(new FormFieldMetadata(expected))
                         .usingRecursiveComparison()
+                        .withComparatorForType(Double::compare, Double.class)
                         .isEqualTo(expected);
                 assertThat(generatedMetadata.get(index))
                         .usingRecursiveComparison()
+                        .withComparatorForType(Double::compare, Double.class)
                         .ignoringFields("order")
                         .isEqualTo(expected);
             }

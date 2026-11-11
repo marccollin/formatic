@@ -1,7 +1,11 @@
 <html xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="checkbox-field(field)" th:remove="tag">
+<div th:fragment="checkbox-field(field)" th:remove="tag"
+     th:with="fieldErrors=${#lists.isEmpty(#fields.errors()) ? {} : #fields.errors(field.name)},
+              fieldInvalid=${not #lists.isEmpty(fieldErrors)},
+              fieldHelp=${not #strings.isEmpty(field.helpText)},
+              fieldDescription=${(fieldHelp ? field.name + '-help' : '') + (fieldInvalid ? (fieldHelp ? ' ' : '') + field.name + '-errors' : '')}">
 
-    <div th:class="${field.outerCssClass}">
+    <fieldset th:class="${field.outerCssClass}">
 
         <th:block th:if="${field.multiple}">
             <legend class="form-label"
@@ -11,8 +15,12 @@
 
             <div class="mb-3 form-check" th:each="option : ${field.options}">
                 <input class="form-check-input"
+                       th:attrappend="class=${fieldInvalid ? ' is-invalid' : ''}"
+                       th:aria-invalid="${fieldInvalid ? 'true' : null}"
+                       th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
                        th:classappend="${field.cssClass}"
                        th:field="*{__${field.name}__}"
+                       th:disabled="${field.disabled or option.disabled}"
                        th:id="${field.name + '_' + option.value}"
                        th:required="${field.required}"
                        th:value="${option.value}"
@@ -30,19 +38,26 @@
 
             <div class="form-check">
                 <input class="form-check-input"
-                       th:checked="*{__${field.name}__}"
+                       th:attrappend="class=${fieldInvalid ? ' is-invalid' : ''}"
+                       th:aria-invalid="${fieldInvalid ? 'true' : null}"
+                       th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
+                       th:field="*{__${field.name}__}"
                        th:classappend="${field.cssClass}"
                        th:id="${field.name}"
-                       th:name="${field.name}"
+                       th:disabled="${field.disabled}"
                        th:required="${field.required}"
-                       th:value="*{__${field.name}__}"
+                       value="true"
                        type="checkbox"/>
                 <label class="form-check-label" th:classappend="${field.required} ? 'required' : ''"
                        th:for="${field.name}"
                        th:text="${field.label}"></label>
             </div>
-            <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
         </th:block>
-    </div>
+        <small class="help-text" th:id="${field.name + '-help'}" th:if="${fieldHelp}" th:text="${field.helpText}"></small>
+        <div class="invalid-feedback d-block" th:if="${fieldInvalid}"
+             th:id="${field.name + '-errors'}" role="alert">
+            <div th:each="error : ${fieldErrors}" th:text="${error}"></div>
+        </div>
+    </fieldset>
 </div>
 </html>

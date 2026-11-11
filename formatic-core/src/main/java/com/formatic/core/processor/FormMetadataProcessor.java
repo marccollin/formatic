@@ -156,6 +156,10 @@ public class FormMetadataProcessor extends AbstractProcessor {
                         generateSelectLikeSetters(buildMethodBuilder, fieldName + "Meta", values, annotationSimpleName);
                         break;
 
+                    case "NumberInput":
+                        generateNumberSetters(buildMethodBuilder, metaObjectName, values);
+                        break;
+
                     case "DateInput":
                         //'minDate', 'maxDate'...
                         generateDateSetters(buildMethodBuilder, fieldName + "Meta", values);
@@ -243,6 +247,20 @@ public class FormMetadataProcessor extends AbstractProcessor {
             return (T) value.getValue();
         }
         return defaultValue;
+    }
+
+    private void generateNumberSetters(MethodSpec.Builder buildMethodBuilder,
+                                      String metaObjectName,
+                                      Map<String, AnnotationValue> values) {
+        buildMethodBuilder.addStatement("$N.setType($T.NUMBER)", metaObjectName, FORM_FIELD_TYPE_CLASS);
+        generateCommonTextSetters(buildMethodBuilder, metaObjectName, values);
+        for (String attribute : List.of("min", "max", "step")) {
+            double value = getAnnotationValue(values, attribute, Double.NaN);
+            String setter = "set" + Character.toUpperCase(attribute.charAt(0)) + attribute.substring(1);
+            buildMethodBuilder.addStatement("$N.$N($T.valueOf($S))",
+                    metaObjectName, setter, Double.class, Double.toString(value));
+        }
+        buildMethodBuilder.addStatement("$N.setErrorMessage($S)", metaObjectName, getAnnotationValue(values, "errorMessage", ""));
     }
 
     private void generateTextareaSetters(MethodSpec.Builder buildMethodBuilder,

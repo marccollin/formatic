@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<form th:object="${formData}">
+    <div th:replace="~{bootstrap/forms/vertical/fields/text-field :: text-field(${textField})}"></div>
+    <div th:replace="~{bootstrap/forms/vertical/fields/date-field :: date-field(${dateField})}"></div>
+</form>
+</body>
+</html>

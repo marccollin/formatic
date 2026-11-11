@@ -8,7 +8,6 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +22,7 @@ class TextareaFieldTemplateTest {
 
     @ParameterizedTest
     @MethodSource("wrappingModes")
-    void rendersWrappingMode(String layout, String wrap) throws Exception {
+    void rendersWrappingModeAndTextValue(String layout, String wrap) throws Exception {
         String template;
         try (var resource = getClass().getResourceAsStream("/templates/" + layout + "/fields/textarea-field.html")) {
             assertThat(resource).isNotNull();
@@ -35,9 +34,10 @@ class TextareaFieldTemplateTest {
         field.setCols(40);
         field.setRows(4);
         field.setWrap(wrap);
+        field.setDefaultValue("Default line");
         Context context = new Context();
         context.setVariable("field", field);
-        context.setVariable("formData", Map.of("comment", "Text"));
+        context.setVariable("formData", new FormData("Text\nWith <tag> & quotes"));
 
         SpringTemplateEngine engine = new SpringTemplateEngine();
         engine.setTemplateResolver(new StringTemplateResolver());
@@ -49,5 +49,45 @@ class TextareaFieldTemplateTest {
             assertThat(html).contains("wrap=\"" + wrap + "\"");
         }
         assertThat(html).contains("<textarea", "cols=\"40\"", "rows=\"4\"");
+        assertThat(html).contains(">Text\nWith &lt;tag&gt; &amp; quotes<");
+        assertThat(html).doesNotContain("value=\"Text");
+    }
+
+    @ParameterizedTest
+    @MethodSource("wrappingModes")
+    void fallsBackToDefaultValueWhenBoundValueMissing(String layout, String wrap) throws Exception {
+        String template;
+        try (var resource = getClass().getResourceAsStream("/templates/" + layout + "/fields/textarea-field.html")) {
+            assertThat(resource).isNotNull();
+            template = new String(resource.readAllBytes(), StandardCharsets.UTF_8);
+        }
+
+        FormFieldMetadata field = new FormFieldMetadata();
+        field.setName("comment");
+        field.setCols(40);
+        field.setRows(4);
+        field.setWrap(wrap);
+        field.setDefaultValue("Default line");
+        Context context = new Context();
+        context.setVariable("field", field);
+        context.setVariable("formData", new FormData(null));
+
+        SpringTemplateEngine engine = new SpringTemplateEngine();
+        engine.setTemplateResolver(new StringTemplateResolver());
+        String html = engine.process("<div th:object=\"${formData}\">" + template + "</div>", context);
+
+        assertThat(html).contains(">Default line<").doesNotContain("value=\"Default line\"");
+    }
+
+    private static final class FormData {
+        private final String comment;
+
+        private FormData(String comment) {
+            this.comment = comment;
+        }
+
+        public String getComment() {
+            return comment;
+        }
     }
 }

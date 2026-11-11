@@ -1,5 +1,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="number-field(field)" th:remove="tag">
+<div th:fragment="number-field(field)" th:remove="tag"
+     th:with="fieldErrors=${#lists.isEmpty(#fields.errors()) ? {} : #fields.errors(field.name)},
+              fieldInvalid=${not #lists.isEmpty(fieldErrors)},
+              fieldHelp=${not #strings.isEmpty(field.helpText)},
+              fieldDescription=${(fieldHelp ? field.name + '-help' : '') + (fieldInvalid ? (fieldHelp ? ' ' : '') + field.name + '-errors' : '')}">
 
     <div class="mb-4">
 
@@ -9,10 +13,14 @@
 
 
         <input class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               th:attrappend="class=${fieldInvalid ? ' !border-red-500 focus:!border-red-500 focus:!ring-red-500' : ''}"
+               th:aria-invalid="${fieldInvalid ? 'true' : null}"
+               th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
                th:classappend="${field.cssClass}"
                th:id="${field.name}"
-               th:max="${field.max != 1.7976931348623157E308} ? ${field.max} : null"
-               th:min="${field.min != -1.7976931348623157E308} ? ${field.min} : null"
+               th:max="${field.max >= -1.7976931348623157E308 and field.max <= 1.7976931348623157E308 ? field.max : null}"
+               th:min="${field.min >= -1.7976931348623157E308 and field.min <= 1.7976931348623157E308 ? field.min : null}"
+               th:attr="step=${field.step >= -1.7976931348623157E308 and field.step <= 1.7976931348623157E308 ? field.step : null}"
                th:name="${field.name}"
                th:placeholder="${field.placeholder}"
                th:readonly="${field.readonly}"
@@ -20,7 +28,11 @@
                th:disabled="${field.disabled}"
                th:value="*{__${field.name}__} ?: ${field.defaultValue}"
                type="number"/>
-        <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
+        <small class="help-text" th:id="${field.name + '-help'}" th:if="${fieldHelp}" th:text="${field.helpText}"></small>
+        <div class="mt-1 text-sm text-red-600" th:if="${fieldInvalid}"
+             th:id="${field.name + '-errors'}" role="alert">
+            <div th:each="error : ${fieldErrors}" th:text="${error}"></div>
+        </div>
 
 
     </div>

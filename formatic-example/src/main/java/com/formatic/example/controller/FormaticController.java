@@ -96,7 +96,7 @@ public class FormaticController {
             model.addAttribute("formData", editorDto);
             model.addAttribute("formTitle", "Form " + Editor.class.getSimpleName());
 
-            return "bootstrap/forms/form-base";
+            return "bootstrap/forms/vertical/form-base";
         } catch (Exception e) {
             logger.error("Error while generating the form for the class {}: {}",
                     Editor.class.getSimpleName(), e.getMessage());
