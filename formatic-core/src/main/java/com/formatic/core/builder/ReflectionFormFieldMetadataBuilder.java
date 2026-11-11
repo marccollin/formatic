@@ -2,6 +2,7 @@ package com.formatic.core.builder;
 
 import com.formatic.core.annotation.handler.FormFieldAnnotationHandler;
 import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.FormConstraintValidator;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -40,7 +41,10 @@ public class ReflectionFormFieldMetadataBuilder  implements FormFieldMetadataBui
                     .findFirst()
                     .ifPresent(handler -> {
                         FormFieldMetadata m = handler.handle(field);
-                        if (m != null) result.add(m);
+                        if (m != null) {
+                            FormConstraintValidator.validate(m, clazz.getName() + "." + field.getName());
+                            result.add(m);
+                        }
                     });
         }
 

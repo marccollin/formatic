@@ -1,6 +1,8 @@
 package com.formatic.core.processor;
 
 import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.FormConstraintValidator;
+import com.formatic.core.form.ConstraintValidationException;
 import com.google.auto.service.AutoService;
 import com.palantir.javapoet.*;
 
@@ -45,9 +47,12 @@ public class FormMetadataProcessor extends AbstractProcessor {
                     if (!generatedClasses.containsKey(className)) {
 
                         try {
+                            generatedClasses.put(className, true);
+                            if (!validateConstraints(classElement)) {
+                                continue;
+                            }
                             //Call the method that will analyze ALL the fields of this class
                             generateMetadataAccessor(classElement);
-                            generatedClasses.put(className, true);
                         } catch (IOException e) {
                             processingEnv.getMessager().printMessage(
                                     Diagnostic.Kind.ERROR,
@@ -61,6 +66,40 @@ public class FormMetadataProcessor extends AbstractProcessor {
         }
 
         return true;
+    }
+
+    private boolean validateConstraints(TypeElement classElement) {
+        boolean valid = true;
+        for (Element field : classElement.getEnclosedElements()) {
+            if (field.getKind() != ElementKind.FIELD) continue;
+            for (AnnotationMirror annotation : field.getAnnotationMirrors()) {
+                String name = annotation.getAnnotationType().toString();
+                if (!name.startsWith("com.formatic.core.annotation.")) continue;
+                Map<String, AnnotationValue> values = getAnnotationValues(annotation);
+                String location = classElement.getQualifiedName() + "." + field.getSimpleName();
+                try {
+                    switch (name.substring(name.lastIndexOf('.') + 1)) {
+                        case "TextInput", "TextareaInput", "EmailInput", "PasswordInput", "PhoneInput", "UrlInput" ->
+                                FormConstraintValidator.validateLengths(location,
+                                        getAnnotationValue(values, "minLength", -1),
+                                        getAnnotationValue(values, "maxLength", -1));
+                        case "NumberInput" -> FormConstraintValidator.validateNumber(location,
+                                getAnnotationValue(values, "min", Double.NaN),
+                                getAnnotationValue(values, "max", Double.NaN),
+                                getAnnotationValue(values, "step", Double.NaN));
+                        case "DateInput" -> FormConstraintValidator.validateDate(location,
+                                getAnnotationValue(values, "min", ""),
+                                getAnnotationValue(values, "max", ""),
+                                getAnnotationValue(values, "step", ""));
+                        default -> { }
+                    }
+                } catch (ConstraintValidationException e) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), field);
+                    valid = false;
+                }
+            }
+        }
+        return valid;
     }
 
     private void generateMetadataAccessor(TypeElement classElement) throws IOException {
@@ -146,6 +185,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
                     case "EmailInput":
                     case "UrlInput":
                     case "PhoneInput":
+                    case "PasswordInput":
                         //share same setters (minLength, maxLength, pattern, label...)
                         generateTextLikeSetters(buildMethodBuilder, fieldName + "Meta", values, annotationSimpleName);
                         break;
@@ -283,6 +323,13 @@ public class FormMetadataProcessor extends AbstractProcessor {
     private void generateCommonTextSetters(MethodSpec.Builder buildMethodBuilder,
                                            String metaObjectName,
                                            Map<String, AnnotationValue> values) {
+        generateCommonTextSetters(buildMethodBuilder, metaObjectName, values, true);
+    }
+
+    private void generateCommonTextSetters(MethodSpec.Builder buildMethodBuilder,
+                                           String metaObjectName,
+                                           Map<String, AnnotationValue> values,
+                                           boolean includeDefaultValue) {
         String name = getAnnotationValue(values, "name", "");
         if (!name.isEmpty()) {
             buildMethodBuilder.addStatement("$N.setName($S)", metaObjectName, name);
@@ -292,7 +339,9 @@ public class FormMetadataProcessor extends AbstractProcessor {
         buildMethodBuilder.addStatement("$N.setOuterCssClass($S)", metaObjectName, getAnnotationValue(values, "outerCssClass", ""));
         buildMethodBuilder.addStatement("$N.setDisabled($L)", metaObjectName, getAnnotationValue(values, "disabled", false));
         buildMethodBuilder.addStatement("$N.setPlaceholder($S)", metaObjectName, getAnnotationValue(values, "placeholder", ""));
-        buildMethodBuilder.addStatement("$N.setDefaultValue($S)", metaObjectName, getAnnotationValue(values, "defaultValue", ""));
+        if (includeDefaultValue) {
+            buildMethodBuilder.addStatement("$N.setDefaultValue($S)", metaObjectName, getAnnotationValue(values, "defaultValue", ""));
+        }
         buildMethodBuilder.addStatement("$N.setRequired($L)", metaObjectName, getAnnotationValue(values, "required", false));
         buildMethodBuilder.addStatement("$N.setReadonly($L)", metaObjectName, getAnnotationValue(values, "readonly", false));
     }
@@ -363,11 +412,13 @@ public class FormMetadataProcessor extends AbstractProcessor {
 
         buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, FORM_FIELD_TYPE_CLASS, formFieldType);
 
-        generateCommonTextSetters(buildMethodBuilder, metaObjectName, values);
+        generateCommonTextSetters(buildMethodBuilder, metaObjectName, values, !"PasswordInput".equals(annotationSimpleName));
         buildMethodBuilder.addStatement("$N.setMinLength($L)", metaObjectName, getAnnotationValue(values, "minLength", -1));
         buildMethodBuilder.addStatement("$N.setMaxLength($L)", metaObjectName, getAnnotationValue(values, "maxLength", -1));
         buildMethodBuilder.addStatement("$N.setPattern($S)", metaObjectName, getAnnotationValue(values, "pattern", ""));
-        buildMethodBuilder.addStatement("$N.setErrorMessage($S)", metaObjectName, getAnnotationValue(values, "errorMessage", ""));
+        if (!"PasswordInput".equals(annotationSimpleName)) {
+            buildMethodBuilder.addStatement("$N.setErrorMessage($S)", metaObjectName, getAnnotationValue(values, "errorMessage", ""));
+        }
         if (values.containsKey("title")) {
             buildMethodBuilder.addStatement("$N.setTitle($S)", metaObjectName, getAnnotationValue(values, "title", ""));
         }

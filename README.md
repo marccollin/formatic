@@ -164,8 +164,9 @@ Result of processing Editeur class with tailwind vertical form
 
 ### Text length constraints
 
-Text, email, password, phone, URL, and textarea fields omit `maxlength` when
-`maxLength` is negative (the annotation default is `-1`, meaning no explicit limit).
+Text, email, password, phone, URL, and textarea templates omit `maxlength` when
+`maxLength` is negative. The annotation default is `-1`, meaning no explicit limit;
+other negative annotation values are rejected during metadata validation.
 Non-negative limits, including `0` and `Integer.MAX_VALUE`, are rendered unchanged
 in all bundled layouts. For example, `@TextInput(maxLength = 100)` renders
 `maxlength="100"`. Enforce required length limits on the server as well.
@@ -175,9 +176,68 @@ in all bundled layouts. For example, `@TextInput(maxLength = 100)` renders
 `@NumberInput(min = -10.5, max = 100, step = 0.01)` generates numeric constraints
 in Bootstrap and Tailwind forms, including fractional steps.
 Reflection, bytecode, and compile-time metadata builders support these attributes.
-The default `Double.NaN` means no explicit constraint; non-finite values are omitted
-from the HTML. Without an explicit step, the browser uses its default step of `1`.
-Use a positive step value.
+The default `Double.NaN` means no explicit constraint. Explicit numeric limits must
+be finite, and the step must be finite and positive. Without an explicit step, the
+browser uses its default step of `1`.
+
+### Form constraint configuration
+
+Formatic validates the annotation constraints when it builds metadata. Invalid
+configuration fails with a `ConstraintValidationException` naming the DTO, field,
+attribute, and value; the annotation processor reports an error on the field at
+compile time. This is a compatibility change: annotations with previously ignored
+invalid constraints must be corrected.
+
+- Length limits use `-1` for unspecified; other values must be non-negative, and
+  `minLength` must not exceed `maxLength`.
+- Numeric bounds use `Double.NaN` for unspecified; other bounds must be finite,
+  `min` must not exceed `max`, and an explicit step must be finite and positive.
+- Date bounds are empty or valid HTML dates such as `2024-02-29`, with `min` no
+  later than `max`. Date step is empty, `"any"`, or a finite positive HTML number
+  representing days (for example `"7"` or `"0.5"`).
+
+For example:
+
+```java
+public class RegistrationForm {
+    @TextInput(minLength = 2, maxLength = 50)
+    private String name;
+
+    @NumberInput(min = 0, max = 100, step = 0.5)
+    private double score;
+
+    @DateInput(min = "2000-01-01", max = "2100-12-31", step = "1")
+    private LocalDate registrationDate;
+}
+```
+
+For comparison, `@NumberInput(step = 0)` is invalid. With the annotation processor
+enabled, compilation reports the field and the invalid `step`; otherwise, a runtime
+metadata builder throws `ConstraintValidationException`.
+
+The example's `FormaticController` handles this configuration error for `/form`,
+`/formfeeded`, and `/formhybrid/{id}`: it logs the detailed exception on the
+server and returns HTTP 500 with a generic message, without exposing DTO names
+or constraint values to clients. A consuming Spring MVC controller can use a
+similar handler:
+
+```java
+@ExceptionHandler(ConstraintValidationException.class)
+public ResponseEntity<String> handleInvalidFormConfiguration(ConstraintValidationException exception) {
+    logger.error("Invalid form constraint configuration", exception);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Unable to generate the form because its configuration is invalid.");
+}
+```
+
+An annotation processor error stops compilation before the application starts,
+so correct the annotation based on the compiler diagnostic; the runtime exception
+handler cannot handle that case.
+
+Configuration validation is separate from validation of submitted values.
+Applications must still validate submissions on the server. Directly constructed
+or subsequently modified `FormFieldMetadata` is not automatically revalidated;
+call `FormConstraintValidator.validate(metadata, location)` when needed.
 
 ### File uploads
 
@@ -342,6 +402,12 @@ before rendering, including city, postal code, birth date, interests, and paymen
 It uses the reflection builder and the Bootstrap vertical layout.
 There are no `class`, `cssLibrary`, `form`, or `mode` parameters for this endpoint,
 and no REST request is needed to populate its values.
+
+Submitting this form sends `POST /formfeeded`. The example binds the submitted
+`Editor` and redisplays it with a confirmation, or shows Spring binding errors
+if conversion fails. This is a demo: it does not persist changes or automatically
+validate submitted values against Formatic annotation constraints. Disabled fields
+are not submitted by the browser, and the handler does not reload stored values.
 
 #### Hybrid form: `/formhybrid/{id}`
 

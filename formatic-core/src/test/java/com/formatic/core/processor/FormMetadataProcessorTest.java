@@ -5,6 +5,7 @@ import com.formatic.core.annotation.handler.DateInputHandler;
 import com.formatic.core.annotation.handler.NumberInputHandler;
 import com.formatic.core.annotation.handler.EmailInputHandler;
 import com.formatic.core.annotation.handler.PhoneInputHandler;
+import com.formatic.core.annotation.handler.PasswordInputHandler;
 import com.formatic.core.annotation.handler.TextInputHandler;
 import com.formatic.core.annotation.handler.UrlInputHandler;
 import com.formatic.core.annotation.handler.FormFieldAnnotationHandler;
@@ -58,20 +59,19 @@ class FormMetadataProcessorTest {
                         step = Double.MIN_VALUE)
                     private double extremes;
 
-                    @NumberInput(min = Double.NEGATIVE_INFINITY, max = Double.POSITIVE_INFINITY)
-                    private double unbounded;
                 }
-                """, new NumberInputHandler(), List.of("amount", "custom", "zero", "extremes", "unbounded"));
+                """, new NumberInputHandler(), List.of("amount", "custom", "zero", "extremes"));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"TextInput", "EmailInput", "UrlInput", "PhoneInput"})
+    @ValueSource(strings = {"TextInput", "EmailInput", "UrlInput", "PhoneInput", "PasswordInput"})
     void generatedTextLikeMetadataMatchesReflection(String annotationName) throws Exception {
         FormFieldAnnotationHandler<?> handler = switch (annotationName) {
             case "TextInput" -> new TextInputHandler();
             case "EmailInput" -> new EmailInputHandler();
             case "UrlInput" -> new UrlInputHandler();
             case "PhoneInput" -> new PhoneInputHandler();
+            case "PasswordInput" -> new PasswordInputHandler();
             default -> throw new IllegalArgumentException(annotationName);
         };
         String titleAttribute = annotationName.equals("TextInput") || annotationName.equals("UrlInput")

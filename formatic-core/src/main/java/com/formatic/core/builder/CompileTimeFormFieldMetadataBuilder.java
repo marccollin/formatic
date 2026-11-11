@@ -1,6 +1,8 @@
 package com.formatic.core.builder;
 
 import com.formatic.core.form.SelectRadioOption;
+import com.formatic.core.form.FormConstraintValidator;
+import com.formatic.core.form.ConstraintValidationException;
 import com.formatic.core.service.OptionsProviderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +55,10 @@ public class CompileTimeFormFieldMetadataBuilder implements FormFieldMetadataBui
             //Class static method to get metadata
             List<FormFieldMetadata> metadata = (List<FormFieldMetadata>) getMetadataMethod.invoke(null);
 
+            for (FormFieldMetadata field : metadata) {
+                FormConstraintValidator.validate(field, clazz.getName() + "." + field.getName());
+            }
+
             //Resolve dynamically option value (radio button, select... before caching
             List<FormFieldMetadata> resolvedMetadata = resolveDynamicOptions(metadata);
 
@@ -64,6 +70,8 @@ public class CompileTimeFormFieldMetadataBuilder implements FormFieldMetadataBui
                     .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
 
 
+        } catch (ConstraintValidationException e) {
+            throw e;
         } catch (ClassNotFoundException e) {
             log.warn("Generated metadata class {} not found for {}. Please ensure Annotation Processor is running.",
                     accessorClassName, clazz.getSimpleName());

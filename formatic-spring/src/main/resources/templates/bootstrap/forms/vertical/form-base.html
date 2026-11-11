@@ -15,6 +15,7 @@
 
 <div class="container-md" th:fragment="Generic" th:remove="tag">
     <h2 th:text="${formName}"></h2>
+    <div class="alert alert-success" role="status" th:if="${formSuccess}" th:text="${formSuccess}"></div>
     <form class="row g-3" method="post" th:object="${formData}"
           th:attr="enctype=${fields.?[type.name() == 'FILE'].isEmpty() ? null : 'multipart/form-data'}">
 
