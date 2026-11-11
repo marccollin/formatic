@@ -3,6 +3,7 @@ package com.formatic.example.controller;
 import com.formatic.core.builder.BytecodeFormFieldMetadataBuilder;
 import com.formatic.core.builder.CompileTimeFormFieldMetadataBuilder;
 import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.ConstraintValidationException;
 import com.formatic.core.builder.ReflectionFormFieldMetadataBuilder;
 import com.formatic.example.dto.BuilderMode;
 import com.formatic.example.dto.CssLibrary;
@@ -12,8 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.lang.reflect.InvocationTargetException;
@@ -94,15 +101,34 @@ public class FormaticController {
 
             model.addAttribute("fields", formMetadata);
             model.addAttribute("formData", editorDto);
-            model.addAttribute("formTitle", "Form " + Editor.class.getSimpleName());
+            model.addAttribute("formName", "Form " + Editor.class.getSimpleName());
 
             return "bootstrap/forms/vertical/form-base";
+        } catch (ConstraintValidationException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Error while generating the form for the class {}: {}",
                     Editor.class.getSimpleName(), e.getMessage());
             model.addAttribute("error", "Unable to generate the form");
             return "error";
         }
+    }
+
+    @PostMapping("/formfeeded")
+    public String submitFormValue(@ModelAttribute("formData") Editor editor, BindingResult bindingResult, Model model) {
+        model.addAttribute("fields", reflectionFormFieldMetadataBuilder.buildMetadata(Editor.class));
+        model.addAttribute("formName", "Form " + Editor.class.getSimpleName());
+        if (!bindingResult.hasErrors()) {
+            model.addAttribute("formSuccess", "Form submitted successfully. This demo does not save changes.");
+        }
+        return "bootstrap/forms/vertical/form-base";
+    }
+
+    @ExceptionHandler(ConstraintValidationException.class)
+    public ResponseEntity<String> handleConstraintConfigurationError(ConstraintValidationException exception) {
+        logger.error("Invalid form constraint configuration", exception);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Unable to generate the form because its configuration is invalid.");
     }
 
 

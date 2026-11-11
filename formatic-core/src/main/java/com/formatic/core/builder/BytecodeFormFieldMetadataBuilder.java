@@ -4,6 +4,7 @@ import com.formatic.core.annotation.handler.FormFieldAnnotationHandler;
 import com.formatic.core.form.BytecodeAccessor;
 import com.formatic.core.form.CachedFormMetadata;
 import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.FormConstraintValidator;
 import com.formatic.core.form.ReflectionFallback;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
@@ -53,8 +54,8 @@ public class BytecodeFormFieldMetadataBuilder implements FormFieldMetadataBuilde
     private CachedFormMetadata generateBytecodeAccessor(Class<?> clazz) {
         long startTime = System.nanoTime();
 
+        List<FormFieldMetadata> metadata = analyzeWithReflection(clazz);
         try {
-            List<FormFieldMetadata> metadata = analyzeWithReflection(clazz);
 
             //Create unique class name
             String accessorClassName = String.format(
@@ -87,7 +88,7 @@ public class BytecodeFormFieldMetadataBuilder implements FormFieldMetadataBuilde
         } catch (Exception e) {
             log.error("Failed to generate bytecode for {}, using fallback", clazz.getSimpleName(), e);
             //Fallback: only reflexion version
-            return new ReflectionFallback(analyzeWithReflection(clazz));
+            return new ReflectionFallback(metadata);
         }
     }
 
@@ -103,7 +104,10 @@ public class BytecodeFormFieldMetadataBuilder implements FormFieldMetadataBuilde
                     .findFirst()
                     .ifPresent(handler -> {
                         FormFieldMetadata m = handler.handle(field);
-                        if (m != null) result.add(m);
+                        if (m != null) {
+                            FormConstraintValidator.validate(m, clazz.getName() + "." + field.getName());
+                            result.add(m);
+                        }
                     });
         }
 
