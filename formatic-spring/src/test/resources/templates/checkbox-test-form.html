@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<form method="post" th:object="${formData}">
+    <div th:replace="~{${layout + '/fields/checkbox-field'} :: checkbox-field(${field})}"></div>
+</form>
+</body>
+</html>

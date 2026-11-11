@@ -162,6 +162,104 @@ Result of processing Editeur class with tailwind vertical form
 ![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_thymeleaf_vertical_tailwind.jpg)
 
 
+### Text length constraints
+
+Text, email, password, phone, URL, and textarea fields omit `maxlength` when
+`maxLength` is negative (the annotation default is `-1`, meaning no explicit limit).
+Non-negative limits, including `0` and `Integer.MAX_VALUE`, are rendered unchanged
+in all bundled layouts. For example, `@TextInput(maxLength = 100)` renders
+`maxlength="100"`. Enforce required length limits on the server as well.
+
+### Numeric input constraints
+
+`@NumberInput(min = -10.5, max = 100, step = 0.01)` generates numeric constraints
+in Bootstrap and Tailwind forms, including fractional steps.
+Reflection, bytecode, and compile-time metadata builders support these attributes.
+The default `Double.NaN` means no explicit constraint; non-finite values are omitted
+from the HTML. Without an explicit step, the browser uses its default step of `1`.
+Use a positive step value.
+
+### File uploads
+
+The bundled Bootstrap and Tailwind forms render `FILE` metadata as file inputs and
+use `multipart/form-data` encoding when the form contains a file field.
+`@FileInput(accept = "image/png,image/jpeg", multiple = true)` controls the file
+picker's accepted formats and multiple-file selection.
+
+In a Spring MVC DTO, use `MultipartFile` for a single upload and
+`List<MultipartFile>` for multiple uploads. The consuming application must provide
+the POST handler and validate upload size and content on the server; `accept` is
+only a browser hint. File inputs cannot be prefilled from DTO values or REST data.
+
+### Simple checkbox binding
+
+The bundled templates use Spring-aware Thymeleaf binding for simple checkboxes.
+Checked `boolean` and `Boolean` fields submit `true`; unchecked fields bind to `false`
+using Spring's hidden field marker. Disabled simple checkboxes emit neither a submitted
+value nor a reset marker, so an existing bound value is not reset.
+
+Simple `String` checkboxes submit `"true"` when checked and bind to `null` when unchecked.
+Prefer `boolean` or `Boolean` for true/false properties. Collection checkboxes continue
+to submit their individual option values.
+
+The hybrid form normalizes REST checkbox values to strings before matching them to
+HTML input values, supporting both JSON booleans and arrays of selected options.
+Its JavaScript regression tests require Node.js and can be run from the project root:
+
+```bash
+node --test formatic-spring/src/test/javascript/hybrid-checkbox.test.cjs
+```
+
+### Disabled fields and options
+
+In all bundled Bootstrap and Tailwind layouts, `disabled = true` disables the
+entire checkbox group, radio group, or select. An individual option's `disabled`
+flag still applies when its field is enabled; enabling an option never overrides
+a disabled field.
+
+Disabled checkbox fields and multiple selects omit Spring's hidden reset markers.
+They therefore leave existing values unchanged when binding a submission onto a
+preloaded DTO. Enabled collection controls retain their markers so an empty
+selection can clear the collection.
+
+Browsers do not submit disabled controls or disabled selected options. Disabling
+only an option does not guarantee that its existing value will be retained when
+other choices are submitted. Disabled state is a UI feature, not authorization:
+the consuming application must enforce allowed updates on the server.
+
+### Validation feedback and accessibility
+
+The bundled templates support native browser validation, custom frontend validation,
+and Spring MVC validation without requiring JavaScript or HTMX. Existing HTML
+constraints (`required`, `pattern`, length and numeric limits) remain in place.
+Use `novalidate` on your application's form if you want to bypass native browser
+validation and rely on the backend or your own frontend validation instead.
+
+All visible fields link help text through `aria-describedby` when help is present.
+When Spring's `BindingResult` contains errors for a field, its controls receive
+`aria-invalid="true"` and Bootstrap invalid styling or Tailwind red border/focus
+styling. Escaped validation messages appear in an accessible error block; every
+checkbox/radio option links to the same group feedback. Hidden inputs do not
+receive visible feedback. Annotation `errorMessage` values are not automatically
+shown: an error message alone does not mean validation failed.
+
+For backend validation, use Bean Validation constraints on your DTO and
+`@Valid @ModelAttribute("formData")` with an immediately following `BindingResult`
+parameter in your POST handler, or populate a `BindingResult` using your own
+Spring validator. On failure, return the form view with its field metadata,
+the submitted DTO, and its binding result intact rather than redirecting or
+replacing the DTO. Global/object errors are not displayed by individual fields;
+provide an application-level summary if needed. Formatic does not perform
+server-side validation merely because a Formatic annotation declares a constraint.
+
+The IDs `<field-name>-help` and `<field-name>-errors` provide hooks for custom
+frontend validation. The error block is rendered only when server field errors
+exist; frontend code may create its own block using that ID and update
+`aria-invalid`/`aria-describedby` as validation changes. For HTMX, return and swap
+the error-aware form fragment from your application's POST handler. No
+HTMX-specific library configuration is required. Backend validation remains
+necessary regardless of the frontend approach.
+
 ### Customizing Thymeleaf templates
 
 In a consuming Spring Boot application, place a customized template under
@@ -231,6 +329,50 @@ http://localhost:8080/form?class=com.formatic.example.dto.Editor&cssLibrary=TAIL
 To compare builders, keep `class`, `cssLibrary`, and `form` unchanged and vary only `mode`.
 Compile-time mode requires generated metadata for the DTO. The example module configures the annotation processor;
 running it through Gradle generates the metadata during compilation.
+
+#### Prefilled form: `/formfeeded`
+
+```text
+http://localhost:8080/formfeeded
+```
+
+Unlike `/form`, which creates a new instance of the DTO selected by `class`,
+`/formfeeded` always creates an `Editor` and sets several values in the controller
+before rendering, including city, postal code, birth date, interests, and payment method.
+It uses the reflection builder and the Bootstrap vertical layout.
+There are no `class`, `cssLibrary`, `form`, or `mode` parameters for this endpoint,
+and no REST request is needed to populate its values.
+
+#### Hybrid form: `/formhybrid/{id}`
+
+```text
+http://localhost:8080/formhybrid/1?class=com.formatic.example.dto.Editor
+```
+
+Unlike `/formfeeded`, the hybrid endpoint first renders a new DTO using the reflection
+builder and Bootstrap horizontal fragments. Browser JavaScript then fetches
+`/api/editors/{id}` and populates the fields from the JSON response.
+The `class` parameter selects the initial DTO, while the path ID selects the editor data.
+Use `com.formatic.example.dto.Editor` to match the editor REST response.
+The endpoint does not accept layout or builder selection parameters.
+
+Change the path ID to `2` or `3` to load another editor. JavaScript and a successful
+REST response are required for the saved editor values to appear.
+
+#### Testing the REST controller
+
+`FormaticRestController` returns editor data as JSON:
+
+```text
+http://localhost:8080/api/editors/1
+http://localhost:8080/api/editors/2
+http://localhost:8080/api/editors/3
+```
+
+An unknown editor ID returns HTTP `404`.
+
+These URLs return JSON only, not a rendered form. The hybrid page described above
+consumes the same endpoint to populate its fields.
 
 ### DataSource for RadioInput, CheckBoxInput and SelectInput
 

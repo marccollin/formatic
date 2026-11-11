@@ -1,7 +1,11 @@
 <html xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="radio-field(field)" th:remove="tag">
+<div th:fragment="radio-field(field)" th:remove="tag"
+     th:with="fieldErrors=${#lists.isEmpty(#fields.errors()) ? {} : #fields.errors(field.name)},
+              fieldInvalid=${not #lists.isEmpty(fieldErrors)},
+              fieldHelp=${not #strings.isEmpty(field.helpText)},
+              fieldDescription=${(fieldHelp ? field.name + '-help' : '') + (fieldInvalid ? (fieldHelp ? ' ' : '') + field.name + '-errors' : '')}">
 
-    <div class="mb-4">
+    <fieldset class="mb-4">
 
         <legend class="text-sm font-medium text-gray-700 mb-3"
                 th:classappend="${field.required} ? 'required' : ''"
@@ -10,8 +14,12 @@
         <div class="space-y-2">
             <div class="flex items-center" th:each="option : ${field.options}">
                 <input class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                       th:classappend="${field.cssClass}"
+                       th:attrappend="class=${fieldInvalid ? ' !border-red-500 focus:!border-red-500 focus:!ring-red-500' : ''}"
+                       th:aria-invalid="${fieldInvalid ? 'true' : null}"
+                       th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
                        th:checked="${option.selected}"
-                       th:disabled="${option.disabled}"
+                       th:disabled="${field.disabled or option.disabled}"
                        th:field="*{__${field.name}__}"
                        th:id="${field.name + '_' + option.value}"
                        th:name="${field.name}"
@@ -20,7 +28,7 @@
                        type="radio"/>
 
                 <label class="ml-2 block text-sm text-gray-700"
-                       th:classappend="${option.disabled} ? 'disabled' : ''"
+                       th:classappend="${field.disabled or option.disabled} ? 'disabled' : ''"
                        th:for="${field.name + '_' + option.value}"
                        th:text="${option.label}"></label>
             </div>
@@ -28,14 +36,12 @@
 
         <!-- Message d'aide -->
         <small class="help-text radio-help"
-               th:if="${field.helpText}"
+               th:id="${field.name + '-help'}" th:if="${fieldHelp}"
                th:text="${field.helpText}"></small>
-
-        <!-- Message d'erreur (si validation côté client) -->
-        <div class="error-message radio-error"
-             style="display: none;"
-             th:if="${field.errorMessage}"
-             th:text="${field.errorMessage}"></div>
-    </div>
+        <div class="mt-1 text-sm text-red-600" th:if="${fieldInvalid}"
+             th:id="${field.name + '-errors'}" role="alert">
+            <div th:each="error : ${fieldErrors}" th:text="${error}"></div>
+        </div>
+    </fieldset>
 </div>
 </html>

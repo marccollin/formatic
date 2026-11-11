@@ -13,12 +13,14 @@
 
 <div class="container-md" th:fragment="Generic" th:remove="tag">
     <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-8">
-        <form class="space-y-6" method="post" th:object="${formData}">
+        <form class="space-y-6" method="post" th:object="${formData}"
+              th:attr="enctype=${fields.?[type.name() == 'FILE'].isEmpty() ? null : 'multipart/form-data'}">
 
         <div th:each="field : ${fields}" th:remove="tag">
 
             <div th:remove="tag" th:switch="${field.type.name()}">
                 <div th:case="'TEXT'" th:insert="~{tailwind/forms/vertical/fields/text-field :: text-field(${field})}"></div>
+                <div th:case="'FILE'" th:insert="~{tailwind/forms/vertical/fields/file-field :: file-field(${field})}"></div>
                 <div th:case="'SELECT'" th:insert="~{tailwind/forms/vertical/fields/select-field :: select-field(${field})}"></div>
                 <div th:case="'CHECKBOX'" th:insert="~{tailwind/forms/vertical/fields/checkbox-field :: checkbox-field(${field})}"></div>
                 <div th:case="'PHONE'" th:insert="~{tailwind/forms/vertical/fields/phone-field :: phone-field(${field})}"></div>

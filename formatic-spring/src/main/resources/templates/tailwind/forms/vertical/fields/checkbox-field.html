@@ -1,10 +1,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="checkbox-field(field)" th:remove="tag">
+<div th:fragment="checkbox-field(field)" th:remove="tag"
+     th:with="fieldErrors=${#lists.isEmpty(#fields.errors()) ? {} : #fields.errors(field.name)},
+              fieldInvalid=${not #lists.isEmpty(fieldErrors)},
+              fieldHelp=${not #strings.isEmpty(field.helpText)},
+              fieldDescription=${(fieldHelp ? field.name + '-help' : '') + (fieldInvalid ? (fieldHelp ? ' ' : '') + field.name + '-errors' : '')}">
 
     <div class="mb-4">
 
-        <th:block th:if="${field.multiple}">
-            <fieldset>
+        <fieldset th:if="${field.multiple}">
             <legend class="text-sm font-medium text-gray-700 mb-3"
                     th:classappend="${field.required} ? 'required' : ''"
                     th:text="${field.label} "></legend>
@@ -13,8 +16,12 @@
 
                 <div class="flex items-center" th:each="option : ${field.options}">
                     <input class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                           th:attrappend="class=${fieldInvalid ? ' !border-red-500 focus:!border-red-500 focus:!ring-red-500' : ''}"
+                           th:aria-invalid="${fieldInvalid ? 'true' : null}"
+                           th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
                            th:classappend="${field.cssClass}"
                            th:field="*{__${field.name}__}"
+                           th:disabled="${field.disabled or option.disabled}"
                            th:id="${field.name + '_' + option.value}"
                            th:required="${field.required}"
                            th:value="${option.value}"
@@ -25,25 +32,31 @@
                            th:text="${option.label}"></label>
                 </div>
             </div>
-            </fieldset>
-    </th:block>
+        </fieldset>
 
-    <!-- Checkbox simple (boolean) -->
-    <div class="flex items-center" th:unless="${field.multiple}">
+        <!-- Checkbox simple (boolean) -->
+        <div class="flex items-center" th:unless="${field.multiple}">
 
-        <input class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-               th:checked="*{__${field.name}__}"
-               th:classappend="${field.cssClass}"
-               th:id="${field.name}"
-               th:name="${field.name}"
-               th:required="${field.required}"
-               th:value="*{__${field.name}__}"
-               type="checkbox"/>
-        <label class="ml-2 block text-sm text-gray-700" th:classappend="${field.required} ? 'required' : ''"
-               th:for="${field.name}"
-               th:text="${field.label}"></label>
-        <small class="help-text" th:if="${field.helpText}" th:text="${field.helpText}"></small>
+            <input class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                   th:attrappend="class=${fieldInvalid ? ' !border-red-500 focus:!border-red-500 focus:!ring-red-500' : ''}"
+                   th:aria-invalid="${fieldInvalid ? 'true' : null}"
+                   th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
+                   th:field="*{__${field.name}__}"
+                   th:classappend="${field.cssClass}"
+                   th:id="${field.name}"
+                   th:disabled="${field.disabled}"
+                   th:required="${field.required}"
+                   value="true"
+                   type="checkbox"/>
+            <label class="ml-2 block text-sm text-gray-700" th:classappend="${field.required} ? 'required' : ''"
+                   th:for="${field.name}"
+                   th:text="${field.label}"></label>
+        </div>
+        <small class="help-text" th:id="${field.name + '-help'}" th:if="${fieldHelp}" th:text="${field.helpText}"></small>
+        <div class="mt-1 text-sm text-red-600" th:if="${fieldInvalid}"
+             th:id="${field.name + '-errors'}" role="alert">
+            <div th:each="error : ${fieldErrors}" th:text="${error}"></div>
+        </div>
     </div>
-</div>
 </div>
 </html>
