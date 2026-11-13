@@ -1,0 +1,33 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="file-field(field)" th:remove="tag"
+     th:with="fieldErrors=${#lists.isEmpty(#fields.errors()) ? {} : #fields.errors(field.name)},
+              fieldInvalid=${not #lists.isEmpty(fieldErrors)},
+              fieldHelp=${not #strings.isEmpty(field.helpText)},
+              fieldDescription=${(fieldHelp ? field.name + '-help' : '') + (fieldInvalid ? (fieldHelp ? ' ' : '') + field.name + '-errors' : '')}">
+
+    <div class="field" th:classappend="${field.outerCssClass}">
+
+        <label class="label" th:classappend="${field.required} ? 'required' : ''"
+               th:for="${field.name}"
+               th:text="${field.label}"></label>
+
+        <input class="input"
+               th:attrappend="class=${fieldInvalid ? ' is-danger' : ''}"
+               th:aria-invalid="${fieldInvalid ? 'true' : null}"
+               th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
+               th:classappend="${field.cssClass}"
+               th:id="${field.name}"
+               th:name="${field.name}"
+               th:required="${field.required}"
+               th:disabled="${field.disabled}"
+               th:accept="${#strings.isEmpty(field.accept) ? null : field.accept}"
+               th:multiple="${field.multiple}"
+               type="file"/>
+        <small class="help" th:id="${field.name + '-help'}" th:if="${fieldHelp}" th:text="${field.helpText}"></small>
+        <div class="help is-danger" th:if="${fieldInvalid}"
+             th:id="${field.name + '-errors'}" role="alert">
+            <div th:each="error : ${fieldErrors}" th:text="${error}"></div>
+        </div>
+
+    </div>
+</div>

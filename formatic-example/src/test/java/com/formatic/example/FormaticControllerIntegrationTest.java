@@ -107,6 +107,35 @@ class FormaticControllerIntegrationTest {
     }
 
     @Test
+    void bulmaRendersVerticalFormWithBulmaStyles() throws Exception {
+        mockMvc.perform(get("/form")
+                        .param("class", Editor.class.getName())
+                        .param("cssLibrary", "BULMA")
+                        .param("form", "VERTICAL")
+                        .param("mode", "REFLECTION"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("bulma/forms/vertical/form-base"))
+                .andExpect(content().string(containsString("class=\"input\"")))
+                .andExpect(content().string(containsString("class=\"textarea\"")))
+                .andExpect(content().string(containsString("class=\"button is-primary\"")))
+                .andExpect(content().string(containsString("name=\"comment\"")));
+    }
+
+    @Test
+    void bulmaHorizontalFormUsesResponsiveTwoColumnLayout() throws Exception {
+        mockMvc.perform(get("/form")
+                        .param("class", Editor.class.getName())
+                        .param("cssLibrary", "BULMA")
+                        .param("form", "HORIZONTAL")
+                        .param("mode", "REFLECTION"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("bulma/forms/horizontal/form-base"))
+                .andExpect(content().string(containsString("column is-half-desktop")))
+                .andExpect(content().string(containsString("column is-full")))
+                .andExpect(content().string(containsString("name=\"comment\"")));
+    }
+
+    @Test
     void hybridFormResolvesHorizontalFieldFragments() throws Exception {
         mockMvc.perform(get("/formhybrid/1")
                         .param("class", "com.formatic.example.dto.Editor"))

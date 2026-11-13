@@ -1,0 +1,44 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="radio-field(field)" th:remove="tag"
+     th:with="fieldErrors=${#lists.isEmpty(#fields.errors()) ? {} : #fields.errors(field.name)},
+              fieldInvalid=${not #lists.isEmpty(fieldErrors)},
+              fieldHelp=${not #strings.isEmpty(field.helpText)},
+              fieldDescription=${(fieldHelp ? field.name + '-help' : '') + (fieldInvalid ? (fieldHelp ? ' ' : '') + field.name + '-errors' : '')}">
+
+    <fieldset class="field" th:classappend="${field.outerCssClass}">
+
+        <legend class="label"
+                th:classappend="${field.required} ? 'required' : ''"
+                th:text="${field.label}"></legend>
+
+        <div class="field" th:each="option : ${field.options}">
+            <label class="radio"
+                   th:classappend="${field.disabled or option.disabled} ? 'disabled' : ''">
+                <input th:class="${field.cssClass}"
+                   th:attrappend="class=${fieldInvalid ? ' is-danger' : ''}"
+                   th:aria-invalid="${fieldInvalid ? 'true' : null}"
+                   th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
+                   th:checked="${option.selected}"
+                   th:disabled="${field.disabled or option.disabled}"
+                   th:field="*{__${field.name}__}"
+                   th:id="${field.name + '_' + option.value}"
+                   th:name="${field.name}"
+                   th:required="${field.required}"
+                   th:value="${option.value}"
+                   type="radio"/>
+                <span th:text="${option.label}"></span>
+            </label>
+        </div>
+
+
+        <!-- Message d'aide -->
+        <small class="help radio-help"
+               th:id="${field.name + '-help'}" th:if="${fieldHelp}"
+               th:text="${field.helpText}"></small>
+        <div class="help is-danger" th:if="${fieldInvalid}"
+             th:id="${field.name + '-errors'}" role="alert">
+            <div th:each="error : ${fieldErrors}" th:text="${error}"></div>
+        </div>
+    </fieldset>
+</div>
+</html>

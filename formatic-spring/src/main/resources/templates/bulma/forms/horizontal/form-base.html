@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Formatic form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" rel="stylesheet">
+</head>
+<body>
+<section class="section">
+    <div class="container" th:fragment="Generic" th:remove="tag">
+        <h1 class="title" th:text="${formName}"></h1>
+        <div class="notification is-success" role="status" th:if="${formSuccess}" th:text="${formSuccess}"></div>
+        <form method="post" th:object="${formData}"
+              th:attr="enctype=${fields.?[type.name() == 'FILE'].isEmpty() ? null : 'multipart/form-data'}">
+            <div class="columns is-multiline">
+                <div class="column is-half-desktop" th:each="field : ${fields}"
+                     th:if="${field.type.name() != 'HIDDEN'}">
+                    <div th:remove="tag" th:switch="${field.type.name()}">
+                        <div th:case="'TEXT'" th:insert="~{bulma/forms/vertical/fields/text-field :: text-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'FILE'" th:insert="~{bulma/forms/vertical/fields/file-field :: file-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'SELECT'" th:insert="~{bulma/forms/vertical/fields/select-field :: select-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'CHECKBOX'" th:insert="~{bulma/forms/vertical/fields/checkbox-field :: checkbox-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'PHONE'" th:insert="~{bulma/forms/vertical/fields/phone-field :: phone-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'URL'" th:insert="~{bulma/forms/vertical/fields/url-field :: url-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'TEXTAREA'" th:insert="~{bulma/forms/vertical/fields/textarea-field :: textarea-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'RADIO'" th:insert="~{bulma/forms/vertical/fields/radio-field :: radio-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'NUMBER'" th:insert="~{bulma/forms/vertical/fields/number-field :: number-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'EMAIL'" th:insert="~{bulma/forms/vertical/fields/email-field :: email-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'PASSWORD'" th:insert="~{bulma/forms/vertical/fields/password-field :: password-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'DATE'" th:insert="~{bulma/forms/vertical/fields/date-field :: date-field(${field})}" th:remove="tag"></div>
+                    </div>
+                </div>
+                <div th:each="field : ${fields}" th:if="${field.type.name() == 'HIDDEN'}" th:remove="tag"
+                     th:insert="~{bulma/forms/vertical/fields/hidden-field :: hidden-field(${field})}"></div>
+                <div class="column is-full">
+                    <button class="button is-primary" type="submit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+</body>
+</html>

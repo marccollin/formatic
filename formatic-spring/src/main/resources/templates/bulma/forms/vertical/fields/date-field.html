@@ -1,0 +1,37 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="date-field(field)" th:remove="tag"
+     th:with="fieldErrors=${#lists.isEmpty(#fields.errors()) ? {} : #fields.errors(field.name)},
+              fieldInvalid=${not #lists.isEmpty(fieldErrors)},
+              fieldHelp=${not #strings.isEmpty(field.helpText)},
+              fieldDescription=${(fieldHelp ? field.name + '-help' : '') + (fieldInvalid ? (fieldHelp ? ' ' : '') + field.name + '-errors' : '')}">
+
+    <div class="field" th:classappend="${field.outerCssClass}">
+
+        <label class="label" th:classappend="${field.required} ? 'required' : ''"
+               th:for="${field.name}"
+               th:text="${field.label}"></label>
+
+
+        <input class="input"
+               th:attrappend="class=${fieldInvalid ? ' is-danger' : ''}"
+               th:aria-invalid="${fieldInvalid ? 'true' : null}"
+               th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
+               th:classappend="${field.cssClass}"
+               th:id="${field.name}"
+               th:max="${field.maxDate != null} ? ${field.maxDate} : null"
+               th:min="${field.minDate != null} ? ${field.minDate} : null"
+               th:attr="step=${#strings.isEmpty(field.dateStep) ? null : field.dateStep}"
+               th:name="${field.name}"
+               th:placeholder="${field.placeholder}"
+               th:readonly="${field.readonly}"
+               th:required="${field.required}"
+               th:disabled="${field.disabled}"
+               th:value="*{__${field.name}__}"
+               type="date"/>
+        <small class="help" th:id="${field.name + '-help'}" th:if="${fieldHelp}" th:text="${field.helpText}"></small>
+        <div class="help is-danger" th:if="${fieldInvalid}"
+             th:id="${field.name + '-errors'}" role="alert">
+            <div th:each="error : ${fieldErrors}" th:text="${error}"></div>
+        </div>
+    </div>
+</th:block>

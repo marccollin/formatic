@@ -23,7 +23,7 @@ Responsibilities:
 
 Spring Boot auto-configuration (FormaticSpringAutoConfiguration)  
 Automatic bean registration (handlers, builders)  
-Thymeleaf templates for form rendering with boostrap, tailwind css
+Thymeleaf templates for form rendering with Bootstrap, Tailwind CSS, and Bulma
 Automatic component scanning
 
 
@@ -151,7 +151,7 @@ public class Editor {
 }
 ```
 
-Thymeleaf template use actually boostrap and tailwind css library. Bootstrap have vertical and horizontal form. Tailwind have vertical form.
+Thymeleaf templates support Bootstrap in vertical and horizontal layouts, Tailwind CSS in vertical layouts, and Bulma in vertical and responsive two-column horizontal layouts.
 
 Result of processing Editeur class with boostrap horizontal form parameter
 
@@ -352,7 +352,7 @@ Open `http://localhost:8080/form` with the following query parameters. Enum valu
 | Parameter | Values | Default |
 |---|---|---|
 | `class` | Fully qualified name of an annotated DTO, such as `com.formatic.example.dto.Editor` | Required |
-| `cssLibrary` | `BOOTSTRAP` or `TAILWIND` | Required |
+| `cssLibrary` | `BOOTSTRAP`, `TAILWIND`, or `BULMA` | Required |
 | `form` | `VERTICAL` or `HORIZONTAL` | `VERTICAL` |
 | `mode` | `BYTECODE`, `REFLECTION`, or `COMPILE_TIME_GENERATION` | `BYTECODE` |
 
@@ -365,7 +365,7 @@ The example module includes these DTOs. Use their fully qualified name as the `c
 | `UserBasic` | `com.formatic.example.dto.UserBasic` |
 | `UserClub` | `com.formatic.example.dto.UserClub` |
 
-Bootstrap supports both layouts. Tailwind supports only `VERTICAL`; do not combine `TAILWIND` with `HORIZONTAL`.
+Bootstrap and Bulma support both layouts. Tailwind supports only `VERTICAL`; do not combine `TAILWIND` with `HORIZONTAL`. Bulma's horizontal layout stacks fields on smaller screens and displays two columns on desktop screens.
 The builder query parameter is named `mode`, not `builderMode`.
 
 Bootstrap horizontal form using the default bytecode builder:
@@ -384,6 +384,18 @@ Tailwind vertical form using compile-time generated metadata:
 
 ```text
 http://localhost:8080/form?class=com.formatic.example.dto.Editor&cssLibrary=TAILWIND&form=VERTICAL&mode=COMPILE_TIME_GENERATION
+```
+
+Bulma vertical form:
+
+```text
+http://localhost:8080/form?class=com.formatic.example.dto.Editor&cssLibrary=BULMA&form=VERTICAL
+```
+
+Bulma responsive two-column form:
+
+```text
+http://localhost:8080/form?class=com.formatic.example.dto.Editor&cssLibrary=BULMA&form=HORIZONTAL
 ```
 
 To compare builders, keep `class`, `cssLibrary`, and `form` unchanged and vary only `mode`.
