@@ -68,6 +68,7 @@ Annotate fields in a DTO to describe the form:
 ```java
 import com.formatic.core.annotation.DateInput;
 import com.formatic.core.annotation.EmailInput;
+import com.formatic.core.annotation.ColorInput;
 import com.formatic.core.annotation.TextInput;
 import java.time.LocalDate;
 
@@ -80,10 +81,16 @@ public class ContactForm {
 
     @DateInput
     private LocalDate preferredDate;
+
+    @ColorInput(defaultValue = "#336699")
+    private String favoriteColor;
+
+    @ColorInput(alpha = true)
+    private String overlayColor;
 }
 ```
 
-Formatic's Spring integration builds field metadata from the annotations and renders it with Thymeleaf templates. The example app demonstrates a complete controller and view; see the [User Guide](docs/USER_GUIDE.md) for field options and application integration details.
+Formatic's Spring integration builds field metadata from the annotations and renders it with Thymeleaf templates. `@ColorInput` supports opaque colors by default and can enable alpha-channel editing with `alpha = true`. Browser support for alpha color pickers varies; see the [User Guide](docs/USER_GUIDE.md) for details.
 
 ## 🎨 CSS Framework Support
 

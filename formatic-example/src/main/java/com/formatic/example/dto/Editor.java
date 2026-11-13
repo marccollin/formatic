@@ -47,6 +47,12 @@ public class Editor {
     @DateInput
     private LocalDate birthDate;
 
+    @ColorInput(defaultValue = "#336699")
+    private String favoriteColor;
+
+    @ColorInput(alpha = true)
+    private String overlayColor;
+
     @TextareaInput(rows = 5, cols = 50, required = true)
     private String comment;
 
@@ -158,6 +164,22 @@ public class Editor {
 
     public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
+    }
+
+    public String getFavoriteColor() {
+        return favoriteColor;
+    }
+
+    public void setFavoriteColor(String favoriteColor) {
+        this.favoriteColor = favoriteColor;
+    }
+
+    public String getOverlayColor() {
+        return overlayColor;
+    }
+
+    public void setOverlayColor(String overlayColor) {
+        this.overlayColor = overlayColor;
     }
 
     public String getComment() {

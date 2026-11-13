@@ -4,6 +4,7 @@ import com.formatic.core.annotation.DateInput;
 import com.formatic.core.annotation.EmailInput;
 import com.formatic.core.annotation.HiddenInput;
 import com.formatic.core.annotation.TextareaInput;
+import com.formatic.core.annotation.ColorInput;
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldType;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,19 @@ class UpdatedFieldAttributesTest {
     }
 
     @Test
+    void colorMapsDefaultValueAndAlphaCapability() throws Exception {
+        ColorInputHandler handler = new ColorInputHandler();
+        FormFieldMetadata opaque = handler.handle(Form.class.getDeclaredField("favoriteColor"));
+        assertThat(opaque.getType()).isEqualTo(FormFieldType.COLOR);
+        assertThat(opaque.getDefaultValue()).isEqualTo("#336699");
+        assertThat(opaque.isAlpha()).isFalse();
+
+        FormFieldMetadata alpha = handler.handle(Form.class.getDeclaredField("overlayColor"));
+        assertThat(alpha.isAlpha()).isTrue();
+        assertThat(new FormFieldMetadata(alpha).isAlpha()).isTrue();
+    }
+
+    @Test
     void hiddenMapsNameAndDefaultValueWithoutAddingLabel() throws Exception {
         FormFieldMetadata metadata = new HiddenInputHandler().handle(Form.class.getDeclaredField("id"));
 
@@ -105,6 +119,12 @@ class UpdatedFieldAttributesTest {
 
         @EmailInput(defaultValue = "contact@example.com", errorMessage = "Enter a valid email address")
         private String contact;
+
+        @ColorInput(defaultValue = "#336699")
+        private String favoriteColor;
+
+        @ColorInput(alpha = true)
+        private String overlayColor;
 
         @HiddenInput(name = "identifier", defaultValue = "123")
         private String id;

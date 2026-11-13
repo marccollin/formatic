@@ -18,7 +18,8 @@ import java.util.*;
 @SupportedAnnotationTypes({"com.formatic.core.annotation.CheckboxInput","com.formatic.core.annotation.DateInput","com.formatic.core.annotation.EmailInput", "com.formatic.core.annotation.FileInput",
         "com.formatic.core.annotation.FormInput",  "com.formatic.core.annotation.HiddenInput",  "com.formatic.core.annotation.NumberInput",  "com.formatic.core.annotation.PasswordInput",
         "com.formatic.core.annotation.PhoneInput",  "com.formatic.core.annotation.RadioInput",  "com.formatic.core.annotation.SelectInput",  "com.formatic.core.annotation.TextareaInput",
-        "com.formatic.core.annotation.TextInput",  "com.formatic.core.annotation.UrlInput"})
+        "com.formatic.core.annotation.TextInput",  "com.formatic.core.annotation.UrlInput",
+        "com.formatic.core.annotation.ColorInput"})
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class FormMetadataProcessor extends AbstractProcessor {
 
@@ -203,6 +204,11 @@ public class FormMetadataProcessor extends AbstractProcessor {
                     case "DateInput":
                         //'minDate', 'maxDate'...
                         generateDateSetters(buildMethodBuilder, fieldName + "Meta", values);
+                        break;
+                    case "ColorInput":
+                        buildMethodBuilder.addStatement("$N.setType($T.COLOR)", fieldName + "Meta", FORM_FIELD_TYPE_CLASS);
+                        generateCommonTextSetters(buildMethodBuilder, fieldName + "Meta", values);
+                        buildMethodBuilder.addStatement("$N.setAlpha($L)", fieldName + "Meta", getAnnotationValue(values, "alpha", false));
                         break;
                     case "TextareaInput":
                         generateTextareaSetters(buildMethodBuilder, fieldName + "Meta", values, annotationSimpleName);

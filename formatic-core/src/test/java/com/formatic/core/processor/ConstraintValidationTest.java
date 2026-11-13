@@ -88,7 +88,8 @@ class ConstraintValidationTest {
             Class<?> type = loader.loadClass("fixture.InvalidForm");
             List<FormFieldAnnotationHandler<?>> handlers = List.of(
                     new TextInputHandler(), new EmailInputHandler(), new UrlInputHandler(), new PhoneInputHandler(),
-                    new PasswordInputHandler(), new TextareaInputHandler(), new NumberInputHandler(), new DateInputHandler());
+                    new PasswordInputHandler(), new TextareaInputHandler(), new NumberInputHandler(), new DateInputHandler(),
+                    new ColorInputHandler());
             var reflection = new ReflectionFormFieldMetadataBuilder(handlers);
             var bytecode = new BytecodeFormFieldMetadataBuilder(handlers);
             for (var builder : List.of(reflection, bytecode)) {

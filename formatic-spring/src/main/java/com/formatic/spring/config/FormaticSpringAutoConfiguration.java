@@ -59,6 +59,12 @@ public class FormaticSpringAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ColorInputHandler colorInputHandler() {
+        return new ColorInputHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public NumberInputHandler numberInputHandler() {
         return new NumberInputHandler();
     }

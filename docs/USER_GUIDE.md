@@ -82,6 +82,7 @@ This library follows the principle of "convention over configuration," making fo
 Select a formatic annotation
 
 - CheckboxInput  
+- ColorInput
 - DateInput  
 - EmailInput  
 - FileInput  
@@ -139,6 +140,12 @@ public class Editor {
     @DateInput
     private LocalDate birthDate;
 
+    @ColorInput(defaultValue = "#336699")
+    private String favoriteColor;
+
+    @ColorInput(alpha = true, defaultValue = "#336699cc")
+    private String overlayColor;
+
     @TextareaInput(rows = 5, cols = 50, required = true)
     private String comment;
 
@@ -150,7 +157,7 @@ public class Editor {
 }
 ```
 
-Thymeleaf templates support Bootstrap in vertical and horizontal layouts, Tailwind CSS in vertical layouts, and Bulma in vertical and responsive two-column horizontal layouts.
+Thymeleaf templates support Bootstrap in vertical and horizontal layouts, Tailwind CSS in vertical layouts, and Bulma in vertical and responsive two-column horizontal layouts. `@ColorInput` renders as a native HTML color control in every layout. Set `alpha = true` to emit the HTML `alpha` attribute for browsers that support selecting transparency; browser support varies, and older browsers may show only an opaque picker.
 
 Result of processing Editeur class with boostrap horizontal form parameter
 

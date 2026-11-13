@@ -35,6 +35,7 @@
                 <div th:case="'EMAIL'" th:insert="~{bootstrap/forms/vertical/fields/email-field :: email-field(${field})}" th:remove="tag"></div>
                 <div th:case="'PASSWORD'" th:insert="~{bootstrap/forms/vertical/fields/password-field :: password-field(${field})}" th:remove="tag"></div>
                 <div th:case="'DATE'" th:insert="~{bootstrap/forms/vertical/fields/date-field :: date-field(${field})}" th:remove="tag"></div>
+                <div th:case="'COLOR'" th:insert="~{bootstrap/forms/vertical/fields/color-field :: color-field(${field})}" th:remove="tag"></div>
                 <div th:case="'HIDDEN'" th:insert="~{bootstrap/forms/vertical/fields/hidden-field :: hidden-field(${field})}" th:remove="tag"></div>
             </div>
 

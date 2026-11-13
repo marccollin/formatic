@@ -38,6 +38,7 @@ public class FormFieldMetadata {
     private String dateStep;
 
     private boolean disabled;
+    private boolean alpha;
 
     private double min;
     private double max;
@@ -88,6 +89,7 @@ public class FormFieldMetadata {
         this.maxDate = source.maxDate;
         this.dateStep = source.dateStep;
         this.disabled = source.disabled;
+        this.alpha = source.alpha;
         this.min = source.min;
         this.max = source.max;
         this.step = source.step;
@@ -453,5 +455,13 @@ public class FormFieldMetadata {
 
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
+    }
+
+    public boolean isAlpha() {
+        return alpha;
+    }
+
+    public void setAlpha(boolean alpha) {
+        this.alpha = alpha;
     }
 }
