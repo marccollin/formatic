@@ -10,7 +10,7 @@
 ## ✨ Features
 
 - Generate form fields from annotations on Java DTOs.
-- Support text, date, number, choice, checkbox, file, and other common input types.
+- Support text, date/time, range, color, choice, checkbox, file, and other common input types.
 - Integrate with Spring Boot, Spring MVC, and Thymeleaf.
 - Choose bundled Bootstrap, Tailwind CSS, or Bulma templates.
 - Customize field metadata and override Thymeleaf templates.
@@ -69,7 +69,10 @@ Annotate fields in a DTO to describe the form:
 import com.formatic.core.annotation.DateInput;
 import com.formatic.core.annotation.EmailInput;
 import com.formatic.core.annotation.ColorInput;
+import com.formatic.core.annotation.DateTimeInput;
 import com.formatic.core.annotation.TextInput;
+import com.formatic.core.annotation.RangeInput;
+import com.formatic.core.annotation.TimeInput;
 import java.time.LocalDate;
 
 public class ContactForm {
@@ -87,10 +90,19 @@ public class ContactForm {
 
     @ColorInput(alpha = true)
     private String overlayColor;
+
+    @DateTimeInput(min = "2025-01-01T09:00", step = "60")
+    private LocalDateTime appointment;
+
+    @TimeInput(min = "09:00", max = "17:00", step = "300")
+    private LocalTime meetingTime;
+
+    @RangeInput(min = 0, max = 100, step = 5, defaultValue = "50")
+    private int rating;
 }
 ```
 
-Formatic's Spring integration builds field metadata from the annotations and renders it with Thymeleaf templates. `@ColorInput` supports opaque colors by default and can enable alpha-channel editing with `alpha = true`. Browser support for alpha color pickers varies; see the [User Guide](docs/USER_GUIDE.md) for details.
+Formatic's Spring integration builds field metadata from the annotations and renders it with Thymeleaf templates. `@ColorInput` supports opaque colors by default and can enable alpha-channel editing with `alpha = true`. The HTML `datetime-local`, `time`, and `range` controls support min/max/step constraints; see the [User Guide](docs/USER_GUIDE.md) for details.
 
 ## 🎨 CSS Framework Support
 

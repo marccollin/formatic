@@ -2,7 +2,10 @@ package com.formatic.core.processor;
 
 import com.formatic.core.annotation.TextInput;
 import com.formatic.core.annotation.DateInput;
+import com.formatic.core.annotation.DateTimeInput;
 import com.formatic.core.annotation.NumberInput;
+import com.formatic.core.annotation.RangeInput;
+import com.formatic.core.annotation.TimeInput;
 import com.formatic.core.annotation.handler.*;
 import com.formatic.core.builder.BytecodeFormFieldMetadataBuilder;
 import com.formatic.core.builder.CompileTimeFormFieldMetadataBuilder;
@@ -56,7 +59,14 @@ class ConstraintValidationTest {
                 new Object[]{"DateInput", "step = \"NaN\"", "step"},
                 new Object[]{"DateInput", "step = \"1e9999\"", "step"},
                 new Object[]{"DateInput", "step = \"1e-9999\"", "step"},
-                new Object[]{"DateInput", "step = \"1 day\"", "step"}
+                new Object[]{"DateInput", "step = \"1 day\"", "step"},
+                new Object[]{"DateTimeInput", "min = \"2025-02-30T09:00\"", "min"},
+                new Object[]{"DateTimeInput", "min = \"2025-12-31T17:00\", max = \"2025-01-01T09:00\"", "min"},
+                new Object[]{"DateTimeInput", "step = \"0\"", "step"},
+                new Object[]{"TimeInput", "min = \"25:00\"", "min"},
+                new Object[]{"TimeInput", "step = \"-1\"", "step"},
+                new Object[]{"RangeInput", "step = 0", "step"},
+                new Object[]{"RangeInput", "min = 2, max = 1", "min"}
         );
     }
 
@@ -89,7 +99,7 @@ class ConstraintValidationTest {
             List<FormFieldAnnotationHandler<?>> handlers = List.of(
                     new TextInputHandler(), new EmailInputHandler(), new UrlInputHandler(), new PhoneInputHandler(),
                     new PasswordInputHandler(), new TextareaInputHandler(), new NumberInputHandler(), new DateInputHandler(),
-                    new ColorInputHandler());
+                    new ColorInputHandler(), new DateTimeInputHandler(), new TimeInputHandler(), new RangeInputHandler());
             var reflection = new ReflectionFormFieldMetadataBuilder(handlers);
             var bytecode = new BytecodeFormFieldMetadataBuilder(handlers);
             for (var builder : List.of(reflection, bytecode)) {
@@ -163,6 +173,10 @@ class ConstraintValidationTest {
             FormConstraintValidator.validateDate("x", "0001-01-01", "10000-02-29", ".5");
             FormConstraintValidator.validateDate("x", "2000-02-29", "2000-02-29", "1e-3");
             FormConstraintValidator.validateDate("x", "", "", "any");
+            FormConstraintValidator.validateDateTime("x", "2025-01-01T09:00", "2025-01-01T10:00", "60");
+            FormConstraintValidator.validateDateTime("x", "", "", "any");
+            FormConstraintValidator.validateTime("x", "22:00", "02:00", "300");
+            FormConstraintValidator.validateTime("x", "", "", "any");
         }).doesNotThrowAnyException();
     }
 

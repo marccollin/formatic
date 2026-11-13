@@ -33,6 +33,7 @@ class ExampleConstraintCompatibilityTest {
         when(options.loadOptions(anyString())).thenReturn(List.of());
         List<FormFieldAnnotationHandler<?>> handlers = List.of(
                 new TextInputHandler(), new TextareaInputHandler(), new DateInputHandler(),
+                new DateTimeInputHandler(), new TimeInputHandler(), new RangeInputHandler(),
                 new NumberInputHandler(), new UrlInputHandler(), new PhoneInputHandler(),
                 new RadioInputHandler(options), new SelectInputHandler(options),
                 new EmailInputHandler(), new FileInputHandler(), new PasswordInputHandler(), new ColorInputHandler(),

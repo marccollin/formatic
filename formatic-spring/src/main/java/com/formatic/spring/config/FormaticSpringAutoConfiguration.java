@@ -65,6 +65,24 @@ public class FormaticSpringAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public DateTimeInputHandler dateTimeInputHandler() {
+        return new DateTimeInputHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TimeInputHandler timeInputHandler() {
+        return new TimeInputHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RangeInputHandler rangeInputHandler() {
+        return new RangeInputHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public NumberInputHandler numberInputHandler() {
         return new NumberInputHandler();
     }

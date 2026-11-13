@@ -5,6 +5,9 @@ import com.formatic.core.annotation.EmailInput;
 import com.formatic.core.annotation.HiddenInput;
 import com.formatic.core.annotation.TextareaInput;
 import com.formatic.core.annotation.ColorInput;
+import com.formatic.core.annotation.DateTimeInput;
+import com.formatic.core.annotation.RangeInput;
+import com.formatic.core.annotation.TimeInput;
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldType;
 import org.junit.jupiter.api.Test;
@@ -90,6 +93,34 @@ class UpdatedFieldAttributesTest {
     }
 
     @Test
+    void dateTimeAndTimeConstraintsAreCopied() throws Exception {
+        FormFieldMetadata dateTime = new DateTimeInputHandler().handle(Form.class.getDeclaredField("appointment"));
+        assertThat(dateTime.getType()).isEqualTo(FormFieldType.DATETIME_LOCAL);
+        assertThat(dateTime.getMinDateTime()).isEqualTo("2025-01-01T09:00");
+        assertThat(dateTime.getMaxDateTime()).isEqualTo("2025-12-31T17:00");
+        assertThat(dateTime.getDateTimeStep()).isEqualTo("60");
+        assertThat(new FormFieldMetadata(dateTime).getDateTimeStep()).isEqualTo("60");
+
+        FormFieldMetadata time = new TimeInputHandler().handle(Form.class.getDeclaredField("time"));
+        assertThat(time.getType()).isEqualTo(FormFieldType.TIME);
+        assertThat(time.getMinTime()).isEqualTo("09:00");
+        assertThat(time.getMaxTime()).isEqualTo("17:00");
+        assertThat(time.getTimeStep()).isEqualTo("300");
+        assertThat(new FormFieldMetadata(time).getMaxTime()).isEqualTo("17:00");
+    }
+
+    @Test
+    void rangeConstraintsUseNumericMetadata() throws Exception {
+        FormFieldMetadata range = new RangeInputHandler().handle(Form.class.getDeclaredField("rating"));
+        assertThat(range.getType()).isEqualTo(FormFieldType.RANGE);
+        assertThat(range.getMin()).isZero();
+        assertThat(range.getMax()).isEqualTo(100);
+        assertThat(range.getStep()).isEqualTo(5);
+        assertThat(range.getDefaultValue()).isEqualTo("50");
+        assertThat(new FormFieldMetadata(range).getStep()).isEqualTo(5);
+    }
+
+    @Test
     void hiddenMapsNameAndDefaultValueWithoutAddingLabel() throws Exception {
         FormFieldMetadata metadata = new HiddenInputHandler().handle(Form.class.getDeclaredField("id"));
 
@@ -125,6 +156,15 @@ class UpdatedFieldAttributesTest {
 
         @ColorInput(alpha = true)
         private String overlayColor;
+
+        @DateTimeInput(min = "2025-01-01T09:00", max = "2025-12-31T17:00", step = "60")
+        private String appointment;
+
+        @TimeInput(min = "09:00", max = "17:00", step = "300")
+        private String time;
+
+        @RangeInput(min = 0, max = 100, step = 5, defaultValue = "50")
+        private double rating;
 
         @HiddenInput(name = "identifier", defaultValue = "123")
         private String id;

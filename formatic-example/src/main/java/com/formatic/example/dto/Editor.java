@@ -3,6 +3,8 @@ package com.formatic.example.dto;
 import com.formatic.core.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 
@@ -46,6 +48,15 @@ public class Editor {
 
     @DateInput
     private LocalDate birthDate;
+
+    @DateTimeInput(min = "2025-01-01T09:00", max = "2025-12-31T17:00", step = "60", defaultValue = "2025-03-08T10:30")
+    private LocalDateTime appointment;
+
+    @TimeInput(min = "09:00", max = "17:00", step = "300", defaultValue = "09:15")
+    private LocalTime contactTime;
+
+    @RangeInput(min = 0, max = 100, step = 5, defaultValue = "50")
+    private double satisfaction;
 
     @ColorInput(defaultValue = "#336699")
     private String favoriteColor;
@@ -164,6 +175,30 @@ public class Editor {
 
     public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
+    }
+
+    public LocalDateTime getAppointment() {
+        return appointment;
+    }
+
+    public void setAppointment(LocalDateTime appointment) {
+        this.appointment = appointment;
+    }
+
+    public LocalTime getContactTime() {
+        return contactTime;
+    }
+
+    public void setContactTime(LocalTime contactTime) {
+        this.contactTime = contactTime;
+    }
+
+    public double getSatisfaction() {
+        return satisfaction;
+    }
+
+    public void setSatisfaction(double satisfaction) {
+        this.satisfaction = satisfaction;
     }
 
     public String getFavoriteColor() {
