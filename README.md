@@ -154,13 +154,13 @@ public class Editor {
 Thymeleaf templates support Bootstrap in vertical and horizontal layouts, Tailwind CSS in vertical layouts, and Bulma in vertical and responsive two-column horizontal layouts.
 
 Result of processing Editeur class with boostrap horizontal form parameter
-
-
-![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_form.jpg)
+![Formatic editor example process with bootstrap ](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_thymleaf_horizontal_bootstrap.jpg)
 
 Result of processing Editeur class with tailwind vertical form
-![Formatic editor example process](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_thymeleaf_vertical_tailwind.jpg)
+![Formatic editor example process with tailwind ](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_thymeleaf_vertical_tailwind.jpg)
 
+Result of processing Editeur class with bulma  horizontal form
+![Formatic editor example process with bulma ](https://raw.githubusercontent.com/marccollin/formatic/master/formatic_thymeleaf_horizontal_bulma.jpg)
 
 ### Text length constraints
 
