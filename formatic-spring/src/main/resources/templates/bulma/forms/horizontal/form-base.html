@@ -29,6 +29,7 @@
                         <div th:case="'EMAIL'" th:insert="~{bulma/forms/vertical/fields/email-field :: email-field(${field})}" th:remove="tag"></div>
                         <div th:case="'PASSWORD'" th:insert="~{bulma/forms/vertical/fields/password-field :: password-field(${field})}" th:remove="tag"></div>
                         <div th:case="'DATE'" th:insert="~{bulma/forms/vertical/fields/date-field :: date-field(${field})}" th:remove="tag"></div>
+                        <div th:case="'COLOR'" th:insert="~{bulma/forms/vertical/fields/color-field :: color-field(${field})}" th:remove="tag"></div>
                     </div>
                 </div>
                 <div th:each="field : ${fields}" th:if="${field.type.name() == 'HIDDEN'}" th:remove="tag"

@@ -35,7 +35,7 @@ class ExampleConstraintCompatibilityTest {
                 new TextInputHandler(), new TextareaInputHandler(), new DateInputHandler(),
                 new NumberInputHandler(), new UrlInputHandler(), new PhoneInputHandler(),
                 new RadioInputHandler(options), new SelectInputHandler(options),
-                new EmailInputHandler(), new FileInputHandler(), new PasswordInputHandler(),
+                new EmailInputHandler(), new FileInputHandler(), new PasswordInputHandler(), new ColorInputHandler(),
                 new HiddenInputHandler(), new CheckBoxHandler(options));
         ReflectionFormFieldMetadataBuilder reflection = new ReflectionFormFieldMetadataBuilder(handlers);
         List<FormFieldMetadataBuilder> builders = List.of(reflection,

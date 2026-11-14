@@ -31,6 +31,7 @@
                 <div th:case="'EMAIL'" th:insert="~{tailwind/forms/vertical/fields/email-field :: email-field(${field})}"></div>
                 <div th:case="'PASSWORD'" th:insert="~{tailwind/forms/vertical/fields/password-field :: password-field(${field})}"></div>
                 <div th:case="'DATE'" th:insert="~{tailwind/forms/vertical/fields/date-field :: date-field(${field})}"></div>
+                <div th:case="'COLOR'" th:insert="~{tailwind/forms/vertical/fields/color-field :: color-field(${field})}"></div>
                 <div th:case="'HIDDEN'" th:insert="~{tailwind/forms/vertical/fields/hidden-field :: hidden-field(${field})}"></div>
             </div>
 

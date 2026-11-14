@@ -7,6 +7,7 @@ import com.formatic.core.annotation.handler.TextareaInputHandler;
 import com.formatic.core.annotation.handler.TextInputHandler;
 import com.formatic.core.annotation.handler.DateInputHandler;
 import com.formatic.core.annotation.handler.CheckBoxHandler;
+import com.formatic.core.annotation.handler.ColorInputHandler;
 import com.formatic.core.form.ConstraintValidationException;
 import com.formatic.example.controller.FormaticController;
 import com.formatic.example.controller.FormaticRestController;
@@ -61,7 +62,9 @@ class FormaticControllerIntegrationTest {
                 new TextareaInputHandler().handle(Editor.class.getDeclaredField("comment")),
                 new TextInputHandler().handle(Editor.class.getDeclaredField("codePostal")),
                 new DateInputHandler().handle(Editor.class.getDeclaredField("birthDate")),
-                new CheckBoxHandler(null).handle(Editor.class.getDeclaredField("confidential"))
+                new CheckBoxHandler(null).handle(Editor.class.getDeclaredField("confidential")),
+                new ColorInputHandler().handle(Editor.class.getDeclaredField("favoriteColor")),
+                new ColorInputHandler().handle(Editor.class.getDeclaredField("overlayColor"))
         ));
     }
 
@@ -132,7 +135,36 @@ class FormaticControllerIntegrationTest {
                 .andExpect(view().name("bulma/forms/horizontal/form-base"))
                 .andExpect(content().string(containsString("column is-half-desktop")))
                 .andExpect(content().string(containsString("column is-full")))
+                .andExpect(content().string(containsString("type=\"color\"")))
+                .andExpect(content().string(containsString("alpha=\"alpha\"")))
                 .andExpect(content().string(containsString("name=\"comment\"")));
+    }
+
+    @Test
+    void bootstrapHorizontalRendersOpaqueAndAlphaColorPickers() throws Exception {
+        mockMvc.perform(get("/form")
+                        .param("class", Editor.class.getName())
+                        .param("cssLibrary", "BOOTSTRAP")
+                        .param("form", "HORIZONTAL")
+                        .param("mode", "REFLECTION"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("bootstrap/forms/horizontal/form-base"))
+                .andExpect(content().string(containsString("id=\"favoriteColor\"")))
+                .andExpect(content().string(containsString("value=\"#336699\"")))
+                .andExpect(content().string(containsString("alpha=\"alpha\"")));
+    }
+
+    @Test
+    void tailwindVerticalRendersColorPicker() throws Exception {
+        mockMvc.perform(get("/form")
+                        .param("class", Editor.class.getName())
+                        .param("cssLibrary", "TAILWIND")
+                        .param("form", "VERTICAL")
+                        .param("mode", "REFLECTION"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("tailwind/forms/vertical/form-base"))
+                .andExpect(content().string(containsString("type=\"color\"")))
+                .andExpect(content().string(containsString("alpha=\"alpha\"")));
     }
 
     @Test
@@ -143,6 +175,8 @@ class FormaticControllerIntegrationTest {
                 .andExpect(view().name("bootstrap/forms/form-base-hybrid"))
                 .andExpect(content().string(containsString("col-sm-10")))
                 .andExpect(content().string(containsString("name=\"comment\"")))
+                .andExpect(content().string(containsString("type=\"color\"")))
+                .andExpect(content().string(containsString("value=\"#336699\"")))
                 .andExpect(content().string(containsString("const editorId = 1;")));
     }
 

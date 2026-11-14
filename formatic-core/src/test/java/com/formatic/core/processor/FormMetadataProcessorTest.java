@@ -1,6 +1,8 @@
 package com.formatic.core.processor;
 
 import com.formatic.core.annotation.TextareaInput;
+import com.formatic.core.annotation.ColorInput;
+import com.formatic.core.annotation.handler.ColorInputHandler;
 import com.formatic.core.annotation.handler.DateInputHandler;
 import com.formatic.core.annotation.handler.NumberInputHandler;
 import com.formatic.core.annotation.handler.EmailInputHandler;
@@ -61,6 +63,25 @@ class FormMetadataProcessorTest {
 
                 }
                 """, new NumberInputHandler(), List.of("amount", "custom", "zero", "extremes"));
+    }
+
+    @Test
+    void generatedColorMetadataMatchesReflectionForOpaqueAndAlphaPickers() throws Exception {
+        assertGeneratedMetadataMatchesReflection("ColorForm", """
+                package fixture;
+
+                import com.formatic.core.annotation.ColorInput;
+
+                public class ColorForm {
+                    @ColorInput(defaultValue = "#336699")
+                    private String opaque;
+
+                    @ColorInput(name = "overlay", label = "Overlay color", alpha = true,
+                        required = true, disabled = true, cssClass = "color-input",
+                        outerCssClass = "color-field", defaultValue = "#336699cc")
+                    private String translucent;
+                }
+                """, new ColorInputHandler(), List.of("opaque", "translucent"));
     }
 
     @ParameterizedTest
