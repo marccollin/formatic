@@ -2,8 +2,13 @@ package com.formatic.core.processor;
 
 import com.formatic.core.annotation.TextareaInput;
 import com.formatic.core.annotation.ColorInput;
+import com.formatic.core.annotation.DateTimeInput;
+import com.formatic.core.annotation.RangeInput;
+import com.formatic.core.annotation.TimeInput;
 import com.formatic.core.annotation.handler.ColorInputHandler;
+import com.formatic.core.annotation.handler.DateTimeInputHandler;
 import com.formatic.core.annotation.handler.DateInputHandler;
+import com.formatic.core.annotation.handler.RangeInputHandler;
 import com.formatic.core.annotation.handler.NumberInputHandler;
 import com.formatic.core.annotation.handler.EmailInputHandler;
 import com.formatic.core.annotation.handler.PhoneInputHandler;
@@ -13,6 +18,7 @@ import com.formatic.core.annotation.handler.UrlInputHandler;
 import com.formatic.core.annotation.handler.FormFieldAnnotationHandler;
 import com.formatic.core.annotation.handler.HiddenInputHandler;
 import com.formatic.core.annotation.handler.TextareaInputHandler;
+import com.formatic.core.annotation.handler.TimeInputHandler;
 import com.formatic.core.form.FormFieldMetadata;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -82,6 +88,50 @@ class FormMetadataProcessorTest {
                     private String translucent;
                 }
                 """, new ColorInputHandler(), List.of("opaque", "translucent"));
+    }
+
+    @Test
+    void generatedDateTimeMetadataMatchesReflection() throws Exception {
+        assertGeneratedMetadataMatchesReflection("DateTimeForm", """
+                package fixture;
+
+                import com.formatic.core.annotation.DateTimeInput;
+
+                public class DateTimeForm {
+                    @DateTimeInput(min = "2025-01-01T09:00", max = "2025-12-31T17:00",
+                        step = "60", defaultValue = "2025-03-08T10:30", required = true)
+                    private String appointment;
+                }
+                """, new DateTimeInputHandler(), List.of("appointment"));
+    }
+
+    @Test
+    void generatedTimeMetadataMatchesReflection() throws Exception {
+        assertGeneratedMetadataMatchesReflection("TimeForm", """
+                package fixture;
+
+                import com.formatic.core.annotation.TimeInput;
+
+                public class TimeForm {
+                    @TimeInput(min = "09:00", max = "17:00", step = "300",
+                        defaultValue = "09:15", required = true)
+                    private String meetingTime;
+                }
+                """, new TimeInputHandler(), List.of("meetingTime"));
+    }
+
+    @Test
+    void generatedRangeMetadataMatchesReflection() throws Exception {
+        assertGeneratedMetadataMatchesReflection("RangeForm", """
+                package fixture;
+
+                import com.formatic.core.annotation.RangeInput;
+
+                public class RangeForm {
+                    @RangeInput(min = 0, max = 100, step = 5, defaultValue = "50")
+                    private double rating;
+                }
+                """, new RangeInputHandler(), List.of("rating"));
     }
 
     @ParameterizedTest

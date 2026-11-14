@@ -1,0 +1,29 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="range-field(field)" th:remove="tag"
+     th:with="fieldErrors=${#lists.isEmpty(#fields.errors()) ? {} : #fields.errors(field.name)},
+              fieldInvalid=${not #lists.isEmpty(fieldErrors)},
+              fieldHelp=${not #strings.isEmpty(field.helpText)},
+              fieldDescription=${(fieldHelp ? field.name + '-help' : '') + (fieldInvalid ? (fieldHelp ? ' ' : '') + field.name + '-errors' : '')}">
+    <div class="mb-4" th:classappend="${field.outerCssClass}">
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+               th:classappend="${field.required} ? 'required' : ''"
+               th:for="${field.name}" th:text="${field.label}"></label>
+        <input class="w-full accent-blue-600"
+               th:attrappend="class=${fieldInvalid ? ' accent-red-600' : ''}"
+               th:aria-invalid="${fieldInvalid ? 'true' : null}"
+               th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
+               th:classappend="${field.cssClass}"
+               th:id="${field.name}" th:name="${field.name}"
+               th:min="${field.min >= -1.7976931348623157E308 and field.min <= 1.7976931348623157E308 ? field.min : null}"
+               th:max="${field.max >= -1.7976931348623157E308 and field.max <= 1.7976931348623157E308 ? field.max : null}"
+               th:attr="step=${field.step >= -1.7976931348623157E308 and field.step <= 1.7976931348623157E308 ? field.step : null}"
+               th:required="${field.required}" th:disabled="${field.disabled}"
+               th:value="*{__${field.name}__} ?: ${field.defaultValue}"
+               type="range"/>
+        <small class="help-text" th:id="${field.name + '-help'}" th:if="${fieldHelp}" th:text="${field.helpText}"></small>
+        <div class="mt-1 text-sm text-red-600" th:if="${fieldInvalid}" th:id="${field.name + '-errors'}" role="alert">
+            <div th:each="error : ${fieldErrors}" th:text="${error}"></div>
+        </div>
+    </div>
+</div>
+</html>

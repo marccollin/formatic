@@ -7,5 +7,6 @@ package com.formatic.core.form;
  * that can be handled in the dynamic form generation system.
  */
 public enum FormFieldType {
-    TEXT, TEXTAREA, SELECT, RADIO, CHECKBOX, DATE, HIDDEN, LABEL, EMAIL, PASSWORD, PHONE, NUMBER, URL, FILE, AUTO, COLOR
+    TEXT, TEXTAREA, SELECT, RADIO, CHECKBOX, DATE, HIDDEN, LABEL, EMAIL, PASSWORD, PHONE, NUMBER, URL, FILE, AUTO,
+    COLOR, DATETIME_LOCAL, TIME, RANGE
 }

@@ -83,6 +83,7 @@ Select a formatic annotation
 
 - CheckboxInput  
 - ColorInput
+- DateTimeInput
 - DateInput  
 - EmailInput  
 - FileInput  
@@ -91,7 +92,9 @@ Select a formatic annotation
 - PasswordInput  
 - PhoneInput  
 - RadioInput  
+- RangeInput
 - SelectInput  
+- TimeInput
 - TextareaInput  
 - TextInput  
 - UrlInput  
@@ -140,6 +143,15 @@ public class Editor {
     @DateInput
     private LocalDate birthDate;
 
+    @DateTimeInput(min = "2025-01-01T09:00", max = "2025-12-31T17:00", step = "60")
+    private LocalDateTime appointment;
+
+    @TimeInput(min = "09:00", max = "17:00", step = "300")
+    private LocalTime meetingTime;
+
+    @RangeInput(min = 0, max = 100, step = 5, defaultValue = "50")
+    private int rating;
+
     @ColorInput(defaultValue = "#336699")
     private String favoriteColor;
 
@@ -179,12 +191,14 @@ in all bundled layouts. For example, `@TextInput(maxLength = 100)` renders
 
 ### Numeric input constraints
 
-`@NumberInput(min = -10.5, max = 100, step = 0.01)` generates numeric constraints
-in Bootstrap, Tailwind, and Bulma forms, including fractional steps.
+`@NumberInput(min = -10.5, max = 100, step = 0.01)` and
+`@RangeInput(min = 0, max = 100, step = 5)` generate numeric constraints in
+Bootstrap, Tailwind, and Bulma forms, including fractional steps.
 Reflection, bytecode, and compile-time metadata builders support these attributes.
 The default `Double.NaN` means no explicit constraint. Explicit numeric limits must
 be finite, and the step must be finite and positive. Without an explicit step, the
-browser uses its default step of `1`.
+browser uses its default step of `1`. For range controls, the browser provides
+default bounds when min or max is omitted.
 
 ### Form constraint configuration
 
@@ -201,6 +215,11 @@ invalid constraints must be corrected.
 - Date bounds are empty or valid HTML dates such as `2024-02-29`, with `min` no
   later than `max`. Date step is empty, `"any"`, or a finite positive HTML number
   representing days (for example `"7"` or `"0.5"`).
+- `@DateTimeInput` bounds are empty or valid local date-times such as
+  `"2025-03-08T10:30"` and must be ordered. `@TimeInput` bounds are empty or
+  valid local times such as `"09:00"` or `"09:00:30"`; a min later than max is
+  allowed to express a time range that crosses midnight. For both annotations,
+  step is empty, `"any"`, or a finite positive number of seconds.
 
 For example:
 

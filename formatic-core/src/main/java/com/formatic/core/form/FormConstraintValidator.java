@@ -1,6 +1,8 @@
 package com.formatic.core.form;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +19,9 @@ public final class FormConstraintValidator {
                     validateLengths(location, field.getMinLength(), field.getMaxLength());
             case NUMBER -> validateNumber(location, field.getMin(), field.getMax(), field.getStep());
             case DATE -> validateDate(location, field.getMinDate(), field.getMaxDate(), field.getDateStep());
+            case DATETIME_LOCAL -> validateDateTime(location, field.getMinDateTime(), field.getMaxDateTime(), field.getDateTimeStep());
+            case TIME -> validateTime(location, field.getMinTime(), field.getMaxTime(), field.getTimeStep());
+            case RANGE -> validateNumber(location, field.getMin(), field.getMax(), field.getStep());
             default -> { }
         }
     }
@@ -61,6 +66,56 @@ public final class FormConstraintValidator {
                 }
             }
             if (!positive) fail(location, "step", step, "must be empty, 'any', or a finite positive number of days");
+        }
+    }
+
+    public static void validateDateTime(String location, String min, String max, String step) {
+        LocalDateTime minDateTime = parseDateTime(location, "min", min);
+        LocalDateTime maxDateTime = parseDateTime(location, "max", max);
+        if (minDateTime != null && maxDateTime != null && minDateTime.isAfter(maxDateTime)) {
+            fail(location, "min", min, "must not be later than max " + max);
+        }
+        validateTimeStep(location, step);
+    }
+
+    public static void validateTime(String location, String min, String max, String step) {
+        parseTime(location, "min", min);
+        parseTime(location, "max", max);
+        validateTimeStep(location, step);
+    }
+
+    private static LocalDateTime parseDateTime(String location, String attribute, String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return LocalDateTime.parse(value);
+        } catch (RuntimeException exception) {
+            fail(location, attribute, value, "must be a valid HTML local date-time");
+            return null;
+        }
+    }
+
+    private static LocalTime parseTime(String location, String attribute, String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return LocalTime.parse(value);
+        } catch (RuntimeException exception) {
+            fail(location, attribute, value, "must be a valid HTML time (HH:mm[:ss[.fraction]])");
+            return null;
+        }
+    }
+
+    private static void validateTimeStep(String location, String step) {
+        if (step != null && !step.isEmpty() && !step.equals("any")) {
+            boolean positive = false;
+            if (FLOAT.matcher(step).matches()) {
+                try {
+                    double parsed = Double.parseDouble(step);
+                    positive = Double.isFinite(parsed) && parsed > 0;
+                } catch (NumberFormatException ignored) {
+                    positive = false;
+                }
+            }
+            if (!positive) fail(location, "step", step, "must be empty, 'any', or a finite positive number of seconds");
         }
     }
 

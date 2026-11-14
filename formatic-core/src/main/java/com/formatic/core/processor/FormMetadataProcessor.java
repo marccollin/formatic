@@ -19,7 +19,8 @@ import java.util.*;
         "com.formatic.core.annotation.FormInput",  "com.formatic.core.annotation.HiddenInput",  "com.formatic.core.annotation.NumberInput",  "com.formatic.core.annotation.PasswordInput",
         "com.formatic.core.annotation.PhoneInput",  "com.formatic.core.annotation.RadioInput",  "com.formatic.core.annotation.SelectInput",  "com.formatic.core.annotation.TextareaInput",
         "com.formatic.core.annotation.TextInput",  "com.formatic.core.annotation.UrlInput",
-        "com.formatic.core.annotation.ColorInput"})
+        "com.formatic.core.annotation.ColorInput", "com.formatic.core.annotation.DateTimeInput",
+        "com.formatic.core.annotation.TimeInput", "com.formatic.core.annotation.RangeInput"})
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class FormMetadataProcessor extends AbstractProcessor {
 
@@ -92,6 +93,18 @@ public class FormMetadataProcessor extends AbstractProcessor {
                                 getAnnotationValue(values, "min", ""),
                                 getAnnotationValue(values, "max", ""),
                                 getAnnotationValue(values, "step", ""));
+                        case "DateTimeInput" -> FormConstraintValidator.validateDateTime(location,
+                                getAnnotationValue(values, "min", ""),
+                                getAnnotationValue(values, "max", ""),
+                                getAnnotationValue(values, "step", ""));
+                        case "TimeInput" -> FormConstraintValidator.validateTime(location,
+                                getAnnotationValue(values, "min", ""),
+                                getAnnotationValue(values, "max", ""),
+                                getAnnotationValue(values, "step", ""));
+                        case "RangeInput" -> FormConstraintValidator.validateNumber(location,
+                                getAnnotationValue(values, "min", Double.NaN),
+                                getAnnotationValue(values, "max", Double.NaN),
+                                getAnnotationValue(values, "step", Double.NaN));
                         default -> { }
                     }
                 } catch (ConstraintValidationException e) {
@@ -209,6 +222,24 @@ public class FormMetadataProcessor extends AbstractProcessor {
                         buildMethodBuilder.addStatement("$N.setType($T.COLOR)", fieldName + "Meta", FORM_FIELD_TYPE_CLASS);
                         generateCommonTextSetters(buildMethodBuilder, fieldName + "Meta", values);
                         buildMethodBuilder.addStatement("$N.setAlpha($L)", fieldName + "Meta", getAnnotationValue(values, "alpha", false));
+                        break;
+                    case "DateTimeInput":
+                        buildMethodBuilder.addStatement("$N.setType($T.DATETIME_LOCAL)", fieldName + "Meta", FORM_FIELD_TYPE_CLASS);
+                        generateDateTimeSetters(buildMethodBuilder, fieldName + "Meta", values, "DateTime");
+                        break;
+                    case "TimeInput":
+                        buildMethodBuilder.addStatement("$N.setType($T.TIME)", fieldName + "Meta", FORM_FIELD_TYPE_CLASS);
+                        generateDateTimeSetters(buildMethodBuilder, fieldName + "Meta", values, "Time");
+                        break;
+                    case "RangeInput":
+                        buildMethodBuilder.addStatement("$N.setType($T.RANGE)", fieldName + "Meta", FORM_FIELD_TYPE_CLASS);
+                        generateCommonTextSetters(buildMethodBuilder, fieldName + "Meta", values);
+                        for (String attribute : List.of("min", "max", "step")) {
+                            double value = getAnnotationValue(values, attribute, Double.NaN);
+                            String setter = "set" + Character.toUpperCase(attribute.charAt(0)) + attribute.substring(1);
+                            buildMethodBuilder.addStatement("$N.$N($T.valueOf($S))",
+                                    fieldName + "Meta", setter, Double.class, Double.toString(value));
+                        }
                         break;
                     case "TextareaInput":
                         generateTextareaSetters(buildMethodBuilder, fieldName + "Meta", values, annotationSimpleName);
@@ -505,6 +536,16 @@ public class FormMetadataProcessor extends AbstractProcessor {
         buildMethodBuilder.addStatement("$N.setMinDate($S)", metaObjectName, getAnnotationValue(values, "min", ""));
         buildMethodBuilder.addStatement("$N.setMaxDate($S)", metaObjectName, getAnnotationValue(values, "max", ""));
         buildMethodBuilder.addStatement("$N.setDateStep($S)", metaObjectName, getAnnotationValue(values, "step", ""));
+    }
+
+    private void generateDateTimeSetters(MethodSpec.Builder buildMethodBuilder,
+                                        String metaObjectName,
+                                        Map<String, AnnotationValue> values,
+                                        String typePrefix) {
+        generateCommonTextSetters(buildMethodBuilder, metaObjectName, values);
+        buildMethodBuilder.addStatement("$N.setMin$N($S)", metaObjectName, typePrefix, getAnnotationValue(values, "min", ""));
+        buildMethodBuilder.addStatement("$N.setMax$N($S)", metaObjectName, typePrefix, getAnnotationValue(values, "max", ""));
+        buildMethodBuilder.addStatement("$N.set$NStep($S)", metaObjectName, typePrefix, getAnnotationValue(values, "step", ""));
     }
 
     private void generateHiddenSetters(MethodSpec.Builder buildMethodBuilder,

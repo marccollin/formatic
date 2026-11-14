@@ -27,6 +27,9 @@
                     <div th:case="'EMAIL'" th:insert="~{bulma/forms/vertical/fields/email-field :: email-field(${field})}" th:remove="tag"></div>
                     <div th:case="'PASSWORD'" th:insert="~{bulma/forms/vertical/fields/password-field :: password-field(${field})}" th:remove="tag"></div>
                     <div th:case="'DATE'" th:insert="~{bulma/forms/vertical/fields/date-field :: date-field(${field})}" th:remove="tag"></div>
+                    <div th:case="'DATETIME_LOCAL'" th:insert="~{bulma/forms/vertical/fields/datetime-field :: datetime-field(${field})}" th:remove="tag"></div>
+                    <div th:case="'TIME'" th:insert="~{bulma/forms/vertical/fields/time-field :: time-field(${field})}" th:remove="tag"></div>
+                    <div th:case="'RANGE'" th:insert="~{bulma/forms/vertical/fields/range-field :: range-field(${field})}" th:remove="tag"></div>
                     <div th:case="'COLOR'" th:insert="~{bulma/forms/vertical/fields/color-field :: color-field(${field})}" th:remove="tag"></div>
                     <div th:case="'HIDDEN'" th:insert="~{bulma/forms/vertical/fields/hidden-field :: hidden-field(${field})}" th:remove="tag"></div>
                 </div>

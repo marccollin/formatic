@@ -36,6 +36,12 @@ public class FormFieldMetadata {
     private String minDate;
     private String maxDate;
     private String dateStep;
+    private String minDateTime;
+    private String maxDateTime;
+    private String dateTimeStep;
+    private String minTime;
+    private String maxTime;
+    private String timeStep;
 
     private boolean disabled;
     private boolean alpha;
@@ -88,6 +94,12 @@ public class FormFieldMetadata {
         this.minDate = source.minDate;
         this.maxDate = source.maxDate;
         this.dateStep = source.dateStep;
+        this.minDateTime = source.minDateTime;
+        this.maxDateTime = source.maxDateTime;
+        this.dateTimeStep = source.dateTimeStep;
+        this.minTime = source.minTime;
+        this.maxTime = source.maxTime;
+        this.timeStep = source.timeStep;
         this.disabled = source.disabled;
         this.alpha = source.alpha;
         this.min = source.min;
@@ -439,6 +451,54 @@ public class FormFieldMetadata {
 
     public void setDateStep(String dateStep) {
         this.dateStep = dateStep;
+    }
+
+    public String getMinDateTime() {
+        return minDateTime;
+    }
+
+    public void setMinDateTime(String minDateTime) {
+        this.minDateTime = minDateTime;
+    }
+
+    public String getMaxDateTime() {
+        return maxDateTime;
+    }
+
+    public void setMaxDateTime(String maxDateTime) {
+        this.maxDateTime = maxDateTime;
+    }
+
+    public String getDateTimeStep() {
+        return dateTimeStep;
+    }
+
+    public void setDateTimeStep(String dateTimeStep) {
+        this.dateTimeStep = dateTimeStep;
+    }
+
+    public String getMinTime() {
+        return minTime;
+    }
+
+    public void setMinTime(String minTime) {
+        this.minTime = minTime;
+    }
+
+    public String getMaxTime() {
+        return maxTime;
+    }
+
+    public void setMaxTime(String maxTime) {
+        this.maxTime = maxTime;
+    }
+
+    public String getTimeStep() {
+        return timeStep;
+    }
+
+    public void setTimeStep(String timeStep) {
+        this.timeStep = timeStep;
     }
 
     public String getAccept() {

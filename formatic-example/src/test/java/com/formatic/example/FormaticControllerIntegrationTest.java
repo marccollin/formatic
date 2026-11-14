@@ -8,6 +8,9 @@ import com.formatic.core.annotation.handler.TextInputHandler;
 import com.formatic.core.annotation.handler.DateInputHandler;
 import com.formatic.core.annotation.handler.CheckBoxHandler;
 import com.formatic.core.annotation.handler.ColorInputHandler;
+import com.formatic.core.annotation.handler.DateTimeInputHandler;
+import com.formatic.core.annotation.handler.TimeInputHandler;
+import com.formatic.core.annotation.handler.RangeInputHandler;
 import com.formatic.core.form.ConstraintValidationException;
 import com.formatic.example.controller.FormaticController;
 import com.formatic.example.controller.FormaticRestController;
@@ -62,6 +65,9 @@ class FormaticControllerIntegrationTest {
                 new TextareaInputHandler().handle(Editor.class.getDeclaredField("comment")),
                 new TextInputHandler().handle(Editor.class.getDeclaredField("codePostal")),
                 new DateInputHandler().handle(Editor.class.getDeclaredField("birthDate")),
+                new DateTimeInputHandler().handle(Editor.class.getDeclaredField("appointment")),
+                new TimeInputHandler().handle(Editor.class.getDeclaredField("contactTime")),
+                new RangeInputHandler().handle(Editor.class.getDeclaredField("satisfaction")),
                 new CheckBoxHandler(null).handle(Editor.class.getDeclaredField("confidential")),
                 new ColorInputHandler().handle(Editor.class.getDeclaredField("favoriteColor")),
                 new ColorInputHandler().handle(Editor.class.getDeclaredField("overlayColor"))
@@ -121,6 +127,9 @@ class FormaticControllerIntegrationTest {
                 .andExpect(content().string(containsString("class=\"input\"")))
                 .andExpect(content().string(containsString("class=\"textarea\"")))
                 .andExpect(content().string(containsString("class=\"button is-primary\"")))
+                .andExpect(content().string(containsString("type=\"datetime-local\"")))
+                .andExpect(content().string(containsString("type=\"time\"")))
+                .andExpect(content().string(containsString("type=\"range\"")))
                 .andExpect(content().string(containsString("name=\"comment\"")));
     }
 
@@ -135,6 +144,9 @@ class FormaticControllerIntegrationTest {
                 .andExpect(view().name("bulma/forms/horizontal/form-base"))
                 .andExpect(content().string(containsString("column is-half-desktop")))
                 .andExpect(content().string(containsString("column is-full")))
+                .andExpect(content().string(containsString("type=\"datetime-local\"")))
+                .andExpect(content().string(containsString("type=\"time\"")))
+                .andExpect(content().string(containsString("type=\"range\"")))
                 .andExpect(content().string(containsString("type=\"color\"")))
                 .andExpect(content().string(containsString("alpha=\"alpha\"")))
                 .andExpect(content().string(containsString("name=\"comment\"")));
@@ -151,7 +163,14 @@ class FormaticControllerIntegrationTest {
                 .andExpect(view().name("bootstrap/forms/horizontal/form-base"))
                 .andExpect(content().string(containsString("id=\"favoriteColor\"")))
                 .andExpect(content().string(containsString("value=\"#336699\"")))
-                .andExpect(content().string(containsString("alpha=\"alpha\"")));
+                .andExpect(content().string(containsString("type=\"datetime-local\"")))
+                .andExpect(content().string(containsString("value=\"2025-03-08T10:30\"")))
+                .andExpect(content().string(containsString("type=\"time\"")))
+                .andExpect(content().string(containsString("value=\"09:15\"")))
+                .andExpect(content().string(containsString("type=\"range\"")))
+                .andExpect(content().string(containsString("step=\"5.0\"")))
+                .andExpect(content().string(containsString("alpha=\"alpha\"")))
+                .andExpect(content().string(containsString("name=\"comment\"")));
     }
 
     @Test
@@ -164,6 +183,9 @@ class FormaticControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("tailwind/forms/vertical/form-base"))
                 .andExpect(content().string(containsString("type=\"color\"")))
+                .andExpect(content().string(containsString("type=\"datetime-local\"")))
+                .andExpect(content().string(containsString("type=\"time\"")))
+                .andExpect(content().string(containsString("type=\"range\"")))
                 .andExpect(content().string(containsString("alpha=\"alpha\"")));
     }
 

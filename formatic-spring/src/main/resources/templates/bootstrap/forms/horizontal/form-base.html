@@ -33,6 +33,9 @@
                 <div th:case="'EMAIL'" th:insert="~{bootstrap/forms/horizontal/fields/email-field :: email-field(${field})}"></div>
                 <div th:case="'PASSWORD'" th:insert="~{bootstrap/forms/horizontal/fields/password-field :: password-field(${field})}"></div>
                 <div th:case="'DATE'" th:insert="~{bootstrap/forms/horizontal/fields/date-field :: date-field(${field})}"></div>
+                <div th:case="'DATETIME_LOCAL'" th:insert="~{bootstrap/forms/horizontal/fields/datetime-field :: datetime-field(${field})}"></div>
+                <div th:case="'TIME'" th:insert="~{bootstrap/forms/horizontal/fields/time-field :: time-field(${field})}"></div>
+                <div th:case="'RANGE'" th:insert="~{bootstrap/forms/horizontal/fields/range-field :: range-field(${field})}"></div>
                 <div th:case="'COLOR'" th:insert="~{bootstrap/forms/horizontal/fields/color-field :: color-field(${field})}"></div>
                 <div th:case="'HIDDEN'" th:insert="~{bootstrap/forms/horizontal/fields/hidden-field :: hidden-field(${field})}"></div>
             </div>
