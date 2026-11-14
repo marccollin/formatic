@@ -4,7 +4,8 @@ import com.formatic.core.annotation.handler.FormFieldAnnotationHandler;
 import com.formatic.core.form.BytecodeAccessor;
 import com.formatic.core.form.CachedFormMetadata;
 import com.formatic.core.form.FormFieldMetadata;
-import com.formatic.core.form.FormConstraintValidator;
+import com.formatic.core.form.FieldIdStyle;
+import com.formatic.core.form.FormMetadataNaming;
 import com.formatic.core.form.ReflectionFallback;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
@@ -14,24 +15,26 @@ import net.bytebuddy.implementation.FixedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class BytecodeFormFieldMetadataBuilder implements FormFieldMetadataBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(BytecodeFormFieldMetadataBuilder.class);
 
     private final List<FormFieldAnnotationHandler<?>> handlers;
+    private final FieldIdStyle idStyle;
     private final Map<Class<?>, CachedFormMetadata> cache = new ConcurrentHashMap<>();
     private final ByteBuddy byteBuddy;
 
     public BytecodeFormFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers) {
+        this(handlers, FieldIdStyle.DOT);
+    }
+
+    public BytecodeFormFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers, FieldIdStyle idStyle) {
         this.handlers = handlers;
+        this.idStyle = java.util.Objects.requireNonNull(idStyle, "idStyle");
         this.byteBuddy = new ByteBuddy();
         log.info("BytecodeFormFieldMetadataBuilder initialized with {} handlers", handlers.size());
     }
@@ -96,25 +99,7 @@ public class BytecodeFormFieldMetadataBuilder implements FormFieldMetadataBuilde
      * Analyze class with reflection
      */
     private List<FormFieldMetadata> analyzeWithReflection(Class<?> clazz) {
-        List<FormFieldMetadata> result = new ArrayList<>();
-
-        for (Field field : clazz.getDeclaredFields()) {
-            handlers.stream()
-                    .filter(h -> h.supports(field))
-                    .findFirst()
-                    .ifPresent(handler -> {
-                        FormFieldMetadata m = handler.handle(field);
-                        if (m != null) {
-                            FormConstraintValidator.validate(m, clazz.getName() + "." + field.getName());
-                            result.add(m);
-                        }
-                    });
-        }
-
-        return result.stream()
-                .sorted(Comparator.comparingInt((FormFieldMetadata m) ->
-                        m.getOrder() == 0 ? Integer.MAX_VALUE : m.getOrder()))
-                .collect(Collectors.toList());
+        return FormMetadataNaming.apply(ReflectionMetadataScanner.scan(clazz, handlers), idStyle, clazz.getName());
     }
 
 }

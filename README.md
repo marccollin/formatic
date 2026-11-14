@@ -104,6 +104,10 @@ public class ContactForm {
 
 Formatic's Spring integration builds field metadata from the annotations and renders it with Thymeleaf templates. `@ColorInput` supports opaque colors by default and can enable alpha-channel editing with `alpha = true`. The HTML `datetime-local`, `time`, and `range` controls support min/max/step constraints; see the [User Guide](docs/USER_GUIDE.md) for details.
 
+Use `@NestedForm` to include a single nested DTO with Spring-compatible names such as
+`address.street`. HTML ID styles are configurable in `application.properties`;
+see [nested DTOs](docs/USER_GUIDE.md#nested-dtos).
+
 ## 🎨 CSS Framework Support
 
 | Framework | Layouts |

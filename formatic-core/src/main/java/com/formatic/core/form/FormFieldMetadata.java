@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 public class FormFieldMetadata {
 
     private String name;
+    private FieldIdStyle idStyle = FieldIdStyle.DOT;
     private FormFieldType type;
     private String label;
     private boolean readonly;
@@ -75,6 +76,7 @@ public class FormFieldMetadata {
     public FormFieldMetadata(FormFieldMetadata source) {
         //Copy primitive values and immutable String references.
         this.name = source.name;
+        this.idStyle = source.idStyle;
         this.type = source.type;
         this.label = source.label;
         this.readonly = source.readonly;
@@ -150,6 +152,18 @@ public class FormFieldMetadata {
         }
 
         return extraProperties;
+    }
+
+    public String getId() {
+        return idStyle.format(name);
+    }
+
+    public String getValuePath() {
+        return name.replace(".", "?.");
+    }
+
+    public void setIdStyle(FieldIdStyle idStyle) {
+        this.idStyle = Objects.requireNonNull(idStyle, "idStyle");
     }
 
 

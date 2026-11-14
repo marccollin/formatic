@@ -50,52 +50,48 @@
 
         fetch(`/api/editors/${editorId}`)
             .then(res => res.json())
-            .then(data => {
-                // Parcours de toutes les propriétés du DTO
-                Object.entries(data).forEach(([fieldName, fieldValue]) => {
-                    // On récupère tous les éléments avec ce nom
-                    const elements = document.querySelectorAll(`[name="${fieldName}"]`);
+            .then(data => populateFields(data));
 
+        function populateFields(data, prefix = '') {
+                Object.entries(data).forEach(([fieldName, fieldValue]) => {
+                    fieldName = prefix + fieldName;
+                    if (fieldValue !== null && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) {
+                        populateFields(fieldValue, fieldName + '.');
+                        return;
+                    }
+                    const elements = document.querySelectorAll(`[name="${fieldName}"]`);
                     if (elements.length === 0) return;
 
-                    // Cas particulier pour les radios (un seul à sélectionner)
                     if (elements[0].type === 'radio') {
                         elements.forEach(radio => {
-                            radio.checked = (radio.value === fieldValue.toString());
+                            radio.checked = (fieldValue != null && radio.value === String(fieldValue));
                         });
-                    }
-                    //Match JSON booleans and collection values to HTML checkbox strings.
-                    else if (elements[0].type === 'checkbox') {
+                    } else if (elements[0].type === 'checkbox') {
                         const values = (Array.isArray(fieldValue) ? fieldValue : [fieldValue])
                             .filter(value => value != null)
                             .map(value => String(value));
                         elements.forEach(checkbox => {
                             checkbox.checked = values.includes(checkbox.value);
                         });
-                    }
-                    // Cas particulier pour les selects
-                    else if (elements[0].tagName === 'SELECT') {
+                    } else if (elements[0].tagName === 'SELECT') {
                         const select = elements[0];
                         if (select.multiple) {
-                            // Select multiple
+                            const values = Array.isArray(fieldValue) ? fieldValue.map(String) : [];
                             Array.from(select.options).forEach(option => {
-                                option.selected = fieldValue.includes(option.value);
+                                option.selected = values.includes(option.value);
                             });
                         } else {
-                            // Select simple
-                            select.value = fieldValue || '';
+                            select.value = fieldValue ?? '';
                         }
-                    }
-                    // Cas par défaut (input, textarea)
-                    else {
+                    } else {
                         elements.forEach(el => {
-                            if (el.type !== 'file') { // On ignore les fichiers
-                                el.value = fieldValue || '';
+                            if (el.type !== 'file') {
+                                el.value = fieldValue ?? '';
                             }
                         });
                     }
                 });
-            });
+        }
 
         /*]]>*/
     </script>

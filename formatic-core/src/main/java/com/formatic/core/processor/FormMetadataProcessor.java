@@ -9,6 +9,7 @@ import com.palantir.javapoet.*;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
 import javax.tools.Diagnostic;
 
 import java.io.IOException;
@@ -20,7 +21,8 @@ import java.util.*;
         "com.formatic.core.annotation.PhoneInput",  "com.formatic.core.annotation.RadioInput",  "com.formatic.core.annotation.SelectInput",  "com.formatic.core.annotation.TextareaInput",
         "com.formatic.core.annotation.TextInput",  "com.formatic.core.annotation.UrlInput",
         "com.formatic.core.annotation.ColorInput", "com.formatic.core.annotation.DateTimeInput",
-        "com.formatic.core.annotation.TimeInput", "com.formatic.core.annotation.RangeInput"})
+        "com.formatic.core.annotation.TimeInput", "com.formatic.core.annotation.RangeInput",
+        "com.formatic.core.annotation.NestedForm"})
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class FormMetadataProcessor extends AbstractProcessor {
 
@@ -50,11 +52,14 @@ public class FormMetadataProcessor extends AbstractProcessor {
 
                         try {
                             generatedClasses.put(className, true);
-                            if (!validateConstraints(classElement)) {
+                            List<CollectedField> fields = collectFields(classElement, "", new HashSet<>());
+                            if (!validateConstraints(classElement, fields)) {
                                 continue;
                             }
                             //Call the method that will analyze ALL the fields of this class
-                            generateMetadataAccessor(classElement);
+                            generateMetadataAccessor(classElement, fields);
+                        } catch (ConstraintValidationException e) {
+                            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), classElement);
                         } catch (IOException e) {
                             processingEnv.getMessager().printMessage(
                                     Diagnostic.Kind.ERROR,
@@ -70,15 +75,62 @@ public class FormMetadataProcessor extends AbstractProcessor {
         return true;
     }
 
-    private boolean validateConstraints(TypeElement classElement) {
-        boolean valid = true;
-        for (Element field : classElement.getEnclosedElements()) {
+    private record CollectedField(Element element, String prefix) {}
+
+    private List<CollectedField> collectFields(TypeElement type, String prefix, Set<String> ancestors) {
+        String typeName = type.getQualifiedName().toString();
+        if (!ancestors.add(typeName)) {
+            throw new ConstraintValidationException(typeName + "." + prefix + ": cyclic @NestedForm reference");
+        }
+        List<CollectedField> result = new ArrayList<>();
+        for (Element field : type.getEnclosedElements()) {
             if (field.getKind() != ElementKind.FIELD) continue;
+            boolean nested = field.getAnnotationMirrors().stream().anyMatch(annotation ->
+                    annotation.getAnnotationType().toString().equals("com.formatic.core.annotation.NestedForm"));
+            if (nested) {
+                String path = prefix + field.getSimpleName();
+                if (!(field.asType() instanceof DeclaredType declared)
+                        || !(declared.asElement() instanceof TypeElement nestedType)
+                        || nestedType.getKind() != ElementKind.CLASS
+                        || nestedType.getModifiers().contains(Modifier.ABSTRACT)
+                        || field.getModifiers().contains(Modifier.STATIC)
+                        || nestedType.getQualifiedName().toString().startsWith("java.")
+                        || nestedType.getQualifiedName().toString().startsWith("javax.")
+                        || isAssignableTo(nestedType, "java.util.Collection")
+                        || isAssignableTo(nestedType, "java.util.Map")
+                        || field.getAnnotationMirrors().stream().anyMatch(this::isInputAnnotation)) {
+                    throw new ConstraintValidationException(typeName + "." + path
+                            + ": @NestedForm requires a single concrete DTO without an input annotation");
+                }
+                result.addAll(collectFields(nestedType, path + ".", ancestors));
+            } else {
+                result.add(new CollectedField(field, prefix));
+            }
+        }
+        ancestors.remove(typeName);
+        return result;
+    }
+
+    private boolean isAssignableTo(TypeElement type, String target) {
+        return processingEnv.getTypeUtils().isAssignable(
+                processingEnv.getTypeUtils().erasure(type.asType()),
+                processingEnv.getTypeUtils().erasure(processingEnv.getElementUtils().getTypeElement(target).asType()));
+    }
+
+    private boolean isInputAnnotation(AnnotationMirror annotation) {
+        return annotation.getAnnotationType().asElement().getAnnotationMirrors().stream().anyMatch(marker ->
+                marker.getAnnotationType().toString().equals("com.formatic.core.annotation.FormInput"));
+    }
+
+    private boolean validateConstraints(TypeElement classElement, List<CollectedField> fields) {
+        boolean valid = true;
+        for (CollectedField collected : fields) {
+            Element field = collected.element();
             for (AnnotationMirror annotation : field.getAnnotationMirrors()) {
                 String name = annotation.getAnnotationType().toString();
                 if (!name.startsWith("com.formatic.core.annotation.")) continue;
                 Map<String, AnnotationValue> values = getAnnotationValues(annotation);
-                String location = classElement.getQualifiedName() + "." + field.getSimpleName();
+                String location = classElement.getQualifiedName() + "." + collected.prefix() + field.getSimpleName();
                 try {
                     switch (name.substring(name.lastIndexOf('.') + 1)) {
                         case "TextInput", "TextareaInput", "EmailInput", "PasswordInput", "PhoneInput", "UrlInput" ->
@@ -116,11 +168,10 @@ public class FormMetadataProcessor extends AbstractProcessor {
         return valid;
     }
 
-    private void generateMetadataAccessor(TypeElement classElement) throws IOException {
-        String className = classElement.getSimpleName().toString();
+    private void generateMetadataAccessor(TypeElement classElement, List<CollectedField> fields) throws IOException {
         String packageName = processingEnv.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
-
-        String accessorName = className + "FormMetadata";
+        String binaryName = processingEnv.getElementUtils().getBinaryName(classElement).toString();
+        String accessorName = binaryName.substring(packageName.isEmpty() ? 0 : packageName.length() + 1) + "FormMetadata";
 
         ClassName listClass = ClassName.get(List.class);
         ClassName arrayListClass = ClassName.get(ArrayList.class);
@@ -138,32 +189,21 @@ public class FormMetadataProcessor extends AbstractProcessor {
 
         //Collect field metadata
         int orderCounter = 0;
-        for (Element field : classElement.getEnclosedElements()) {
-            if (field.getKind() != ElementKind.FIELD) {
-                continue;
-            }
+        for (CollectedField collected : fields) {
+            Element field = collected.element();
 
             //Try to find one of specific annotations on the field
             Optional<? extends AnnotationMirror> controlAnnotationMirror = field.getAnnotationMirrors().stream()
-                    .filter(a -> {
-                        //The annotation type element (e.g., TypeElement for @TextInput)
-                        Element annotationElement = a.getAnnotationType().asElement();
-
-                        //Only TypeElement and PackageElement have getQualifiedName()
-                        if (!(annotationElement instanceof TypeElement annotationTypeElement)) {
-                            return false;
-                        }
-
-                        PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(annotationTypeElement);
-
-                        //Check if correct package name
-                        return packageElement.getQualifiedName().toString().equals("com.formatic.core.annotation");
-                    })
+                    .filter(annotation -> processingEnv.getElementUtils()
+                            .getPackageOf(annotation.getAnnotationType().asElement())
+                            .getQualifiedName().contentEquals("com.formatic.core.annotation"))
+                    .filter(this::isInputAnnotation)
                     .findFirst();
 
             if (controlAnnotationMirror.isPresent()) {
                 orderCounter++;
-                String fieldName = field.getSimpleName().toString();
+                String propertyName = field.getSimpleName().toString();
+                String fieldName = "field" + orderCounter;
                 AnnotationMirror annotationMirror = controlAnnotationMirror.get();
 
                 //get name of annotation
@@ -174,20 +214,20 @@ public class FormMetadataProcessor extends AbstractProcessor {
 
                 //Initialization of the generated FormFieldMetadata object
                 buildMethodBuilder.addStatement("$T $N = new $T()", formFieldMetadataClass, fieldName + "Meta", formFieldMetadataClass);
-                buildMethodBuilder.addStatement("$N.setName($S)", fieldName + "Meta", fieldName);
+                buildMethodBuilder.addStatement("$N.setName($S)", fieldName + "Meta", propertyName);
                 buildMethodBuilder.addStatement("$N.setOrder($L)", fieldName + "Meta", orderCounter);
 
                 //Initializing annotation values (Map<String, AnnotationValue>)
                 Map<String, AnnotationValue> values = getAnnotationValues(annotationMirror);
 
                 //Use the field name when no label is provided.
-                String label = getAnnotationValue(values, "label", fieldName);
+                String label = getAnnotationValue(values, "label", propertyName);
 
                 //not needed for hiddenInput
                 if (!"HiddenInput".equals(annotationSimpleName)) {
 
                     if(label==null || label.isEmpty()){
-                        label = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                        label = propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
                     }
 
                     buildMethodBuilder.addStatement("$N.setLabel($S)", metaObjectName, label);
@@ -208,6 +248,13 @@ public class FormMetadataProcessor extends AbstractProcessor {
                     case "RadioInput":
                         //this annotation have 'optionsProvider', 'options', 'multiple'...
                         generateSelectLikeSetters(buildMethodBuilder, fieldName + "Meta", values, annotationSimpleName);
+                        break;
+                    case "FileInput":
+                        buildMethodBuilder.addStatement("$N.setType($T.FILE)", metaObjectName, FORM_FIELD_TYPE_CLASS);
+                        generateCommonFieldSetters(buildMethodBuilder, metaObjectName, values);
+                        buildMethodBuilder.addStatement("$N.setAccept($S)", metaObjectName, getAnnotationValue(values, "accept", ""));
+                        buildMethodBuilder.addStatement("$N.setMultiple($L)", metaObjectName, getAnnotationValue(values, "multiple", false));
+                        buildMethodBuilder.addStatement("$N.setErrorMessage($S)", metaObjectName, getAnnotationValue(values, "errorMessage", ""));
                         break;
 
                     case "NumberInput":
@@ -246,7 +293,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
                             break;
 
                     case "CheckboxInput":
-                        generateCheckboxSetters(buildMethodBuilder, fieldName + "Meta", values, annotationSimpleName);
+                        generateCheckboxSetters(buildMethodBuilder, fieldName + "Meta", values, annotationSimpleName, field);
                         break;
 
                     case "HiddenInput":
@@ -256,6 +303,10 @@ public class FormMetadataProcessor extends AbstractProcessor {
                     default:
                         break;
                 }
+
+                String name = getAnnotationValue(values, "name", "");
+                buildMethodBuilder.addStatement("$N.setName($S)", metaObjectName,
+                        collected.prefix() + (name.isEmpty() ? propertyName : name));
 
                 //Add the configured object to the list
                 buildMethodBuilder.addStatement("list.add($N)", fieldName + "Meta");
@@ -383,14 +434,30 @@ public class FormMetadataProcessor extends AbstractProcessor {
         buildMethodBuilder.addStatement("$N.setReadonly($L)", metaObjectName, getAnnotationValue(values, "readonly", false));
     }
 
+    private void generateCommonFieldSetters(MethodSpec.Builder builder, String name,
+                                           Map<String, AnnotationValue> values) {
+        builder.addStatement("$N.setCssClass($S)", name, getAnnotationValue(values, "cssClass", ""));
+        builder.addStatement("$N.setOuterCssClass($S)", name, getAnnotationValue(values, "outerCssClass", ""));
+        builder.addStatement("$N.setDisabled($L)", name, getAnnotationValue(values, "disabled", false));
+        builder.addStatement("$N.setRequired($L)", name, getAnnotationValue(values, "required", false));
+    }
+
     private void generateCheckboxSetters(MethodSpec.Builder buildMethodBuilder,
                                          String metaObjectName,
                                          Map<String, AnnotationValue> values,
-                                         String annotationSimpleName) {
+                                         String annotationSimpleName, Element field) {
 
         //FormFieldType management
         String formFieldType = annotationSimpleName.toUpperCase().replace("INPUT", "");
         buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, FORM_FIELD_TYPE_CLASS, formFieldType);
+        generateCommonFieldSetters(buildMethodBuilder, metaObjectName, values);
+        if (field.asType().toString().equals("boolean") || field.asType().toString().equals("java.lang.Boolean")) {
+            return;
+        }
+        boolean multiple = field.asType() instanceof DeclaredType declared
+                && declared.asElement() instanceof TypeElement type && isAssignableTo(type, "java.util.Collection");
+        buildMethodBuilder.addStatement("$N.setMultiple($L)", metaObjectName, multiple);
+        String provider = getAnnotationValue(values, "optionsProvider", "");
 
         //Define type
         ClassName listClass = ClassName.get(List.class);
@@ -414,10 +481,6 @@ public class FormMetadataProcessor extends AbstractProcessor {
                 buildMethodBuilder.addStatement("$T<$T> $N = new $T<>()",
                         listClass, selectOptionClass, optionsListName, arrayListClass);
 
-                if(rawOptions.size()>1){
-                    buildMethodBuilder.addStatement("$N.setMultiple($L)", metaObjectName, true);
-                }
-
                 for (AnnotationValue option : rawOptions) {
                     //Every option use this format "value:Label"
                     String optionString = (String) option.getValue();
@@ -434,6 +497,8 @@ public class FormMetadataProcessor extends AbstractProcessor {
 
                 //Generate : [field]Meta.setOptions(optionsList);
                 buildMethodBuilder.addStatement("$N.setOptions($N)", metaObjectName, optionsListName);
+            } else if (!provider.isEmpty()) {
+                buildMethodBuilder.addStatement("$N.setOptionsProvider($S)", metaObjectName, provider);
             }
         }
     }
@@ -469,13 +534,18 @@ public class FormMetadataProcessor extends AbstractProcessor {
         String formFieldType = annotationSimpleName.toUpperCase().replace("INPUT", "");
         buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, FORM_FIELD_TYPE_CLASS, formFieldType);
 
+        generateCommonFieldSetters(buildMethodBuilder, metaObjectName, values);
+        if (annotationSimpleName.equals("RadioInput")) {
+            buildMethodBuilder.addStatement("$N.setDefaultValue($S)", metaObjectName, getAnnotationValue(values, "defaultValue", ""));
+        }
         String optionsProvider = getAnnotationValue(values, "optionsProvider", null);
 
-        if (optionsProvider != null && !optionsProvider.isEmpty()) {
+        AnnotationValue optionsValue = values.get("options");
+        boolean hasStaticOptions = optionsValue != null && optionsValue.getValue() instanceof List<?> options && !options.isEmpty();
+        if (!hasStaticOptions && optionsProvider != null && !optionsProvider.isEmpty()) {
             //Generate : [field]Meta.setOptionsProvider("getCities");
             buildMethodBuilder.addStatement("$N.setOptionsProvider($S)", metaObjectName, optionsProvider);
         }else{
-            AnnotationValue optionsValue = values.get("options");
             if (optionsValue != null) {
                 @SuppressWarnings("unchecked")
                 List<AnnotationValue> rawOptions = (List<AnnotationValue>) optionsValue.getValue();
@@ -492,10 +562,6 @@ public class FormMetadataProcessor extends AbstractProcessor {
                     //Example : List<SelectOption> optionsList = new ArrayList<>();
                     String optionsListName = metaObjectName + "Options";
                     buildMethodBuilder.addStatement("$T<$T> $N = new $T<>()", listClass, selectOptionClass, optionsListName, arrayListClass);
-
-                    if(rawOptions.size()>1){
-                        buildMethodBuilder.addStatement("$N.setMultiple($L)", metaObjectName, true);
-                    }
 
                     for (AnnotationValue option : rawOptions) {
                         //Every option is a chain "value:Label"

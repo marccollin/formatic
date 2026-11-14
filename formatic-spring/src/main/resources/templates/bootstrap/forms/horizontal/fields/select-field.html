@@ -3,12 +3,12 @@
      th:with="fieldErrors=${#lists.isEmpty(#fields.errors()) ? {} : #fields.errors(field.name)},
               fieldInvalid=${not #lists.isEmpty(fieldErrors)},
               fieldHelp=${not #strings.isEmpty(field.helpText)},
-              fieldDescription=${(fieldHelp ? field.name + '-help' : '') + (fieldInvalid ? (fieldHelp ? ' ' : '') + field.name + '-errors' : '')}">
+              fieldDescription=${(fieldHelp ? field.id + '-help' : '') + (fieldInvalid ? (fieldHelp ? ' ' : '') + field.id + '-errors' : '')}">
 
     <div class="row mb-3">
 
         <label class="col-sm-2 col-form-label" th:classappend="${field.required} ? 'required' : ''"
-               th:for="${field.name}"
+               th:for="${field.id}"
                th:text="${field.label}"></label>
 
         <div class="col-sm-10">
@@ -18,6 +18,7 @@
                     th:aria-invalid="${fieldInvalid ? 'true' : null}"
                     th:aria-describedby="${#strings.isEmpty(fieldDescription) ? null : fieldDescription}"
                     th:classappend="${field.cssClass}"
+                    th:id="${field.id}"
                     th:field="*{__${field.name}__}"
                     th:multiple="${field.multiple}"
                     th:disabled="${field.disabled}"
@@ -28,9 +29,9 @@
                         th:text="${option.label}"
                         th:value="${option.value}"></option>
             </select>
-            <small class="help-text" th:id="${field.name + '-help'}" th:if="${fieldHelp}" th:text="${field.helpText}"></small>
+            <small class="help-text" th:id="${field.id + '-help'}" th:if="${fieldHelp}" th:text="${field.helpText}"></small>
             <div class="invalid-feedback d-block" th:if="${fieldInvalid}"
-                 th:id="${field.name + '-errors'}" role="alert">
+                 th:id="${field.id + '-errors'}" role="alert">
                 <div th:each="error : ${fieldErrors}" th:text="${error}"></div>
             </div>
         </div>

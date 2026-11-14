@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -29,6 +30,7 @@ import java.util.List;
  * `com.formatic.core.builder.FormFieldMetadataBuilder` is present on the classpath.
  */
 @AutoConfiguration
+@EnableConfigurationProperties(FormaticProperties.class)
 @ComponentScan(basePackages = "com.formatic")
 @ConditionalOnClass(name = "com.formatic.core.builder.ReflectionFormFieldMetadataBuilder")
 public class FormaticSpringAutoConfiguration {
@@ -155,26 +157,30 @@ public class FormaticSpringAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ReflectionFormFieldMetadataBuilder formFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers) {
+    public ReflectionFormFieldMetadataBuilder formFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers,
+                                                                       FormaticProperties properties) {
         logger.info("Creating FormFieldMetadataBuilder with {} handlers", handlers.size());
 
-        return new ReflectionFormFieldMetadataBuilder(handlers);
+        return new ReflectionFormFieldMetadataBuilder(handlers, properties.getNested().getIdStyle());
     }
 
     @Bean
     @ConditionalOnClass(name = "net.bytebuddy.ByteBuddy")
-    public BytecodeFormFieldMetadataBuilder bytecodeFormFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers) {
+    public BytecodeFormFieldMetadataBuilder bytecodeFormFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers,
+                                                                            FormaticProperties properties) {
         logger.info("Creating BytecodeFormFieldMetadataBuilder with {} handlers", handlers.size());
-        return new BytecodeFormFieldMetadataBuilder(handlers);
+        return new BytecodeFormFieldMetadataBuilder(handlers, properties.getNested().getIdStyle());
     }
 
     @Bean
     @ConditionalOnClass
     public CompileTimeFormFieldMetadataBuilder compileTimeFormFieldMetadataBuilder(
             OptionsProviderService optionsProviderService,
-            ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder) {
+            ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder,
+            FormaticProperties properties) {
         logger.info("Creating CompileTimeFormFieldMetadataBuilder");
-        return new CompileTimeFormFieldMetadataBuilder(optionsProviderService, reflectionFormFieldMetadataBuilder);
+        return new CompileTimeFormFieldMetadataBuilder(optionsProviderService, reflectionFormFieldMetadataBuilder,
+                properties.getNested().getIdStyle());
     }
 
 }

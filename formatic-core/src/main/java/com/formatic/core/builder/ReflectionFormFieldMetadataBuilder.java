@@ -2,15 +2,12 @@ package com.formatic.core.builder;
 
 import com.formatic.core.annotation.handler.FormFieldAnnotationHandler;
 import com.formatic.core.form.FormFieldMetadata;
-import com.formatic.core.form.FormConstraintValidator;
+import com.formatic.core.form.FieldIdStyle;
+import com.formatic.core.form.FormMetadataNaming;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Builder class responsible for creating form field metadata from a given class.
@@ -23,10 +20,16 @@ import java.util.stream.Collectors;
  */
 public class ReflectionFormFieldMetadataBuilder  implements FormFieldMetadataBuilder{
     private final List<FormFieldAnnotationHandler<?>> handlers;
+    private final FieldIdStyle idStyle;
     private final Map<Class<?>, List<FormFieldMetadata>> cache = new ConcurrentHashMap<>();
 
     public ReflectionFormFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers) {
+        this(handlers, FieldIdStyle.DOT);
+    }
+
+    public ReflectionFormFieldMetadataBuilder(List<FormFieldAnnotationHandler<?>> handlers, FieldIdStyle idStyle) {
         this.handlers = handlers;
+        this.idStyle = java.util.Objects.requireNonNull(idStyle, "idStyle");
     }
 
     public List<FormFieldMetadata> buildMetadata(Class<?> clazz) {
@@ -34,25 +37,6 @@ public class ReflectionFormFieldMetadataBuilder  implements FormFieldMetadataBui
     }
 
     private List<FormFieldMetadata> buildMetadataInternal(Class<?> clazz) {
-        List<FormFieldMetadata> result = new ArrayList<>();
-        for (Field field : clazz.getDeclaredFields()) {
-            handlers.stream()
-                    .filter(h -> h.supports(field))
-                    .findFirst()
-                    .ifPresent(handler -> {
-                        FormFieldMetadata m = handler.handle(field);
-                        if (m != null) {
-                            FormConstraintValidator.validate(m, clazz.getName() + "." + field.getName());
-                            result.add(m);
-                        }
-                    });
-        }
-
-        //sort
-        return result.stream()
-                .sorted(Comparator.comparingInt((FormFieldMetadata m) ->
-                        m.getOrder() == 0 ? Integer.MAX_VALUE : m.getOrder()))
-                .collect(Collectors.toList());
-
+        return FormMetadataNaming.apply(ReflectionMetadataScanner.scan(clazz, handlers), idStyle, clazz.getName());
     }
 }
