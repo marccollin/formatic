@@ -5,7 +5,7 @@
 
 **Generate responsive Thymeleaf forms from Java annotations—with Spring Boot and your choice of CSS framework.**
 
-![Example Formatic form](formatic_form.jpg)
+![Example Formatic form](formatic_thymeleaf_horizontal_bulma.jpg)
 
 ## ✨ Features
 
