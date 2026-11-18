@@ -312,6 +312,99 @@ only an option does not guarantee that its existing value will be retained when
 other choices are submitted. Disabled state is a UI feature, not authorization:
 the consuming application must enforce allowed updates on the server.
 
+### Nested DTOs
+
+Mark a single nested DTO field with `@NestedForm`. Its annotated fields are
+flattened into the parent form using Spring MVC dotted binding paths:
+
+```java
+import com.formatic.core.annotation.NestedForm;
+import com.formatic.core.annotation.TextInput;
+import jakarta.validation.Valid;
+
+public class CustomerForm {
+    @TextInput
+    private String name;
+
+    @NestedForm
+    @Valid
+    private Address address = new Address();
+
+    // Public getters and setters for both properties.
+}
+
+public class Address {
+    @TextInput(label = "Street")
+    private String street;
+
+    @TextInput(label = "City")
+    private String city;
+
+    // Public getters and setters for both properties.
+}
+```
+
+Metadata names and submitted input names are `name`, `address.street`, and
+`address.city`. Mark further nested properties with `@NestedForm` for paths such as
+`address.location.city`. Two properties of the same DTO type are supported and
+receive their own prefixes. Nested fields appear at the parent property's position,
+with their declaration order preserved under the built-in handlers.
+
+Configure only the HTML ID format in your application's `application.properties`:
+
+```properties
+formatic.nested.id-style=SNAKE_CASE
+```
+
+| Setting | Input name | HTML ID |
+|---|---|---|
+| `DOT` (default) | `address.street` | `address.street` |
+| `CAMEL_CASE` | `address.street` | `addressStreet` |
+| `SNAKE_CASE` | `address.street` | `address_street` |
+
+Labels, checkbox/radio option IDs, help IDs, and validation error links follow the
+configured ID style. Top-level IDs stay unchanged. Spring binding and error paths
+always remain dotted; this setting does not rename submitted parameters. Duplicate
+field names or IDs caused by the selected style fail with a configuration error.
+In core-only usage, pass a `FieldIdStyle` to the builder's overloaded constructor.
+Custom templates should use `field.id` for IDs and labels, `field.name` for binding
+and errors, and `field.valuePath` for null-safe SpringEL value reads.
+
+Reflection, bytecode, and compile-time builders support nested DTOs. The annotation
+processor generates flattened parent metadata and uses binary names for static
+inner DTO classes. Class-based metadata generation does not instantiate DTOs.
+Use public bean accessors and initialize nested objects, as above, or give them a
+public no-argument constructor so Spring can auto-grow nested paths during binding.
+Read-only value rendering is null-safe; bound select/checkbox/radio controls may
+cause Spring to initialize null nested objects.
+
+`@NestedForm` does not enable Bean Validation by itself. Add `@Valid` on nested
+properties and use `@Valid @ModelAttribute("formData")` plus `BindingResult` in the
+POST handler to cascade validation. Field errors such as `address.street` render
+next to the corresponding control. The hybrid template also reads nested JSON
+using dotted input names.
+
+This first version supports concrete, single-valued DTOs using declared fields.
+Unmarked nested objects are ignored. Collections of DTOs, maps, arrays, optional
+wrappers, records, interfaces, abstract types, and cyclic `@NestedForm` relationships
+are not supported. Do not combine `@NestedForm` with an input annotation on the same
+property. Keep input annotation names aligned with actual bean properties;
+use the ID style setting rather than `name` overrides for cosmetic naming.
+
+Try the example with:
+
+```bash
+./gradlew :formatic-example:bootRun
+```
+
+```text
+# Bootstrap vertical
+http://localhost:8080/form?class=com.formatic.example.dto.CustomerForm&cssLibrary=BOOTSTRAP&mode=REFLECTION
+
+# Bulma responsive two-column layout
+http://localhost:8080/form?class=com.formatic.example.dto.CustomerForm&cssLibrary=BULMA&form=HORIZONTAL&mode=REFLECTION
+```
+
 ### Validation feedback and accessibility
 
 The bundled templates support native browser validation, custom frontend validation,
@@ -337,7 +430,7 @@ replacing the DTO. Global/object errors are not displayed by individual fields;
 provide an application-level summary if needed. Formatic does not perform
 server-side validation merely because a Formatic annotation declares a constraint.
 
-The IDs `<field-name>-help` and `<field-name>-errors` provide hooks for custom
+The IDs `<field-id>-help` and `<field-id>-errors` provide hooks for custom
 frontend validation. The error block is rendered only when server field errors
 exist; frontend code may create its own block using that ID and update
 `aria-invalid`/`aria-describedby` as validation changes. For HTMX, return and swap

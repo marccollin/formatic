@@ -51,3 +51,27 @@ for (const [name, value, options, expected] of [
         assert.ok(elements.every(element => options.includes(element.value)));
     });
 }
+
+test('hybrid nested DTO loading preserves dotted paths, zero and false', async () => {
+    const controls = {
+        'address.street': [{ type: 'text', value: '' }],
+        'address.rating': [{ type: 'range', value: '' }],
+        'address.newsletter': [{ type: 'checkbox', value: 'true', checked: true }],
+        'address.interests': [{ type: 'checkbox', value: 'sport', checked: false }],
+    };
+    vm.runInNewContext(script, {
+        document: {
+            querySelectorAll(selector) {
+                return controls[selector.match(/name="([^"]+)"/)[1]] || [];
+            },
+        },
+        fetch: () => Promise.resolve({ json: () => ({
+            address: { street: 'Main', rating: 0, newsletter: false, interests: ['sport'] },
+        }) }),
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(controls['address.street'][0].value, 'Main');
+    assert.equal(controls['address.rating'][0].value, 0);
+    assert.equal(controls['address.newsletter'][0].checked, false);
+    assert.equal(controls['address.interests'][0].checked, true);
+});

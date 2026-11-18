@@ -3,6 +3,8 @@ package com.formatic.core.builder;
 import com.formatic.core.form.SelectRadioOption;
 import com.formatic.core.form.FormConstraintValidator;
 import com.formatic.core.form.ConstraintValidationException;
+import com.formatic.core.form.FieldIdStyle;
+import com.formatic.core.form.FormMetadataNaming;
 import com.formatic.core.service.OptionsProviderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +29,19 @@ public class CompileTimeFormFieldMetadataBuilder implements FormFieldMetadataBui
 
     private final OptionsProviderService optionsProviderService;
     private final ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder;
+    private final FieldIdStyle idStyle;
 
     public CompileTimeFormFieldMetadataBuilder(OptionsProviderService optionsProviderService,
                                               ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder) {
+        this(optionsProviderService, reflectionFormFieldMetadataBuilder, FieldIdStyle.DOT);
+    }
+
+    public CompileTimeFormFieldMetadataBuilder(OptionsProviderService optionsProviderService,
+                                              ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder,
+                                              FieldIdStyle idStyle) {
         this.optionsProviderService = optionsProviderService;
         this.reflectionFormFieldMetadataBuilder = reflectionFormFieldMetadataBuilder;
+        this.idStyle = java.util.Objects.requireNonNull(idStyle, "idStyle");
     }
 
     @Override
@@ -47,13 +57,14 @@ public class CompileTimeFormFieldMetadataBuilder implements FormFieldMetadataBui
 
         try {
             //Try to load class
-            Class<?> accessorClass = Class.forName(accessorClassName);
+            Class<?> accessorClass = Class.forName(accessorClassName, true, clazz.getClassLoader());
 
             //Get static method
             java.lang.reflect.Method getMetadataMethod = accessorClass.getMethod("getMetadata");
 
             //Class static method to get metadata
-            List<FormFieldMetadata> metadata = (List<FormFieldMetadata>) getMetadataMethod.invoke(null);
+            List<FormFieldMetadata> metadata = FormMetadataNaming.apply(
+                    (List<FormFieldMetadata>) getMetadataMethod.invoke(null), idStyle, clazz.getName());
 
             for (FormFieldMetadata field : metadata) {
                 FormConstraintValidator.validate(field, clazz.getName() + "." + field.getName());

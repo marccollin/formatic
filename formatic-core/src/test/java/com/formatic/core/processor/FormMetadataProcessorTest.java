@@ -20,6 +20,9 @@ import com.formatic.core.annotation.handler.HiddenInputHandler;
 import com.formatic.core.annotation.handler.TextareaInputHandler;
 import com.formatic.core.annotation.handler.TimeInputHandler;
 import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.FieldIdStyle;
+import com.formatic.core.builder.ReflectionFormFieldMetadataBuilder;
+import com.formatic.core.builder.CompileTimeFormFieldMetadataBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,6 +45,114 @@ class FormMetadataProcessorTest {
 
     @TempDir
     Path temporaryDirectory;
+
+    @Test
+    void generatedNestedMetadataMatchesRuntimeBuildersAndIsNotMutatedByIdStyle() throws Exception {
+        Path source = temporaryDirectory.resolve("Customer.java");
+        Files.writeString(source, """
+                package fixture;
+                import com.formatic.core.annotation.*;
+                public class Customer {
+                    @TextInput private String name;
+                    @NestedForm private Address billing;
+                    @NestedForm private Address shipping;
+                    public static class Address {
+                        @TextInput(required = true) private String street;
+                        @NestedForm private Location location;
+                        @FileInput(accept = ".pdf", multiple = true, disabled = true) private Object file;
+                        @CheckboxInput(options = {"sport:Sport"}) private java.util.List<String> interests;
+                        @SelectInput(options = {"Paris:Paris", "London:London"}, required = true) private String city;
+                        @RadioInput(options = {"visa:Visa", "cash:Cash"}, defaultValue = "cash") private String payment;
+                    }
+                    public static class Location {
+                        @TextInput private String city;
+                    }
+                }
+                """);
+        compile(source, true);
+        try (URLClassLoader loader = new URLClassLoader(
+                new URL[]{temporaryDirectory.toUri().toURL()}, getClass().getClassLoader())) {
+            Class<?> type = loader.loadClass("fixture.Customer");
+            Class<?> addressType = loader.loadClass("fixture.Customer$Address");
+            for (FieldIdStyle style : FieldIdStyle.values()) {
+                var options = org.mockito.Mockito.mock(com.formatic.core.service.OptionsProviderService.class);
+                var reflection = new ReflectionFormFieldMetadataBuilder(List.of(new TextInputHandler(),
+                        new com.formatic.core.annotation.handler.FileInputHandler(),
+                        new com.formatic.core.annotation.handler.CheckBoxHandler(options),
+                        new com.formatic.core.annotation.handler.SelectInputHandler(options),
+                        new com.formatic.core.annotation.handler.RadioInputHandler(options)), style);
+                var generated = new CompileTimeFormFieldMetadataBuilder(null, reflection, style);
+                for (Class<?> dto : List.of(type, addressType)) {
+                    assertThat(generated.buildMetadata(dto))
+                            .usingRecursiveComparison().ignoringFields("order")
+                            .withComparatorForType(Double::compare, Double.class)
+                            .isEqualTo(reflection.buildMetadata(dto));
+                }
+            }
+            List<?> original = (List<?>) loader.loadClass("fixture.CustomerFormMetadata")
+                    .getMethod("getMetadata").invoke(null);
+            assertThat(((FormFieldMetadata) original.get(1)).getId()).isEqualTo("billing.street");
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "@NestedForm private Invalid child;",
+            "@NestedForm private java.util.List<Invalid> children;",
+            "@NestedForm @TextInput private Child child; static class Child {}",
+            "@NestedForm private String text;"
+    })
+    void rejectsInvalidNestedDeclarationsAtCompileTime(String declaration) throws Exception {
+        Path source = temporaryDirectory.resolve("Invalid.java");
+        Files.writeString(source, """
+                package fixture;
+                import com.formatic.core.annotation.*;
+                public class Invalid { %s }
+                """.formatted(declaration));
+        compile(source, false);
+    }
+
+    private void compile(Path source, boolean expectedSuccess) throws Exception {
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+        Path coreClasses = Path.of(TextareaInput.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        try (var manager = compiler.getStandardFileManager(diagnostics, null, StandardCharsets.UTF_8)) {
+            var task = compiler.getTask(null, manager, diagnostics,
+                    List.of("-classpath", coreClasses.toString(), "-d", temporaryDirectory.toString(),
+                            "-s", temporaryDirectory.toString()), null, manager.getJavaFileObjects(source.toFile()));
+            task.setProcessors(List.of(new FormMetadataProcessor()));
+            assertThat(task.call()).as("Compiler diagnostics: %s", diagnostics.getDiagnostics()).isEqualTo(expectedSuccess);
+            if (!expectedSuccess) {
+                assertThat(diagnostics.getDiagnostics().toString()).contains("@NestedForm");
+            }
+        }
+    }
+
+    @Test
+    void nestedConstraintDiagnosticsIncludeTheParentBindingPath() throws Exception {
+        Path source = temporaryDirectory.resolve("Invalid.java");
+        Files.writeString(source, """
+                package fixture;
+                import com.formatic.core.annotation.*;
+                public class Invalid {
+                    @NestedForm private Address address;
+                    static class Address {
+                        @TextInput(minLength = 10, maxLength = 2) private String street;
+                    }
+                }
+                """);
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+        Path coreClasses = Path.of(TextareaInput.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        try (var manager = compiler.getStandardFileManager(diagnostics, null, StandardCharsets.UTF_8)) {
+            var task = compiler.getTask(null, manager, diagnostics,
+                    List.of("-classpath", coreClasses.toString(), "-d", temporaryDirectory.toString(),
+                            "-s", temporaryDirectory.toString()), null, manager.getJavaFileObjects(source.toFile()));
+            task.setProcessors(List.of(new FormMetadataProcessor()));
+            assertThat(task.call()).isFalse();
+            assertThat(diagnostics.getDiagnostics().toString()).contains("fixture.Invalid.address.street");
+        }
+    }
 
     @Test
     void generatedNumberMetadataMatchesReflection() throws Exception {
