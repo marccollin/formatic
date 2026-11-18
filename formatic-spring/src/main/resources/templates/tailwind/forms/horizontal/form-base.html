@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Formatic form</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50 py-8">
+<section class="mx-auto max-w-6xl px-4">
+    <div class="rounded-lg bg-white p-8 shadow-lg" th:fragment="Generic" th:remove="tag">
+        <h1 class="mb-6 text-2xl font-semibold text-gray-900" th:text="${formName}"></h1>
+        <div class="mb-6 rounded-md bg-green-50 p-4 text-green-800" role="status"
+             th:if="${formSuccess}" th:text="${formSuccess}"></div>
+        <form method="post" th:object="${formData}"
+              th:attr="enctype=${fields.?[type.name() == 'FILE'].isEmpty() ? null : 'multipart/form-data'}">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div th:each="field : ${fields}" th:if="${field.type.name() != 'HIDDEN'}">
+                    <div th:remove="tag" th:switch="${field.type.name()}">
+                        <div th:case="'TEXT'" th:insert="~{tailwind/forms/vertical/fields/text-field :: text-field(${field})}"></div>
+                        <div th:case="'FILE'" th:insert="~{tailwind/forms/vertical/fields/file-field :: file-field(${field})}"></div>
+                        <div th:case="'SELECT'" th:insert="~{tailwind/forms/vertical/fields/select-field :: select-field(${field})}"></div>
+                        <div th:case="'CHECKBOX'" th:insert="~{tailwind/forms/vertical/fields/checkbox-field :: checkbox-field(${field})}"></div>
+                        <div th:case="'PHONE'" th:insert="~{tailwind/forms/vertical/fields/phone-field :: phone-field(${field})}"></div>
+                        <div th:case="'URL'" th:insert="~{tailwind/forms/vertical/fields/url-field :: url-field(${field})}"></div>
+                        <div th:case="'TEXTAREA'" th:insert="~{tailwind/forms/vertical/fields/textarea-field :: textarea-field(${field})}"></div>
+                        <div th:case="'RADIO'" th:insert="~{tailwind/forms/vertical/fields/radio-field :: radio-field(${field})}"></div>
+                        <div th:case="'NUMBER'" th:insert="~{tailwind/forms/vertical/fields/number-field :: number-field(${field})}"></div>
+                        <div th:case="'EMAIL'" th:insert="~{tailwind/forms/vertical/fields/email-field :: email-field(${field})}"></div>
+                        <div th:case="'PASSWORD'" th:insert="~{tailwind/forms/vertical/fields/password-field :: password-field(${field})}"></div>
+                        <div th:case="'DATE'" th:insert="~{tailwind/forms/vertical/fields/date-field :: date-field(${field})}"></div>
+                        <div th:case="'DATETIME_LOCAL'" th:insert="~{tailwind/forms/vertical/fields/datetime-field :: datetime-field(${field})}"></div>
+                        <div th:case="'TIME'" th:insert="~{tailwind/forms/vertical/fields/time-field :: time-field(${field})}"></div>
+                        <div th:case="'RANGE'" th:insert="~{tailwind/forms/vertical/fields/range-field :: range-field(${field})}"></div>
+                        <div th:case="'COLOR'" th:insert="~{tailwind/forms/vertical/fields/color-field :: color-field(${field})}"></div>
+                    </div>
+                </div>
+                <div th:each="field : ${fields}" th:if="${field.type.name() == 'HIDDEN'}" th:remove="tag"
+                     th:insert="~{tailwind/forms/vertical/fields/hidden-field :: hidden-field(${field})}"></div>
+                <div class="md:col-span-2">
+                    <button class="w-full rounded-md bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            type="submit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+</body>
+</html>
