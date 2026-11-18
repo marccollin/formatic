@@ -43,7 +43,8 @@ class FileUploadBindingTest {
 
     static Stream<String> templates() {
         return Stream.of("bootstrap/forms/vertical/form-base", "bootstrap/forms/horizontal/form-base",
-                "tailwind/forms/vertical/form-base", "bootstrap/forms/form-base-hybrid");
+                "tailwind/forms/vertical/form-base", "tailwind/forms/horizontal/form-base",
+                "bootstrap/forms/form-base-hybrid");
     }
 
     @ParameterizedTest

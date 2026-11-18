@@ -190,6 +190,23 @@ class FormaticControllerIntegrationTest {
     }
 
     @Test
+    void tailwindHorizontalRendersResponsiveTwoColumnForm() throws Exception {
+        mockMvc.perform(get("/form")
+                        .param("class", Editor.class.getName())
+                        .param("cssLibrary", "TAILWIND")
+                        .param("form", "HORIZONTAL")
+                        .param("mode", "REFLECTION"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("tailwind/forms/horizontal/form-base"))
+                .andExpect(content().string(containsString("grid-cols-1 gap-6 md:grid-cols-2")))
+                .andExpect(content().string(containsString("md:col-span-2")))
+                .andExpect(content().string(containsString("type=\"color\"")))
+                .andExpect(content().string(containsString("type=\"datetime-local\"")))
+                .andExpect(content().string(containsString("alpha=\"alpha\"")))
+                .andExpect(content().string(containsString("name=\"comment\"")));
+    }
+
+    @Test
     void hybridFormResolvesHorizontalFieldFragments() throws Exception {
         mockMvc.perform(get("/formhybrid/1")
                         .param("class", "com.formatic.example.dto.Editor"))

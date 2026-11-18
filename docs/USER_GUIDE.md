@@ -169,7 +169,7 @@ public class Editor {
 }
 ```
 
-Thymeleaf templates support Bootstrap in vertical and horizontal layouts, Tailwind CSS in vertical layouts, and Bulma in vertical and responsive two-column horizontal layouts. `@ColorInput` renders as a native HTML color control in every layout. Set `alpha = true` to emit the HTML `alpha` attribute for browsers that support selecting transparency; browser support varies, and older browsers may show only an opaque picker.
+Thymeleaf templates support Bootstrap and Tailwind CSS in vertical and responsive two-column horizontal layouts, and Bulma in vertical and responsive two-column horizontal layouts. `@ColorInput` renders as a native HTML color control in every layout. Set `alpha = true` to emit the HTML `alpha` attribute for browsers that support selecting transparency; browser support varies, and older browsers may show only an opaque picker.
 
 Result of processing Editeur class with boostrap horizontal form parameter
 
@@ -390,7 +390,7 @@ The example module includes these DTOs. Use their fully qualified name as the `c
 | `UserBasic` | `com.formatic.example.dto.UserBasic` |
 | `UserClub` | `com.formatic.example.dto.UserClub` |
 
-Bootstrap and Bulma support both layouts. Tailwind supports only `VERTICAL`; do not combine `TAILWIND` with `HORIZONTAL`. Bulma's horizontal layout stacks fields on smaller screens and displays two columns on desktop screens.
+Bootstrap, Tailwind, and Bulma support both layouts. The Tailwind and Bulma horizontal layouts stack fields on smaller screens and display two columns on desktop screens.
 The builder query parameter is named `mode`, not `builderMode`.
 
 Bootstrap horizontal form using the default bytecode builder:
@@ -409,6 +409,12 @@ Tailwind vertical form using compile-time generated metadata:
 
 ```text
 http://localhost:8080/form?class=com.formatic.example.dto.Editor&cssLibrary=TAILWIND&form=VERTICAL&mode=COMPILE_TIME_GENERATION
+```
+
+Tailwind horizontal form:
+
+```text
+http://localhost:8080/form?class=com.formatic.example.dto.Editor&cssLibrary=TAILWIND&form=HORIZONTAL
 ```
 
 Bulma vertical form:
