@@ -35,7 +35,7 @@ The [Running the Example](#-running-the-example) section has more sample URLs.
 
 ## 📦 Installation
 
-Formatic artifacts are not currently published to Maven Central or another Maven repository. Until they are published, use the Gradle project dependency or composite build.
+Formatic artifacts are not currently published to Maven Central or another Maven repository, so the coordinates below are not yet resolvable from a repository. Until publication, use the Gradle project dependency or composite build.
 
 For applications in this repository's multi-project build:
 
@@ -45,13 +45,23 @@ dependencies {
 }
 ```
 
+### Modules and dependency relationships
+
+| Module | Purpose | Dependency behavior |
+|---|---|---|
+| `formatic-core` | Annotations, metadata, and field builders; independent of Spring and Thymeleaf | Brings Byte Buddy as a transitive runtime dependency. Logging, validation APIs, and annotation-processing libraries are compile-time-only or processor dependencies. |
+| `formatic-spring` | Spring Boot auto-configuration, Spring MVC integration, and Thymeleaf templates | Exposes `formatic-core` as an API dependency, so applications depending on this module do not also need to declare `formatic-core`. It also declares Spring Boot Web, Validation, and Thymeleaf starters as implementation dependencies. |
+| `formatic-example` | Demo application and usage examples | Not required by applications using Formatic. |
+
+With Gradle's published module metadata, `formatic-spring`'s implementation dependencies are available at runtime, but are not part of its compile-time API. Use Spring Boot's dependency management (for example, its Gradle plugin or BOM) to align Spring dependency versions. The configuration processor is a build-time annotation processor, not a runtime integration requirement.
+
 For a separate Gradle project, add the Formatic checkout as a composite build in `settings.gradle` (adjust the path as needed):
 
 ```groovy
 includeBuild('../formatic')
 ```
 
-Then add the Spring module to `build.gradle`:
+Then add the Spring module to `build.gradle` (the included build provides the unpublished artifact):
 
 ```groovy
 dependencies {
@@ -59,7 +69,19 @@ dependencies {
 }
 ```
 
-**Maven:** Maven dependency coordinates are not available until Formatic publishes artifacts. The Spring module includes the core library and Thymeleaf integration.
+The version above is illustrative and must match the checkout's project version.
+**Maven:** Maven dependency coordinates are not available until Formatic publishes artifacts. The dependency table describes the module relationships that will be relevant to consumers after publication.
+
+### Starting a Spring Boot application
+
+Add `formatic-spring` as a dependency, annotate a DTO, and create your own
+Spring MVC controller that builds field metadata and returns a bundled Thymeleaf
+view such as `bootstrap/forms/vertical/form-base`. The library supplies
+auto-configuration and templates; it does not supply a generic `/form` endpoint
+or a form-submission controller. The
+[new-project walkthrough](docs/USER_GUIDE.md#starting-a-new-spring-boot-project)
+covers a complete GET/POST example, template selection and overrides, and
+localization.
 
 ## 📖 Basic Usage
 
@@ -113,14 +135,14 @@ see [nested DTOs](docs/USER_GUIDE.md#nested-dtos).
 | Framework | Layouts |
 |---|---|
 | Bootstrap | Vertical and horizontal |
-| Tailwind CSS | Vertical |
+| Tailwind CSS | Vertical and responsive two-column horizontal |
 | Bulma | Vertical and responsive two-column horizontal |
 
 The bundled templates render the form; include the corresponding CSS framework in your application. See [CSS and layout options](docs/USER_GUIDE.md#testing-the-example-application).
 
 ## 🔧 Advanced Topics
 
-The [User Guide](docs/USER_GUIDE.md) covers field constraints and validation, metadata builder modes, hybrid forms, accessibility, file uploads, dynamic options, template overrides, and example endpoints.
+The [User Guide](docs/USER_GUIDE.md) covers field constraints and validation, metadata builder modes, hybrid forms, accessibility, file uploads, [dynamic options and their limits](docs/USER_GUIDE.md#dynamic-options), [internationalization](docs/USER_GUIDE.md#internationalization), [template structure and overrides](docs/USER_GUIDE.md#thymeleaf-template-structure-and-overrides), and example endpoints.
 
 ## 🧪 Running the Example
 
