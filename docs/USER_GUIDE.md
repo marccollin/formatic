@@ -26,6 +26,128 @@ Thymeleaf templates for form rendering with Bootstrap, Tailwind CSS, and Bulma
 Automatic component scanning
 
 
+### Starting a new Spring Boot project
+
+Formatic's example application is a demo, not an endpoint provided by the
+library. In your own Java 21+ Spring Boot application, add `formatic-spring` as
+an application dependency. While Formatic is unpublished, use the composite
+build instructions in the [README installation section](../README.md#-installation);
+after publication, use the published dependency coordinates. With a local
+Formatic checkout at `../formatic`, configure a Gradle application like this:
+
+```groovy
+// settings.gradle
+rootProject.name = 'contact-app'
+includeBuild('../formatic')
+```
+
+```groovy
+// build.gradle
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+dependencies {
+    implementation 'com.formatic:formatic-spring:1.0.0'
+}
+```
+
+The sample Boot version matches this repository's current build; select a
+Spring Boot version compatible with your application. The composite build
+substitutes the local unpublished `formatic-spring` project for its coordinates.
+That module exposes `formatic-core` and brings the Spring Web, Validation, and
+Thymeleaf runtime dependencies.
+
+Create a DTO with Formatic field annotations and ordinary JavaBean accessors:
+
+```java
+import com.formatic.core.annotation.EmailInput;
+import com.formatic.core.annotation.TextInput;
+import jakarta.validation.constraints.NotBlank;
+
+public class ContactForm {
+    @TextInput(label = "Name", required = true)
+    @NotBlank
+    private String name;
+
+    @EmailInput(required = true)
+    private String email;
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+}
+```
+
+Formatic's Spring auto-configuration supplies the metadata builders and input
+handlers. Add your own controller to choose the DTO, view and submission
+behavior:
+
+```java
+import com.formatic.core.builder.BytecodeFormFieldMetadataBuilder;
+import jakarta.validation.Valid;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@Controller
+public class ContactController {
+    private final BytecodeFormFieldMetadataBuilder metadataBuilder;
+
+    public ContactController(BytecodeFormFieldMetadataBuilder metadataBuilder) {
+        this.metadataBuilder = metadataBuilder;
+    }
+
+    @GetMapping("/contact")
+    public String show(Model model) {
+        model.addAttribute("fields", metadataBuilder.buildMetadata(ContactForm.class));
+        model.addAttribute("formData", new ContactForm());
+        model.addAttribute("formName", "Contact");
+        return "bootstrap/forms/vertical/form-base";
+    }
+
+    @PostMapping("/contact")
+    public String submit(@Valid @ModelAttribute("formData") ContactForm form,
+                         BindingResult result, Model model) {
+        model.addAttribute("fields", metadataBuilder.buildMetadata(ContactForm.class));
+        model.addAttribute("formName", "Contact");
+        if (!result.hasErrors()) {
+            model.addAttribute("formSuccess", "Contact details received.");
+        }
+        return "bootstrap/forms/vertical/form-base";
+    }
+}
+```
+
+The bundled form views expect `fields` and `formData`; `formName` and
+`formSuccess` supply the optional heading and success message. Keep
+`BindingResult` immediately after the validated model attribute and return the
+same view on errors so Thymeleaf can render the field errors. The example uses
+the default bytecode builder; you can inject `ReflectionFormFieldMetadataBuilder`
+instead if that suits your application. Change the returned view to
+`bootstrap/forms/horizontal/form-base`, `tailwind/forms/vertical/form-base`,
+`tailwind/forms/horizontal/form-base`, or a Bulma view to select another bundled
+layout. The library does not create your routes, persist submissions, or decide
+what a successful POST should do.
+
+Start your Spring Boot application and open `/contact`. For CSS frameworks not
+included by a full-page bundled view, include the framework's assets in your
+application layout. The [template guide](#thymeleaf-template-structure-and-overrides)
+explains how to replace a bundled template or build your own view from the field
+fragments.
+
 
 ### 🎨 formatic-example - Demo Module
 
@@ -36,6 +158,33 @@ Spring MVC controller (FormaticController)
 Example DTOs (Editor)  
 Test endpoints (/form, /formhybrid, /formfeeded)
 Can be used with mvc or rest application
+
+### Using `outerCssClass` for field layout
+
+`outerCssClass` lets an annotation add CSS classes to the field's outer wrapper.
+Use it for layout classes such as Bootstrap grid columns; it does not set the
+input element's class (use `cssClass` for that). For example:
+
+The example `User` DTO already demonstrates this with Bootstrap grid classes:
+`firstName` and `lastName` each use `col-md-6`, `address` uses `col-md-12`,
+and `birthDate` uses `col-md-4`.
+
+In the bundled Bootstrap vertical field templates, the supplied classes are
+placed on the wrapper inside the form's Bootstrap `.row`, so the two name fields
+share a row at medium and larger breakpoints, the address spans the row, and
+the birth date field uses one third of it. The example app has a dedicated
+`UserFormController` for this DTO:
+
+```text
+http://localhost:8080/user-form
+```
+
+`outerCssClass` values are CSS-framework-specific, not interpreted or validated
+by Formatic. The bundled templates do not all apply this value the same way:
+Bootstrap vertical applies it to field wrappers, while other layouts or field
+types may ignore it or provide different wrapper behavior. Check the template
+you use, or override it as described in
+[Thymeleaf template structure and overrides](#thymeleaf-template-structure-and-overrides).
 
 
 ## Design Principles
@@ -438,24 +587,150 @@ the error-aware form fragment from your application's POST handler. No
 HTMX-specific library configuration is required. Backend validation remains
 necessary regardless of the frontend approach.
 
-### Customizing Thymeleaf templates
+### Thymeleaf template structure and overrides
 
-In a consuming Spring Boot application, place a customized template under
-`src/main/resources/templates/` at the same relative path as the library template.
-For example, override the Bootstrap vertical text field with:
+Formatic templates are packaged in `formatic-spring` under
+`src/main/resources/templates/`. The relative path without `.html` is the
+Thymeleaf view name; for example, returning
+`bootstrap/forms/vertical/form-base` from a controller renders
+`bootstrap/forms/vertical/form-base.html`:
+
+```text
+bootstrap/forms/{vertical,horizontal}/form-base.html
+bootstrap/forms/{vertical,horizontal}/fields/{type}-field.html
+tailwind/forms/{vertical,horizontal}/form-base.html
+tailwind/forms/vertical/fields/{type}-field.html
+bulma/forms/vertical/form-base.html
+bulma/forms/vertical/fields/{type}-field.html
+bulma/forms/horizontal/form-base.html
+bootstrap/forms/form-base-hybrid.html
+```
+
+Each `form-base.html` dispatches fields by `field.type` and inserts the matching
+`<type>-field` fragment. The CSS-specific field fragments live in the `fields`
+directory. Tailwind horizontal and Bulma horizontal form bases reuse their
+framework's vertical field fragments. The special Bootstrap
+`form-base-hybrid.html` is a separate example that populates a form from a JSON
+endpoint.
+
+To replace a template, put a file at the same relative path in your application's
+`src/main/resources/templates/`. For example:
 
 ```text
 src/main/resources/templates/bootstrap/forms/vertical/fields/text-field.html
 ```
 
-Keep the fragment signature `th:fragment="text-field(field)"` so the existing form template
-can still include it. With the default Spring Boot Thymeleaf configuration and application
-resources before dependency JARs on the classpath, the application template takes precedence.
-Templates that are not overridden continue to load from the `formatic-spring` JAR.
-Custom template resolvers or a different classpath order may change this behavior.
+An application copy takes precedence with the default Spring Boot Thymeleaf
+configuration and normal application-before-dependency classpath order. Other
+templates continue to load from the library JAR. Custom resolvers or classpath
+ordering may change this behavior.
+
+There are two common ways to use the templates:
+
+1. **Use a bundled form as-is.** Put `fields` and `formData` in the model and
+   return a bundled form-base view name from your controller, as in the
+   [new-project walkthrough](#starting-a-new-spring-boot-project).
+2. **Customize the bundled form.** Copy the desired `form-base.html` into your
+   application's templates at the same path and edit it. You can also override
+   only a field fragment; all other fragments continue to come from the library.
+
+To create a separate custom view, place it at a new path such as
+`src/main/resources/templates/contact/form.html` and return `contact/form` from
+your controller. Copy a bundled form base to preserve its field-type dispatch,
+or call the bundled field fragments from your own `th:each`/`th:switch`; for
+example:
+
+```html
+<div th:each="field : ${fields}" th:switch="${field.type.name()}">
+    <div th:case="'TEXT'"
+         th:replace="~{bootstrap/forms/vertical/fields/text-field :: text-field(${field})}"></div>
+    <!-- Add the other field types used by your DTO, following the bundled form base. -->
+</div>
+```
+
+Your custom view must still receive `fields` and `formData`. If you do not use
+the bundled form base, your page is also responsible for including the CSS
+framework assets and any form-level behaviors it needs.
+
+You can replace an entire form base or an individual field fragment. When
+replacing a field fragment, keep its fragment name and parameter, such as
+`th:fragment="text-field(field)"`, because the form base includes it by that
+signature. For a form base, retain the `Generic` fragment and the model contract
+used by your view (`fields` and `formData`; some bundled templates additionally
+render `formName` and `formSuccess`). Preserve field binding names, IDs, error display,
+and accessibility attributes if you rely on those behaviors. Copy the library
+template as a starting point and change only what your application needs.
 
 The example module's `TemplateOverrideIntegrationTest` verifies both local overrides and
 library JAR fallback through a rendered Spring MVC request.
+
+### Internationalization
+
+Spring Boot and Thymeleaf can resolve localized messages using the application's
+`MessageSource` and request locale. Add a default bundle and locale-specific
+bundles to the application, for example:
+
+```text
+src/main/resources/messages.properties
+src/main/resources/messages_fr.properties
+```
+
+```properties
+# messages.properties
+form.contact.name=Name
+form.contact.email=Email
+form.contact.name.required=Enter a name
+```
+
+```properties
+# messages_fr.properties
+form.contact.name=Nom
+form.contact.email=Courriel
+form.contact.name.required=Le nom est obligatoire
+```
+
+Bean Validation constraint messages can use standard message keys, for example
+`@NotBlank(message = "{form.contact.name.required}")`; Spring resolves those
+messages for the active locale when validation runs.
+
+Formatic currently stores annotation labels, help text, and option labels as
+literal strings, and its bundled field templates render them literally (for
+example, `th:text="${field.label}"`). Thymeleaf does not automatically treat
+those values as message keys. To localize them, put message keys in the
+annotations/provider labels:
+
+```java
+@TextInput(label = "form.contact.name")
+private String name;
+```
+
+Then copy the relevant library fragment to the same relative path in your
+application, for example
+`src/main/resources/templates/bootstrap/forms/vertical/fields/text-field.html`.
+In that copy, change the label expression to resolve a message key and fall back
+to the original literal if no message exists:
+
+```html
+<label th:for="${field.id}"
+       th:text="${#messages.msgOrNull(field.label) ?: field.label}"></label>
+```
+
+Apply the same lookup to help text and option labels where needed. To translate
+the submit button or page heading, customize the form-base template as well;
+they are not field-fragment labels. Spring Boot's
+default web locale resolution uses the request locale, commonly selected by the
+browser's `Accept-Language` header. You can verify a translation with a request
+such as:
+
+```bash
+curl -H 'Accept-Language: fr' http://localhost:8080/contact
+```
+
+If the application needs a different locale-selection policy, configure Spring
+MVC's locale resolver/interceptor and keep the message bundle names aligned with
+that policy. Built-in message-key support for Formatic metadata is a potential
+future enhancement; today, localization of those values is an
+application/template customization.
 
 ### Testing the example application
 
@@ -576,25 +851,59 @@ An unknown editor ID returns HTTP `404`.
 These URLs return JSON only, not a rendered form. The hybrid page described above
 consumes the same endpoint to populate its fields.
 
-### DataSource for RadioInput, CheckBoxInput and SelectInput
+### Dynamic options
 
-Static or dynamic source can be provided, in the example both way are shown.  
-Dynamic source search in the classpath the method name provided.
-
-#### Dynamic 
-
-Method name to call must be specified in the optionsProvider attribute
+`@SelectInput`, `@RadioInput`, and option-based `@CheckboxInput` fields accept
+either static options or an `optionsProvider`. Static options use
+`value:label` entries:
 
 ```java
-    @SelectInput(optionsProvider = "getCities", required = true)
-    private String city;
+@CheckboxInput(options = {"sport:Sport", "music:Music"})
+private List<String> interests;
 ```
 
-#### Static
-
-Values must be specified in the options attribute
+A dynamic provider is a public, zero-argument method returning a `List` or
+`Map` on a Spring-managed bean. For example:
 
 ```java
-    @CheckboxInput(options = {"sportCheck:Sport", "musiqueCheck:Musique", "lectureCheck:Lecture"})
-    private List<String> interest;
+import com.formatic.core.form.SelectRadioOption;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class LocationOptions {
+    public List<SelectRadioOption> getCities() {
+        return List.of(
+            new SelectRadioOption("NYC", "New York"),
+            new SelectRadioOption("YUL", "Montreal")
+        );
+    }
+}
 ```
+
+Reference the method by name from the DTO:
+
+```java
+@SelectInput(optionsProvider = "getCities", required = true)
+private String city;
+```
+
+Formatic discovers provider methods from Spring beans, converts the result to
+`SelectRadioOption` values, and caches it by provider method name. The provider
+does not receive the current form, request, or another field's value. Provider
+results are resolved when metadata is built, not once per HTTP request. The
+metadata builders also cache results per DTO class, so clearing the option
+service's cache alone does not refresh metadata that a builder has already
+cached. Treat these providers as fixed metadata-time options; use an
+application-specific request handler or custom metadata strategy when options
+must change per request.
+
+This provider mechanism supplies options when Formatic builds field metadata;
+it is not a built-in cascading-dropdown or conditional-display system. For
+cascading choices, expose an application endpoint that accepts the parent value
+and use JavaScript or HTMX to fetch and replace the dependent options. For
+conditional field visibility, use application JavaScript/HTMX or a custom
+Thymeleaf template. In both cases, validate submitted values on the server;
+client-side visibility or option filtering is not an authorization or validation
+boundary.

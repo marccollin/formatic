@@ -14,7 +14,9 @@ import com.formatic.core.annotation.handler.RangeInputHandler;
 import com.formatic.core.form.ConstraintValidationException;
 import com.formatic.example.controller.FormaticController;
 import com.formatic.example.controller.FormaticRestController;
+import com.formatic.example.controller.UserFormController;
 import com.formatic.example.dto.Editor;
+import com.formatic.example.dto.User;
 import com.formatic.example.service.EditorService;
 import com.formatic.spring.config.FormaticSpringAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
@@ -131,6 +133,21 @@ class FormaticControllerIntegrationTest {
                 .andExpect(content().string(containsString("type=\"time\"")))
                 .andExpect(content().string(containsString("type=\"range\"")))
                 .andExpect(content().string(containsString("name=\"comment\"")));
+    }
+
+    @Test
+    void userFormControllerAppliesOuterCssClassToBootstrapWrappers() throws Exception {
+        when(reflectionBuilder.buildMetadata(User.class)).thenReturn(List.of(
+                new TextInputHandler().handle(User.class.getDeclaredField("firstName")),
+                new TextInputHandler().handle(User.class.getDeclaredField("lastName")),
+                new TextInputHandler().handle(User.class.getDeclaredField("address")),
+                new DateInputHandler().handle(User.class.getDeclaredField("birthDate"))
+        ));
+
+        mockMvc.perform(get("/user-form"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("bootstrap/forms/vertical/form-base"))
+                .andExpect(content().string(containsString("class=\"col-md-4\"")));
     }
 
     @Test
@@ -266,7 +283,7 @@ class FormaticControllerIntegrationTest {
 
     @Configuration(proxyBeanMethods = false)
     @EnableAutoConfiguration(exclude = FormaticSpringAutoConfiguration.class)
-    @Import({FormaticController.class, FormaticRestController.class, EditorService.class})
+    @Import({FormaticController.class, UserFormController.class, FormaticRestController.class, EditorService.class})
     static class TestApplication {
     }
 }
