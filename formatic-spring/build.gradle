@@ -16,6 +16,7 @@ dependencyManagement {
 dependencies {
     // Dépendance vers le module core
     api project(':formatic-core')
+    api project(':formatic-render-api')
 
     // Spring Boot dependencies
     implementation 'org.springframework.boot:spring-boot-starter-web'

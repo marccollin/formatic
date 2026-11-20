@@ -53,6 +53,8 @@ dependencies {
 | `formatic-core` | Annotations, metadata, and field builders; independent of Spring and Thymeleaf | Brings Byte Buddy as a transitive runtime dependency. Logging, validation APIs, and annotation-processing libraries are compile-time-only or processor dependencies. |
 | `formatic-spring` | Spring Boot auto-configuration for metadata builders and option providers | Exposes `formatic-core` as an API dependency and uses the Spring Boot Web and Validation starters. Does not select a rendering engine. |
 | `formatic-render-thymeleaf` | Thymeleaf templates for Bootstrap, Tailwind CSS, and Bulma | Adds the Spring Boot Thymeleaf starter at runtime. Declare it alongside `formatic-spring` for the bundled forms. |
+| `formatic-render-api` | Plain Java HTML rendering contract | Exposes `formatic-core` metadata; does not depend on Spring or a template engine. |
+| `formatic-render-jte` | Precompiled JTE renderer for Bootstrap vertical forms | Uses the rendering API and does not require Spring. |
 | `formatic-example` | Demo application and usage examples | Not required by applications using Formatic. |
 
 With Gradle's published module metadata, `formatic-spring`'s implementation dependencies are available at runtime, but are not part of its compile-time API. Use Spring Boot's dependency management (for example, its Gradle plugin or BOM) to align Spring dependency versions. The configuration processor is a build-time annotation processor, not a runtime integration requirement.
@@ -88,6 +90,9 @@ localization.
 
 If you previously used only `formatic-spring`, add `formatic-render-thymeleaf`.
 Existing Thymeleaf view names, fragment signatures, and template override paths are unchanged.
+
+For JTE instead, see the [JTE rendering walkthrough](docs/USER_GUIDE.md#rendering-with-jte).
+The example app includes both engines; open `/jte/customer` to try the JTE form.
 
 ## 📖 Basic Usage
 
