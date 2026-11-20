@@ -3,7 +3,6 @@ package com.formatic.core.processor;
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormConstraintValidator;
 import com.formatic.core.form.ConstraintValidationException;
-import com.google.auto.service.AutoService;
 import com.palantir.javapoet.*;
 
 import javax.annotation.processing.*;
@@ -15,7 +14,6 @@ import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.util.*;
 
-@AutoService(Processor.class)
 @SupportedAnnotationTypes({"com.formatic.core.annotation.CheckboxInput","com.formatic.core.annotation.DateInput","com.formatic.core.annotation.EmailInput", "com.formatic.core.annotation.FileInput",
         "com.formatic.core.annotation.FormInput",  "com.formatic.core.annotation.HiddenInput",  "com.formatic.core.annotation.NumberInput",  "com.formatic.core.annotation.PasswordInput",
         "com.formatic.core.annotation.PhoneInput",  "com.formatic.core.annotation.RadioInput",  "com.formatic.core.annotation.SelectInput",  "com.formatic.core.annotation.TextareaInput",
