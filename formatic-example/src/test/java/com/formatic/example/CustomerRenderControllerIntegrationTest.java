@@ -6,7 +6,9 @@ import com.formatic.core.form.FieldIdStyle;
 import com.formatic.example.controller.CustomerRenderController;
 import com.formatic.spring.config.FormaticSpringAutoConfiguration;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -18,6 +20,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -64,6 +67,45 @@ class CustomerRenderControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("value=\"Main\"")))
                 .andExpect(content().string(containsString("Customer details received")));
+    }
+
+    @ParameterizedTest
+    @MethodSource("styles")
+    void rendersAndPreservesEachStyleOnValidationFailure(String engine, String theme, String layout,
+                                                         String asset, String layoutClass, String errorClass)
+            throws Exception {
+        String path = "/" + engine + "/customer";
+        String action = theme.equals("BOOTSTRAP") && layout.equals("VERTICAL")
+                ? path : path + "?theme=" + theme + "&amp;layout=" + layout;
+        mvc.perform(get(path).param("theme", theme).param("layout", layout))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(asset)))
+                .andExpect(content().string(containsString("class=\"" + layoutClass + "\"")))
+                .andExpect(content().string(containsString("action=\"" + action + "\"")));
+        mvc.perform(post(path).param("theme", theme).param("layout", layout)
+                        .param("name", "Customer").param("address.street", "").param("address.city", "Quebec"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("class=\"" + layoutClass + "\"")))
+                .andExpect(content().string(containsString("class=\"" + errorClass + "\"")))
+                .andExpect(content().string(containsString("aria-describedby=\"address_street-errors\"")))
+                .andExpect(content().string(containsString("Street is required.")))
+                .andExpect(content().string(containsString("value=\"Quebec\"")));
+    }
+
+    static Stream<Arguments> styles() {
+        return Stream.of("jte", "pebble").flatMap(engine -> Stream.of(
+                Arguments.of(engine, "BOOTSTRAP", "VERTICAL", "bootstrap.min.css",
+                        "row g-3", "invalid-feedback d-block"),
+                Arguments.of(engine, "BOOTSTRAP", "HORIZONTAL", "bootstrap.min.css",
+                        "col-sm-2 col-form-label", "invalid-feedback d-block"),
+                Arguments.of(engine, "TAILWIND", "VERTICAL", "@tailwindcss/browser@4",
+                        "space-y-6", "mt-1 text-sm text-red-600"),
+                Arguments.of(engine, "TAILWIND", "HORIZONTAL", "@tailwindcss/browser@4",
+                        "grid grid-cols-1 gap-6 md:grid-cols-2", "mt-1 text-sm text-red-600"),
+                Arguments.of(engine, "BULMA", "VERTICAL", "bulma.min.css",
+                        "field", "help is-danger"),
+                Arguments.of(engine, "BULMA", "HORIZONTAL", "bulma.min.css",
+                        "columns is-multiline", "help is-danger")));
     }
 
     @Configuration(proxyBeanMethods = false)

@@ -5,44 +5,56 @@
 {% set value = view.value() %}
 {% set invalid = view.invalid() %}
 {% set describedBy = view.describedBy() %}
-{% set outerClass = field.outerCssClass %}
+{% set outerClass = style.fieldWrapper(field.outerCssClass) %}
+{% set group = type == "RADIO" or (type == "CHECKBOX" and field.multiple) %}
+{% set singleCheckbox = type == "CHECKBOX" and not group %}
+{% set body = style.fieldBody(singleCheckbox) %}
+{% set selectWrapper = style.selectWrapper(field.multiple, invalid) %}
+{% set controlClass = view.controlClass(style) %}
 {% if type == "HIDDEN" %}
     <input type="hidden" id="{{ id }}" name="{{ name }}"{% if value is not null %} value="{{ value }}"{% endif %}{% if field.disabled %} disabled{% endif %}>
 {% elseif type == "LABEL" %}
-    <div{% if outerClass is not empty %} class="{{ outerClass }}"{% endif %} id="{{ id }}">{{ field.label }}</div>
+    {% set labelWrapper = style.labelWrapper(field.outerCssClass) %}
+    <div{% if labelWrapper is not null %} class="{{ labelWrapper }}"{% endif %} id="{{ id }}">{{ field.label }}</div>
 {% else %}
-    <div{% if outerClass is not empty %} class="{{ outerClass }}"{% endif %}>
+    {% if group %}
+        <fieldset{% if outerClass is not null %} class="{{ outerClass }}"{% endif %} id="{{ id }}">
+            <legend class="{{ style.labelClass() }}">{{ field.label }}</legend>
+    {% else %}
+        <div{% if outerClass is not null %} class="{{ outerClass }}"{% endif %}>
+            {% if not singleCheckbox %}
+                <label class="{{ style.labelClass() }}" for="{{ id }}">{{ field.label }}</label>
+            {% endif %}
+    {% endif %}
+    {% if body is not null %}<div class="{{ body }}">{% endif %}
         {% if view.needsMarker() %}
             <input type="hidden" name="_{{ name }}" value="on">
         {% endif %}
-        {% if type == "RADIO" or (type == "CHECKBOX" and field.multiple) %}
-            <fieldset id="{{ id }}">
-                <legend class="form-label">{{ field.label }}</legend>
+        {% if group %}
                 {% for option in view.options() %}
                     {% set optionId = id ~ "_" ~ option.value %}
-                    <div class="form-check">
+                    <div class="{{ style.checkWrapper() }}">
                         <input type="{{ type == "RADIO" ? "radio" : "checkbox" }}"
-                               class="{{ view.controlClass("form-check-input") }}" id="{{ optionId }}" name="{{ name }}"
+                               {% if controlClass is not null %}class="{{ controlClass }}" {% endif %}id="{{ optionId }}" name="{{ name }}"
                                value="{{ option.value }}"{% if view.selected(option) %} checked{% endif %}
                                {% if field.disabled or option.disabled %}disabled{% endif %}
                                {% if type == "RADIO" and field.required %}required{% endif %}
                                {% if invalid %}aria-invalid="true"{% endif %}{% if describedBy is not null %} aria-describedby="{{ describedBy }}"{% endif %}>
-                        <label class="form-check-label" for="{{ optionId }}">{{ option.label }}</label>
+                        <label class="{{ style.checkLabel(type == "RADIO") }}" for="{{ optionId }}">{{ option.label }}</label>
                     </div>
                 {% endfor %}
-            </fieldset>
-        {% elseif type == "CHECKBOX" %}
-            <div class="form-check">
-                <input type="checkbox" class="{{ view.controlClass("form-check-input") }}" id="{{ id }}"
+        {% elseif singleCheckbox %}
+            <div class="{{ style.checkWrapper() }}">
+                <input type="checkbox"{% if controlClass is not null %} class="{{ controlClass }}"{% endif %} id="{{ id }}"
                        name="{{ name }}" value="true"{% if view.checked() %} checked{% endif %}
                        {% if field.required %}required{% endif %}{% if field.disabled %} disabled{% endif %}
                        {% if invalid %}aria-invalid="true"{% endif %}{% if describedBy is not null %} aria-describedby="{{ describedBy }}"{% endif %}>
-                <label class="form-check-label" for="{{ id }}">{{ field.label }}</label>
+                <label class="{{ style.checkLabel(false) }}" for="{{ id }}">{{ field.label }}</label>
             </div>
         {% else %}
-            <label class="form-label" for="{{ id }}">{{ field.label }}</label>
             {% if type == "SELECT" %}
-                <select class="{{ view.controlClass("form-select") }}" id="{{ id }}" name="{{ name }}"
+                {% if selectWrapper is not null %}<div class="{{ selectWrapper }}">{% endif %}
+                <select{% if controlClass is not null %} class="{{ controlClass }}"{% endif %} id="{{ id }}" name="{{ name }}"
                         {% if field.multiple %}multiple{% endif %}{% if field.required %} required{% endif %}{% if field.disabled %} disabled{% endif %}
                         {% if invalid %}aria-invalid="true"{% endif %}{% if describedBy is not null %} aria-describedby="{{ describedBy }}"{% endif %}>
                     {% if not field.required and not field.multiple %}
@@ -52,8 +64,9 @@
                         <option value="{{ option.value }}"{% if view.selected(option) %} selected{% endif %}{% if option.disabled %} disabled{% endif %}>{{ option.label }}</option>
                     {% endfor %}
                 </select>
+                {% if selectWrapper is not null %}</div>{% endif %}
             {% elseif type == "TEXTAREA" %}
-                <textarea class="{{ view.controlClass("form-control") }}" id="{{ id }}" name="{{ name }}"
+                <textarea class="{{ controlClass }}" id="{{ id }}" name="{{ name }}"
                           {% if field.required %}required{% endif %}{% if field.disabled %} disabled{% endif %}{% if field.readonly %} readonly{% endif %}
                           {% if field.rows > 0 %}rows="{{ field.rows }}"{% endif %}{% if field.cols > 0 %} cols="{{ field.cols }}"{% endif %}
                           {% if field.minLength > 0 %}minlength="{{ field.minLength }}"{% endif %}{% if field.maxLength >= 0 %} maxlength="{{ field.maxLength }}"{% endif %}
@@ -64,7 +77,7 @@
                 {% set max = view.max() %}
                 {% set step = view.step() %}
                 <input type="{{ view.inputType() }}" id="{{ id }}" name="{{ name }}"{% if value is not null %} value="{{ value }}"{% endif %}
-                       class="{{ view.inputClass() }}"
+                       class="{{ controlClass }}"
                        {% if field.required %}required{% endif %}{% if field.disabled %} disabled{% endif %}{% if field.readonly %} readonly{% endif %}
                        {% if view.supportsLength() and field.minLength > 0 %}minlength="{{ field.minLength }}"{% endif %}
                        {% if view.supportsLength() and field.maxLength >= 0 %}maxlength="{{ field.maxLength }}"{% endif %}
@@ -78,14 +91,15 @@
             {% endif %}
         {% endif %}
         {% if view.hasHelp() %}
-            <small class="form-text" id="{{ id }}-help">{{ field.helpText }}</small>
+            <small class="{{ style.helpClass() }}" id="{{ id }}-help">{{ field.helpText }}</small>
         {% endif %}
         {% if invalid %}
-            <div class="invalid-feedback d-block" id="{{ id }}-errors" role="alert">
+            <div class="{{ style.errorClass() }}" id="{{ id }}-errors" role="alert">
                 {% for error in view.field().errors() %}
                     <div>{{ error }}</div>
                 {% endfor %}
-            </div>
+            {% if body is not null %}</div>{% endif %}
+            {% if group %}</fieldset>{% else %}</div>{% endif %}
         {% endif %}
     </div>
 {% endif %}

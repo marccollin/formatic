@@ -34,12 +34,8 @@ public record FieldView(RenderField field) {
         };
     }
 
-    public String inputClass() {
-        return controlClass(switch (type()) {
-            case RANGE -> "form-range";
-            case COLOR -> "form-control form-control-color";
-            default -> "form-control";
-        });
+    public String controlClass(FormStyle style) {
+        return style.controlClass(type(), invalid(), metadata().getCssClass());
     }
 
     public String value() {
@@ -83,11 +79,6 @@ public record FieldView(RenderField field) {
         if (hasHelp() && invalid()) return id + "-help " + id + "-errors";
         if (hasHelp()) return id + "-help";
         return invalid() ? id + "-errors" : null;
-    }
-
-    public String controlClass(String base) {
-        String custom = metadata().getCssClass();
-        return base + (invalid() ? " is-invalid" : "") + (custom == null || custom.isBlank() ? "" : " " + custom);
     }
 
     public boolean supportsLength() {

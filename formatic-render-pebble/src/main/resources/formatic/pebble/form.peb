@@ -1,0 +1,27 @@
+{% set formClass = style.formClass() %}
+{% set titleClass = style.titleClass() %}
+{% set grid = style.fieldsGrid() %}
+<form{% if formClass is not null %} class="{{ formClass }}"{% endif %} method="post" action="{{ form.action() }}"{% if multipart %} enctype="multipart/form-data"{% endif %}>
+    {% if form.title() is not null %}
+        <h2{% if titleClass is not null %} class="{{ titleClass }}"{% endif %}>{{ form.title() }}</h2>
+    {% endif %}
+    {% if form.successMessage() is not null %}
+        <div class="{{ style.successClass() }}" role="status">{{ form.successMessage() }}</div>
+    {% endif %}
+    {% if form.globalErrors() is not empty %}
+        <ul class="{{ style.globalErrorClass() }}" role="alert">
+            {% for error in form.globalErrors() %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% for hidden in form.hiddenFields() %}
+        <input type="hidden" name="{{ hidden.key }}" value="{{ hidden.value }}">
+    {% endfor %}
+    {% if grid is not null %}<div class="{{ grid }}">{% endif %}
+    {% for view in fields %}
+        {% include "formatic/pebble/field.peb" %}
+    {% endfor %}
+    <div class="{{ style.submitWrapper() }}"><button class="{{ style.submitClass() }}" type="submit">Submit</button></div>
+    {% if grid is not null %}</div>{% endif %}
+</form>
