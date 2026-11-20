@@ -5,12 +5,12 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleHome" value="" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/formatic-core" />
             <option value="$PROJECT_DIR$/formatic-example" />
+            <option value="$PROJECT_DIR$/formatic-render-thymeleaf" />
             <option value="$PROJECT_DIR$/formatic-spring" />
           </set>
         </option>
