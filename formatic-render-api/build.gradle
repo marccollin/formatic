@@ -1,0 +1,5 @@
+description = 'Formatic HTML Rendering API'
+
+dependencies {
+    api project(':formatic-core')
+}

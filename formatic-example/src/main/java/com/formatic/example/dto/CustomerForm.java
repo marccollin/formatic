@@ -2,12 +2,15 @@ package com.formatic.example.dto;
 
 import com.formatic.core.annotation.NestedForm;
 import com.formatic.core.annotation.TextInput;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 public class CustomerForm {
     @TextInput(label = "Customer name", required = true)
     private String name;
 
     @NestedForm
+    @Valid
     private Address address = new Address();
 
     public String getName() { return name; }
@@ -17,6 +20,7 @@ public class CustomerForm {
 
     public static class Address {
         @TextInput(label = "Street", required = true)
+        @NotBlank(message = "Street is required.")
         private String street;
 
         @TextInput(label = "City", required = true)

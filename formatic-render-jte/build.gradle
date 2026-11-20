@@ -1,0 +1,18 @@
+plugins {
+    id 'gg.jte.gradle' version '3.2.1'
+}
+
+description = 'Formatic JTE Renderer'
+
+dependencies {
+    api project(':formatic-render-api')
+    implementation 'gg.jte:jte-runtime:3.2.1'
+    testImplementation platform("org.mockito:mockito-bom:${mockitoBomVersion}")
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+jte {
+    generate()
+    contentType = 'Html'
+}

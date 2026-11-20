@@ -11,9 +11,11 @@ dependencies {
     implementation project(':formatic-core')
     implementation project(':formatic-spring')
     implementation project(':formatic-render-thymeleaf')
+    implementation project(':formatic-render-jte')
 
     // Spring Boot for Spring examples
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Helper utilities for examples
     implementation 'org.apache.commons:commons-lang3:3.18.0'

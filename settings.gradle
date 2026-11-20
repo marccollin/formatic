@@ -3,4 +3,6 @@ rootProject.name = "formatic"
 include 'formatic-core'
 include 'formatic-spring'
 include 'formatic-render-thymeleaf'
+include 'formatic-render-api'
+include 'formatic-render-jte'
 include 'formatic-example'

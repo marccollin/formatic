@@ -739,6 +739,51 @@ that policy. Built-in message-key support for Formatic metadata is a potential
 future enhancement; today, localization of those values is an
 application/template customization.
 
+### Rendering with JTE
+
+`formatic-render-jte` renders **Bootstrap vertical** forms as HTML fragments.
+It supports the existing field types, nested binding names, and validation
+feedback. Its templates are compiled during the library build; applications
+using the bundled renderer do not need the JTE Gradle plugin or a template
+compiler at runtime. Existing Thymeleaf views and overrides work as before.
+
+In the local composite build described above, use:
+
+```groovy
+dependencies {
+    implementation 'com.formatic:formatic-render-jte:1.0.0'
+    // Add this only if you use the Spring Boot builders or MVC binding adapter:
+    implementation 'com.formatic:formatic-spring:1.0.0'
+}
+```
+
+In a plain Java application, pass core metadata and optional request values to
+the renderer directly:
+
+```java
+FormRenderer renderer = new JteFormRenderer();
+String html = renderer.render(new FormRenderModel("Contact", "/contact",
+        metadata.stream().map(RenderField::new).toList()));
+```
+
+`FormRenderer`, `FormRenderModel`, and `RenderField` are in `com.formatic.render`;
+`JteFormRenderer` is in `com.formatic.render.jte`. Pass a root-relative submission
+path (including the context path, if any), or an empty string to submit to the
+current URL. Include Bootstrap CSS on the containing page.
+
+For Spring MVC, call `SpringFormRenderModels.fromBinding(...)` with the form
+metadata, `BindingResult`, `MessageSource`, and request locale. The adapter keeps
+dotted field names and resolved validation errors, including errors on nested
+DTOs. Render the resulting model with JTE and return HTML from your controller
+or embed the fragment in a page. For CSRF-protected applications, supply the
+framework's token name and value through the model's `hiddenFields` map; the
+renderer does not look up request attributes or add security tokens on its own.
+
+Run `./gradlew :formatic-example:bootRun` and open
+`http://localhost:8080/jte/customer`. Submit an empty street to see a nested
+validation error. If your browser blocks empty fields, remove the HTML `required`
+attribute for that test or POST directly. The demo does not save submissions.
+
 ### Testing the example application
 
 From the project root, start the example application:
