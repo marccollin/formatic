@@ -739,9 +739,30 @@ that policy. Built-in message-key support for Formatic metadata is a potential
 future enhancement; today, localization of those values is an
 application/template customization.
 
+### Choosing a CSS library and layout with JTE or Pebble
+
+Both renderers support `FormTheme.BOOTSTRAP`, `FormTheme.TAILWIND`, and
+`FormTheme.BULMA`, each with `FormLayout.VERTICAL` or `FormLayout.HORIZONTAL`.
+The no-argument constructors still use Bootstrap vertical. The Bootstrap
+horizontal layout puts labels beside controls on wider screens; Tailwind and
+Bulma use responsive two-column field grids. For example:
+
+```java
+FormRenderer jte = new JteFormRenderer(FormTheme.TAILWIND, FormLayout.HORIZONTAL);
+FormRenderer pebble = new PebbleFormRenderer(FormTheme.BULMA, FormLayout.HORIZONTAL);
+```
+
+`FormTheme` and `FormLayout` are in `com.formatic.render`. Load the chosen CSS
+library in the containing page. For production Tailwind builds, include
+Formatic's shared class definitions in your source scan:
+[`FormStyle.java`](../formatic-render-api/src/main/java/com/formatic/render/internal/FormStyle.java).
+The demos use Tailwind's browser CDN for convenience, not for production.
+Use the style links on either customer demo or add, for example,
+`?theme=TAILWIND&layout=HORIZONTAL` to its URL.
+
 ### Rendering with JTE
 
-`formatic-render-jte` renders **Bootstrap vertical** forms as HTML fragments.
+`formatic-render-jte` renders forms as HTML fragments.
 It supports the existing field types, nested binding names, and validation
 feedback. Its templates are compiled during the library build; applications
 using the bundled renderer do not need the JTE Gradle plugin or a template
@@ -769,7 +790,7 @@ String html = renderer.render(new FormRenderModel("Contact", "/contact",
 `FormRenderer`, `FormRenderModel`, and `RenderField` are in `com.formatic.render`;
 `JteFormRenderer` is in `com.formatic.render.jte`. Pass a root-relative submission
 path (including the context path, if any), or an empty string to submit to the
-current URL. Include Bootstrap CSS on the containing page.
+current URL.
 
 For Spring MVC, call `SpringFormRenderModels.fromBinding(...)` with the form
 metadata, `BindingResult`, `MessageSource`, and request locale. The adapter keeps
@@ -786,10 +807,9 @@ attribute for that test or POST directly. The demo does not save submissions.
 
 ### Rendering with Pebble
 
-`formatic-render-pebble` renders **Bootstrap vertical** forms as HTML fragments.
+`formatic-render-pebble` renders forms as HTML fragments.
 It loads the bundled `.peb` templates from the classpath and does not require
-Spring, a Pebble starter, or a build plugin. Include Bootstrap CSS on the page
-that embeds the fragment.
+Spring, a Pebble starter, or a build plugin.
 
 With the local composite build, add:
 
