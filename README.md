@@ -42,6 +42,7 @@ For applications in this repository's multi-project build:
 ```groovy
 dependencies {
     implementation project(':formatic-spring')
+    implementation project(':formatic-render-thymeleaf')
 }
 ```
 
@@ -50,7 +51,8 @@ dependencies {
 | Module | Purpose | Dependency behavior |
 |---|---|---|
 | `formatic-core` | Annotations, metadata, and field builders; independent of Spring and Thymeleaf | Brings Byte Buddy as a transitive runtime dependency. Logging, validation APIs, and annotation-processing libraries are compile-time-only or processor dependencies. |
-| `formatic-spring` | Spring Boot auto-configuration, Spring MVC integration, and Thymeleaf templates | Exposes `formatic-core` as an API dependency, so applications depending on this module do not also need to declare `formatic-core`. It also declares Spring Boot Web, Validation, and Thymeleaf starters as implementation dependencies. |
+| `formatic-spring` | Spring Boot auto-configuration for metadata builders and option providers | Exposes `formatic-core` as an API dependency and uses the Spring Boot Web and Validation starters. Does not select a rendering engine. |
+| `formatic-render-thymeleaf` | Thymeleaf templates for Bootstrap, Tailwind CSS, and Bulma | Adds the Spring Boot Thymeleaf starter at runtime. Declare it alongside `formatic-spring` for the bundled forms. |
 | `formatic-example` | Demo application and usage examples | Not required by applications using Formatic. |
 
 With Gradle's published module metadata, `formatic-spring`'s implementation dependencies are available at runtime, but are not part of its compile-time API. Use Spring Boot's dependency management (for example, its Gradle plugin or BOM) to align Spring dependency versions. The configuration processor is a build-time annotation processor, not a runtime integration requirement.
@@ -61,11 +63,12 @@ For a separate Gradle project, add the Formatic checkout as a composite build in
 includeBuild('../formatic')
 ```
 
-Then add the Spring module to `build.gradle` (the included build provides the unpublished artifact):
+Then add both modules to `build.gradle` (the included build provides the unpublished artifacts):
 
 ```groovy
 dependencies {
     implementation 'com.formatic:formatic-spring:1.0.0'
+    implementation 'com.formatic:formatic-render-thymeleaf:1.0.0'
 }
 ```
 
@@ -74,7 +77,7 @@ The version above is illustrative and must match the checkout's project version.
 
 ### Starting a Spring Boot application
 
-Add `formatic-spring` as a dependency, annotate a DTO, and create your own
+Add `formatic-spring` and `formatic-render-thymeleaf` as dependencies, annotate a DTO, and create your own
 Spring MVC controller that builds field metadata and returns a bundled Thymeleaf
 view such as `bootstrap/forms/vertical/form-base`. The library supplies
 auto-configuration and templates; it does not supply a generic `/form` endpoint
@@ -82,6 +85,9 @@ or a form-submission controller. The
 [new-project walkthrough](docs/USER_GUIDE.md#starting-a-new-spring-boot-project)
 covers a complete GET/POST example, template selection and overrides, and
 localization.
+
+If you previously used only `formatic-spring`, add `formatic-render-thymeleaf`.
+Existing Thymeleaf view names, fragment signatures, and template override paths are unchanged.
 
 ## 📖 Basic Usage
 

@@ -22,15 +22,19 @@ Responsibilities:
 
 Spring Boot auto-configuration (FormaticSpringAutoConfiguration)  
 Automatic bean registration (handlers, builders)  
-Thymeleaf templates for form rendering with Bootstrap, Tailwind CSS, and Bulma
 Automatic component scanning
 
+### formatic-render-thymeleaf - Thymeleaf Renderer
+
+Provides the Thymeleaf templates for Bootstrap, Tailwind CSS, and Bulma and adds
+Spring Boot's Thymeleaf starter. Add this module explicitly alongside
+`formatic-spring` to use the bundled forms.
 
 ### Starting a new Spring Boot project
 
 Formatic's example application is a demo, not an endpoint provided by the
-library. In your own Java 21+ Spring Boot application, add `formatic-spring` as
-an application dependency. While Formatic is unpublished, use the composite
+library. In your own Java 21+ Spring Boot application, add `formatic-spring` and
+`formatic-render-thymeleaf` as application dependencies. While Formatic is unpublished, use the composite
 build instructions in the [README installation section](../README.md#-installation);
 after publication, use the published dependency coordinates. With a local
 Formatic checkout at `../formatic`, configure a Gradle application like this:
@@ -57,14 +61,17 @@ java {
 
 dependencies {
     implementation 'com.formatic:formatic-spring:1.0.0'
+    implementation 'com.formatic:formatic-render-thymeleaf:1.0.0'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
 ```
 
 The sample Boot version matches this repository's current build; select a
 Spring Boot version compatible with your application. The composite build
-substitutes the local unpublished `formatic-spring` project for its coordinates.
-That module exposes `formatic-core` and brings the Spring Web, Validation, and
-Thymeleaf runtime dependencies.
+substitutes the local unpublished Formatic modules for their coordinates.
+Declare the Web and Validation starters directly to compile against Spring MVC
+and Jakarta Validation in the controller and DTO below.
 
 Create a DTO with Formatic field annotations and ordinary JavaBean accessors:
 
@@ -441,7 +448,7 @@ HTML input values, supporting both JSON booleans and arrays of selected options.
 Its JavaScript regression tests require Node.js and can be run from the project root:
 
 ```bash
-node --test formatic-spring/src/test/javascript/hybrid-checkbox.test.cjs
+node --test formatic-render-thymeleaf/src/test/javascript/hybrid-checkbox.test.cjs
 ```
 
 ### Disabled fields and options
@@ -589,7 +596,7 @@ necessary regardless of the frontend approach.
 
 ### Thymeleaf template structure and overrides
 
-Formatic templates are packaged in `formatic-spring` under
+Formatic templates are packaged in `formatic-render-thymeleaf` under
 `src/main/resources/templates/`. The relative path without `.html` is the
 Thymeleaf view name; for example, returning
 `bootstrap/forms/vertical/form-base` from a controller renders

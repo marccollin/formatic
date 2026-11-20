@@ -22,9 +22,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-configuration-processor'
 
-    // Thymeleaf pour le templating
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-
     // Auto-configuration
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.springframework.boot:spring-boot-autoconfigure-processor'
