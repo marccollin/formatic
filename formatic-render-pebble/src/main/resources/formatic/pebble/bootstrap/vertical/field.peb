@@ -1,0 +1,91 @@
+{% set field = view.metadata() %}
+{% set type = view.type().name() %}
+{% set id = field.id %}
+{% set name = field.name %}
+{% set value = view.value() %}
+{% set invalid = view.invalid() %}
+{% set describedBy = view.describedBy() %}
+{% set outerClass = field.outerCssClass %}
+{% if type == "HIDDEN" %}
+    <input type="hidden" id="{{ id }}" name="{{ name }}"{% if value is not null %} value="{{ value }}"{% endif %}{% if field.disabled %} disabled{% endif %}>
+{% elseif type == "LABEL" %}
+    <div{% if outerClass is not empty %} class="{{ outerClass }}"{% endif %} id="{{ id }}">{{ field.label }}</div>
+{% else %}
+    <div{% if outerClass is not empty %} class="{{ outerClass }}"{% endif %}>
+        {% if view.needsMarker() %}
+            <input type="hidden" name="_{{ name }}" value="on">
+        {% endif %}
+        {% if type == "RADIO" or (type == "CHECKBOX" and field.multiple) %}
+            <fieldset id="{{ id }}">
+                <legend class="form-label">{{ field.label }}</legend>
+                {% for option in view.options() %}
+                    {% set optionId = id ~ "_" ~ option.value %}
+                    <div class="form-check">
+                        <input type="{{ type == "RADIO" ? "radio" : "checkbox" }}"
+                               class="{{ view.controlClass("form-check-input") }}" id="{{ optionId }}" name="{{ name }}"
+                               value="{{ option.value }}"{% if view.selected(option) %} checked{% endif %}
+                               {% if field.disabled or option.disabled %}disabled{% endif %}
+                               {% if type == "RADIO" and field.required %}required{% endif %}
+                               {% if invalid %}aria-invalid="true"{% endif %}{% if describedBy is not null %} aria-describedby="{{ describedBy }}"{% endif %}>
+                        <label class="form-check-label" for="{{ optionId }}">{{ option.label }}</label>
+                    </div>
+                {% endfor %}
+            </fieldset>
+        {% elseif type == "CHECKBOX" %}
+            <div class="form-check">
+                <input type="checkbox" class="{{ view.controlClass("form-check-input") }}" id="{{ id }}"
+                       name="{{ name }}" value="true"{% if view.checked() %} checked{% endif %}
+                       {% if field.required %}required{% endif %}{% if field.disabled %} disabled{% endif %}
+                       {% if invalid %}aria-invalid="true"{% endif %}{% if describedBy is not null %} aria-describedby="{{ describedBy }}"{% endif %}>
+                <label class="form-check-label" for="{{ id }}">{{ field.label }}</label>
+            </div>
+        {% else %}
+            <label class="form-label" for="{{ id }}">{{ field.label }}</label>
+            {% if type == "SELECT" %}
+                <select class="{{ view.controlClass("form-select") }}" id="{{ id }}" name="{{ name }}"
+                        {% if field.multiple %}multiple{% endif %}{% if field.required %} required{% endif %}{% if field.disabled %} disabled{% endif %}
+                        {% if invalid %}aria-invalid="true"{% endif %}{% if describedBy is not null %} aria-describedby="{{ describedBy }}"{% endif %}>
+                    {% if not field.required and not field.multiple %}
+                        <option value="">Select…</option>
+                    {% endif %}
+                    {% for option in view.options() %}
+                        <option value="{{ option.value }}"{% if view.selected(option) %} selected{% endif %}{% if option.disabled %} disabled{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            {% elseif type == "TEXTAREA" %}
+                <textarea class="{{ view.controlClass("form-control") }}" id="{{ id }}" name="{{ name }}"
+                          {% if field.required %}required{% endif %}{% if field.disabled %} disabled{% endif %}{% if field.readonly %} readonly{% endif %}
+                          {% if field.rows > 0 %}rows="{{ field.rows }}"{% endif %}{% if field.cols > 0 %} cols="{{ field.cols }}"{% endif %}
+                          {% if field.minLength > 0 %}minlength="{{ field.minLength }}"{% endif %}{% if field.maxLength >= 0 %} maxlength="{{ field.maxLength }}"{% endif %}
+                          {% if field.wrap is not empty %}wrap="{{ field.wrap }}"{% endif %}{% if field.placeholder is not empty %} placeholder="{{ field.placeholder }}"{% endif %}
+                          {% if invalid %}aria-invalid="true"{% endif %}{% if describedBy is not null %} aria-describedby="{{ describedBy }}"{% endif %}>{{ value }}</textarea>
+            {% else %}
+                {% set min = view.min() %}
+                {% set max = view.max() %}
+                {% set step = view.step() %}
+                <input type="{{ view.inputType() }}" id="{{ id }}" name="{{ name }}"{% if value is not null %} value="{{ value }}"{% endif %}
+                       class="{{ view.inputClass() }}"
+                       {% if field.required %}required{% endif %}{% if field.disabled %} disabled{% endif %}{% if field.readonly %} readonly{% endif %}
+                       {% if view.supportsLength() and field.minLength > 0 %}minlength="{{ field.minLength }}"{% endif %}
+                       {% if view.supportsLength() and field.maxLength >= 0 %}maxlength="{{ field.maxLength }}"{% endif %}
+                       {% if min is not null %}min="{{ min }}"{% endif %}{% if max is not null %} max="{{ max }}"{% endif %}{% if step is not null %} step="{{ step }}"{% endif %}
+                       {% if type == "COLOR" and field.alpha %}alpha{% endif %}
+                       {% if type == "FILE" and field.accept is not empty %}accept="{{ field.accept }}"{% endif %}
+                       {% if (type == "FILE" or type == "EMAIL") and field.multiple %}multiple{% endif %}
+                       {% if field.pattern is not empty %}pattern="{{ field.pattern }}"{% endif %}{% if field.title is not empty %} title="{{ field.title }}"{% endif %}
+                       {% if field.placeholder is not empty %}placeholder="{{ field.placeholder }}"{% endif %}
+                       {% if invalid %}aria-invalid="true"{% endif %}{% if describedBy is not null %} aria-describedby="{{ describedBy }}"{% endif %}>
+            {% endif %}
+        {% endif %}
+        {% if view.hasHelp() %}
+            <small class="form-text" id="{{ id }}-help">{{ field.helpText }}</small>
+        {% endif %}
+        {% if invalid %}
+            <div class="invalid-feedback d-block" id="{{ id }}-errors" role="alert">
+                {% for error in view.field().errors() %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

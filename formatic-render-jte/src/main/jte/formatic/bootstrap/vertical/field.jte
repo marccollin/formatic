@@ -1,5 +1,5 @@
 @import com.formatic.core.form.FormFieldType
-@import com.formatic.render.jte.FieldView
+@import com.formatic.render.internal.FieldView
 @param FieldView view
 !{var field = view.metadata(); var type = view.type();}
 @if(type == FormFieldType.HIDDEN)
@@ -60,7 +60,7 @@
                           aria-invalid="${view.invalid() ? "true" : null}" aria-describedby="${view.describedBy()}">${view.value()}</textarea>
             @else
                 <input type="${view.inputType()}" id="${field.getId()}" name="${field.getName()}" value="${view.value()}"
-                       class="${view.controlClass(type == FormFieldType.RANGE ? "form-range" : type == FormFieldType.COLOR ? "form-control form-control-color" : "form-control")}"
+                       class="${view.inputClass()}"
                        required="${field.isRequired()}" disabled="${field.isDisabled()}" readonly="${field.isReadonly()}"
                        minlength="${view.supportsLength() && field.getMinLength() > 0 ? Integer.toString(field.getMinLength()) : null}"
                        maxlength="${view.supportsLength() && field.getMaxLength() >= 0 ? Integer.toString(field.getMaxLength()) : null}"

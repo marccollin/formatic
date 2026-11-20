@@ -784,6 +784,39 @@ Run `./gradlew :formatic-example:bootRun` and open
 validation error. If your browser blocks empty fields, remove the HTML `required`
 attribute for that test or POST directly. The demo does not save submissions.
 
+### Rendering with Pebble
+
+`formatic-render-pebble` renders **Bootstrap vertical** forms as HTML fragments.
+It loads the bundled `.peb` templates from the classpath and does not require
+Spring, a Pebble starter, or a build plugin. Include Bootstrap CSS on the page
+that embeds the fragment.
+
+With the local composite build, add:
+
+```groovy
+dependencies {
+    implementation 'com.formatic:formatic-render-pebble:1.0.0'
+}
+```
+
+Use the same rendering model as JTE, with
+`com.formatic.render.pebble.PebbleFormRenderer`:
+
+```java
+FormRenderer renderer = new PebbleFormRenderer();
+String html = renderer.render(new FormRenderModel("Contact", "/contact",
+        metadata.stream().map(RenderField::new).toList()));
+```
+
+Your application handles the submission. Pass submitted values and validation
+errors in `RenderField`, or, in Spring MVC, add `formatic-spring` and use the
+same `SpringFormRenderModels.fromBinding(...)` adapter described above. Use a
+root-relative action (including any context path) or an empty string. Supply
+any CSRF token through `hiddenFields` when required.
+
+Run `./gradlew :formatic-example:bootRun` and open
+`http://localhost:8080/pebble/customer` to try nested DTO binding and validation.
+
 ### Testing the example application
 
 From the project root, start the example application:

@@ -1,0 +1,9 @@
+description = 'Formatic Pebble Renderer'
+
+dependencies {
+    api project(':formatic-render-api')
+    implementation 'io.pebbletemplates:pebble:4.1.3'
+    testImplementation platform("org.mockito:mockito-bom:${mockitoBomVersion}")
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

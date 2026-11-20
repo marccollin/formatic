@@ -1,0 +1,22 @@
+<form class="row g-3" method="post" action="{{ form.action() }}"{% if multipart %} enctype="multipart/form-data"{% endif %}>
+    {% if form.title() is not null %}
+        <h2>{{ form.title() }}</h2>
+    {% endif %}
+    {% if form.successMessage() is not null %}
+        <div class="alert alert-success" role="status">{{ form.successMessage() }}</div>
+    {% endif %}
+    {% if form.globalErrors() is not empty %}
+        <ul class="alert alert-danger" role="alert">
+            {% for error in form.globalErrors() %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% for hidden in form.hiddenFields() %}
+        <input type="hidden" name="{{ hidden.key }}" value="{{ hidden.value }}">
+    {% endfor %}
+    {% for view in fields %}
+        {% include "formatic/pebble/bootstrap/vertical/field.peb" %}
+    {% endfor %}
+    <div class="col-12"><button class="btn btn-primary" type="submit">Submit</button></div>
+</form>
