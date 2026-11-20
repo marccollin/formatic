@@ -1,4 +1,4 @@
-package com.formatic.render.jte;
+package com.formatic.render.internal;
 
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldType;
@@ -7,6 +7,7 @@ import com.formatic.render.RenderField;
 
 import java.util.List;
 
+/** Shared presentation rules for the bundled renderers, not part of the public rendering contract. */
 public record FieldView(RenderField field) {
     public FormFieldMetadata metadata() {
         return field.metadata();
@@ -31,6 +32,14 @@ public record FieldView(RenderField field) {
             case RANGE -> "range";
             default -> "text";
         };
+    }
+
+    public String inputClass() {
+        return controlClass(switch (type()) {
+            case RANGE -> "form-range";
+            case COLOR -> "form-control form-control-color";
+            default -> "form-control";
+        });
     }
 
     public String value() {

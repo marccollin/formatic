@@ -1,9 +1,9 @@
-@import com.formatic.core.form.FormFieldType
 @import com.formatic.render.FormRenderModel
-@import com.formatic.render.jte.FieldView
+@import com.formatic.render.internal.FieldView
+@import com.formatic.render.internal.FormView
 @param FormRenderModel form
 <form class="row g-3" method="post" action="${form.action()}"
-      enctype="${form.fields().stream().anyMatch(field -> field.metadata().getType() == FormFieldType.FILE) ? "multipart/form-data" : null}">
+      enctype="${FormView.multipart(form) ? "multipart/form-data" : null}">
     @if(form.title() != null)
         <h2>${form.title()}</h2>
     @endif

@@ -3,9 +3,11 @@ package com.formatic.example;
 import com.formatic.core.annotation.handler.TextInputHandler;
 import com.formatic.core.builder.ReflectionFormFieldMetadataBuilder;
 import com.formatic.core.form.FieldIdStyle;
-import com.formatic.example.controller.JteFormController;
+import com.formatic.example.controller.CustomerRenderController;
 import com.formatic.spring.config.FormaticSpringAutoConfiguration;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,24 +26,28 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = JteFormControllerIntegrationTest.TestApplication.class)
+@SpringBootTest(classes = CustomerRenderControllerIntegrationTest.TestApplication.class)
 @AutoConfigureMockMvc
-class JteFormControllerIntegrationTest {
+class CustomerRenderControllerIntegrationTest {
     @Autowired
     MockMvc mvc;
 
-    @Test
-    void rendersNestedFieldsWithContextRelativeAction() throws Exception {
-        mvc.perform(get("/demo/jte/customer").contextPath("/demo"))
+    @ParameterizedTest
+    @CsvSource({"jte, JTE", "pebble, Pebble"})
+    void rendersNestedFieldsWithContextRelativeAction(String engine, String title) throws Exception {
+        String path = "/demo/" + engine + "/customer";
+        mvc.perform(get(path).contextPath("/demo"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("action=\"/demo/jte/customer\"")))
+                .andExpect(content().string(containsString("<h2>" + title + " customer form</h2>")))
+                .andExpect(content().string(containsString("action=\"" + path + "\"")))
                 .andExpect(content().string(containsString("name=\"address.street\"")))
                 .andExpect(content().string(containsString("id=\"address_street\"")));
     }
 
-    @Test
-    void redisplaysNestedValidationErrorsAndRetainsOtherSubmittedValues() throws Exception {
-        mvc.perform(post("/jte/customer")
+    @ParameterizedTest
+    @ValueSource(strings = {"jte", "pebble"})
+    void redisplaysNestedValidationErrorsAndRetainsOtherSubmittedValues(String engine) throws Exception {
+        mvc.perform(post("/{engine}/customer", engine)
                         .param("name", "Customer").param("address.street", "").param("address.city", "Quebec"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("aria-describedby=\"address_street-errors\"")))
@@ -50,9 +56,10 @@ class JteFormControllerIntegrationTest {
                 .andExpect(content().string(not(containsString("Customer details received"))));
     }
 
-    @Test
-    void acceptsValidNestedSubmission() throws Exception {
-        mvc.perform(post("/jte/customer")
+    @ParameterizedTest
+    @ValueSource(strings = {"jte", "pebble"})
+    void acceptsValidNestedSubmission(String engine) throws Exception {
+        mvc.perform(post("/{engine}/customer", engine)
                         .param("name", "Customer").param("address.street", "Main").param("address.city", "Quebec"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("value=\"Main\"")))
@@ -61,7 +68,7 @@ class JteFormControllerIntegrationTest {
 
     @Configuration(proxyBeanMethods = false)
     @EnableAutoConfiguration(exclude = FormaticSpringAutoConfiguration.class)
-    @Import(JteFormController.class)
+    @Import(CustomerRenderController.class)
     static class TestApplication {
         @Bean
         ReflectionFormFieldMetadataBuilder metadataBuilder() {

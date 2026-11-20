@@ -12,6 +12,7 @@ dependencies {
     implementation project(':formatic-spring')
     implementation project(':formatic-render-thymeleaf')
     implementation project(':formatic-render-jte')
+    implementation project(':formatic-render-pebble')
 
     // Spring Boot for Spring examples
     implementation 'org.springframework.boot:spring-boot-starter-web'

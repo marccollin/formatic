@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/formatic-example" />
             <option value="$PROJECT_DIR$/formatic-render-api" />
             <option value="$PROJECT_DIR$/formatic-render-jte" />
+            <option value="$PROJECT_DIR$/formatic-render-pebble" />
             <option value="$PROJECT_DIR$/formatic-render-thymeleaf" />
             <option value="$PROJECT_DIR$/formatic-spring" />
           </set>
