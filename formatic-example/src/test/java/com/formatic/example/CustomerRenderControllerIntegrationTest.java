@@ -4,6 +4,7 @@ import com.formatic.core.annotation.handler.TextInputHandler;
 import com.formatic.core.builder.ReflectionFormFieldMetadataBuilder;
 import com.formatic.core.form.FieldIdStyle;
 import com.formatic.example.controller.CustomerRenderController;
+import com.formatic.spring.config.FormaticProperties;
 import com.formatic.spring.config.FormaticSpringAutoConfiguration;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -12,6 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
@@ -28,19 +30,25 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-@SpringBootTest(classes = CustomerRenderControllerIntegrationTest.TestApplication.class)
+@SpringBootTest(classes = CustomerRenderControllerIntegrationTest.TestApplication.class, properties = {
+        "formatic.jte.template-prefix=formatic/",
+        "formatic.pebble.template-prefix=formatic/pebble/",
+        "formatic.thymeleaf.template-prefix=templates/formatic/standalone/"
+})
 @AutoConfigureMockMvc
 class CustomerRenderControllerIntegrationTest {
     @Autowired
     MockMvc mvc;
 
     @ParameterizedTest
-    @CsvSource({"jte, JTE", "pebble, Pebble"})
+    @CsvSource({"jte, JTE", "pebble, Pebble", "thymeleaf, Thymeleaf"})
     void rendersNestedFieldsWithContextRelativeAction(String engine, String title) throws Exception {
         String path = "/demo/" + engine + "/customer";
         mvc.perform(get(path).contextPath("/demo"))
                 .andExpect(status().isOk())
+                .andExpect(view().name("formatic-" + engine + "-BOOTSTRAP-VERTICAL"))
                 .andExpect(content().string(containsString("<h2>" + title + " customer form</h2>")))
                 .andExpect(content().string(containsString("action=\"" + path + "\"")))
                 .andExpect(content().string(containsString("name=\"address.street\"")))
@@ -48,7 +56,7 @@ class CustomerRenderControllerIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"jte", "pebble"})
+    @ValueSource(strings = {"jte", "pebble", "thymeleaf"})
     void redisplaysNestedValidationErrorsAndRetainsOtherSubmittedValues(String engine) throws Exception {
         mvc.perform(post("/{engine}/customer", engine)
                         .param("name", "Customer").param("address.street", "").param("address.city", "Quebec"))
@@ -60,7 +68,7 @@ class CustomerRenderControllerIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"jte", "pebble"})
+    @ValueSource(strings = {"jte", "pebble", "thymeleaf"})
     void acceptsValidNestedSubmission(String engine) throws Exception {
         mvc.perform(post("/{engine}/customer", engine)
                         .param("name", "Customer").param("address.street", "Main").param("address.city", "Quebec"))
@@ -93,7 +101,7 @@ class CustomerRenderControllerIntegrationTest {
     }
 
     static Stream<Arguments> styles() {
-        return Stream.of("jte", "pebble").flatMap(engine -> Stream.of(
+        return Stream.of("jte", "pebble", "thymeleaf").flatMap(engine -> Stream.of(
                 Arguments.of(engine, "BOOTSTRAP", "VERTICAL", "bootstrap.min.css",
                         "row g-3", "invalid-feedback d-block"),
                 Arguments.of(engine, "BOOTSTRAP", "HORIZONTAL", "bootstrap.min.css",
@@ -110,6 +118,7 @@ class CustomerRenderControllerIntegrationTest {
 
     @Configuration(proxyBeanMethods = false)
     @EnableAutoConfiguration(exclude = FormaticSpringAutoConfiguration.class)
+    @EnableConfigurationProperties(FormaticProperties.class)
     @Import(CustomerRenderController.class)
     static class TestApplication {
         @Bean

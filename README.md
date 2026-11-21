@@ -42,7 +42,7 @@ For applications in this repository's multi-project build:
 ```groovy
 dependencies {
     implementation project(':formatic-spring')
-    implementation project(':formatic-render-thymeleaf')
+    implementation project(':formatic-render-thymeleaf-spring')
 }
 ```
 
@@ -52,7 +52,8 @@ dependencies {
 |---|---|---|
 | `formatic-core` | Annotations, metadata, and field builders; independent of Spring and Thymeleaf | Brings Byte Buddy as a transitive runtime dependency. Logging and annotation-processing libraries are compile-time-only or processor dependencies. |
 | `formatic-spring` | Spring Boot auto-configuration for metadata builders and option providers | Exposes `formatic-core` as an API dependency and uses the Spring Boot Web and Validation starters. Does not select a rendering engine. |
-| `formatic-render-thymeleaf` | Thymeleaf templates for Bootstrap, Tailwind CSS, and Bulma | Adds the Spring Boot Thymeleaf starter at runtime. Declare it alongside `formatic-spring` for the bundled forms. |
+| `formatic-render-thymeleaf` | Plain Java Thymeleaf renderer for Bootstrap, Tailwind CSS, and Bulma | Uses the rendering API and Thymeleaf, without Spring. |
+| `formatic-render-thymeleaf-spring` | Spring MVC Thymeleaf templates for Bootstrap, Tailwind CSS, and Bulma | Adds the Spring Boot Thymeleaf starter and exposes the standalone renderer. Declare it alongside `formatic-spring` for the existing bundled MVC forms. |
 | `formatic-render-api` | Plain Java HTML rendering contract | Exposes `formatic-core` metadata; does not depend on Spring or a template engine. |
 | `formatic-render-jte` | Precompiled JTE renderer for Bootstrap, Tailwind CSS, and Bulma (vertical and horizontal) | Uses the rendering API and does not require Spring. |
 | `formatic-render-pebble` | Pebble renderer for Bootstrap, Tailwind CSS, and Bulma (vertical and horizontal) | Uses the rendering API and brings in Pebble, without Spring. |
@@ -71,7 +72,7 @@ Then add both modules to `build.gradle` (the included build provides the unpubli
 ```groovy
 dependencies {
     implementation 'com.formatic:formatic-spring:1.0.0'
-    implementation 'com.formatic:formatic-render-thymeleaf:1.0.0'
+    implementation 'com.formatic:formatic-render-thymeleaf-spring:1.0.0'
 }
 ```
 
@@ -80,7 +81,7 @@ The version above is illustrative and must match the checkout's project version.
 
 ### Starting a Spring Boot application
 
-Add `formatic-spring` and `formatic-render-thymeleaf` as dependencies, annotate a DTO, and create your own
+Add `formatic-spring` and `formatic-render-thymeleaf-spring` as dependencies, annotate a DTO, and create your own
 Spring MVC controller that builds field metadata and returns a bundled Thymeleaf
 view such as `bootstrap/forms/vertical/form-base`. The library supplies
 auto-configuration and templates; it does not supply a generic `/form` endpoint
@@ -89,7 +90,7 @@ or a form-submission controller. The
 covers a complete GET/POST example, template selection and overrides, and
 localization.
 
-If you previously used only `formatic-spring`, add `formatic-render-thymeleaf`.
+If you previously used `formatic-render-thymeleaf` for Spring MVC templates, replace it with `formatic-render-thymeleaf-spring`.
 Existing Thymeleaf view names, fragment signatures, and template override paths are unchanged.
 
 For alternative engines, see the [JTE](docs/USER_GUIDE.md#rendering-with-jte) and

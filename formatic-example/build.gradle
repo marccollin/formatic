@@ -10,7 +10,7 @@ dependencies {
     // Dependencies for all modules
     implementation project(':formatic-core')
     implementation project(':formatic-spring')
-    implementation project(':formatic-render-thymeleaf')
+    implementation project(':formatic-render-thymeleaf-spring')
     implementation project(':formatic-render-jte')
     implementation project(':formatic-render-pebble')
 

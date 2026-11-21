@@ -5,6 +5,7 @@ import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldType;
 import com.formatic.core.form.SelectRadioOption;
 import com.formatic.render.FormRenderModel;
+import gg.jte.TemplateNotFoundException;
 import com.formatic.render.RenderField;
 import org.junit.jupiter.api.Test;
 
@@ -15,9 +16,18 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JteFormRendererTest {
-    private final JteFormRenderer renderer = new JteFormRenderer();
+    private final JteFormRenderer renderer = new JteFormRenderer("formatic/form.jte");
+
+    @Test
+    void missingExplicitTemplateDoesNotFallBack() {
+        var renderer = new JteFormRenderer("example/forms/missing.jte");
+        assertThatThrownBy(() -> renderer.render(new FormRenderModel(null, "", List.of())))
+                .isInstanceOf(TemplateNotFoundException.class)
+                .hasMessageContaining("example/forms/missing.jte");
+    }
 
     @Test
     void rendersAllControlTypesWithHtmlNames() {

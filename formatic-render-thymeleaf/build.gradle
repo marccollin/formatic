@@ -1,25 +1,9 @@
-plugins {
-    id 'io.spring.dependency-management'
-}
-
-description = 'Formatic Thymeleaf Renderer'
-
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
-    }
-}
+description = 'Formatic Thymeleaf renderer'
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-
-    testImplementation project(':formatic-spring')
-    testImplementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-validation'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    api project(':formatic-render-api')
+    api 'org.thymeleaf:thymeleaf:3.1.3.RELEASE'
+    testImplementation platform("org.mockito:mockito-bom:${mockitoBomVersion}")
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-compileTestJava {
-    options.compilerArgs << '-parameters'
 }
