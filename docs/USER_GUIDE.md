@@ -27,14 +27,14 @@ Automatic component scanning
 ### formatic-render-thymeleaf-spring - Spring MVC Thymeleaf Integration
 
 Provides the Thymeleaf templates for Bootstrap, Tailwind CSS, and Bulma and adds
-Spring Boot's Thymeleaf starter. Add this module explicitly alongside
-`formatic-spring` to use the bundled forms.
+Spring Boot's Thymeleaf starter. It exposes `formatic-spring` and the standalone
+Thymeleaf renderer, so it is the only Formatic dependency needed for the bundled MVC forms.
 
 ### Starting a new Spring Boot project
 
 Formatic's example application is a demo, not an endpoint provided by the
-library. In your own Java 21+ Spring Boot application, add `formatic-spring` and
-`formatic-render-thymeleaf-spring` as application dependencies. While Formatic is unpublished, use the composite
+library. In your own Java 21+ Spring Boot application, add
+`formatic-render-thymeleaf-spring` as an application dependency. While Formatic is unpublished, use the composite
 build instructions in the [README installation section](../README.md#-installation);
 after publication, use the published dependency coordinates. With a local
 Formatic checkout at `../formatic`, configure a Gradle application like this:
@@ -60,7 +60,6 @@ java {
 }
 
 dependencies {
-    implementation 'com.formatic:formatic-spring:1.0.0'
     implementation 'com.formatic:formatic-render-thymeleaf-spring:1.0.0'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
