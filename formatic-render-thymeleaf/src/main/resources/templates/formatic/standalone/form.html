@@ -1,0 +1,13 @@
+<form xmlns:th="http://www.thymeleaf.org" method="post" th:class="${style.formClass()}"
+      th:action="${form.action()}" th:attr="enctype=${multipart ? 'multipart/form-data' : null}">
+    <h2 th:if="${form.title() != null}" th:class="${style.titleClass()}" th:text="${form.title()}"></h2>
+    <div th:if="${form.successMessage() != null}" th:class="${style.successClass()}" role="status" th:text="${form.successMessage()}"></div>
+    <ul th:if="${!form.globalErrors().isEmpty()}" th:class="${style.globalErrorClass()}" role="alert">
+        <li th:each="error : ${form.globalErrors()}" th:text="${error}"></li>
+    </ul>
+    <input th:each="hidden : ${form.hiddenFields()}" type="hidden" th:name="${hidden.key}" th:value="${hidden.value}">
+    <div th:class="${style.fieldsGrid()}" th:remove="${style.fieldsGrid() == null ? 'tag' : 'none'}">
+        <th:block th:each="view : ${fields}" th:insert="~{templates/formatic/standalone/field.html :: field(${view}, ${style})}"></th:block>
+        <div th:class="${style.submitWrapper()}"><button th:class="${style.submitClass()}" type="submit">Submit</button></div>
+    </div>
+</form>

@@ -7,6 +7,7 @@ import com.formatic.render.FormTheme;
 import com.formatic.render.internal.FieldView;
 import com.formatic.render.internal.FormStyle;
 import com.formatic.render.internal.FormView;
+import com.formatic.render.internal.TemplatePaths;
 import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.loader.ClasspathLoader;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
@@ -15,22 +16,28 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.util.Map;
+import java.util.Objects;
 
-/** Renders forms using bundled Pebble templates. */
+/** Renders forms using an explicitly selected Pebble template. */
 public final class PebbleFormRenderer implements FormRenderer {
-    private final PebbleTemplate template = new PebbleEngine.Builder()
-            .loader(new ClasspathLoader(PebbleFormRenderer.class.getClassLoader()))
-            .autoEscaping(true)
-            .build()
-            .getTemplate("formatic/pebble/form.peb");
+    private final PebbleTemplate template;
     private final FormStyle style;
 
-    public PebbleFormRenderer() {
-        this(FormTheme.BOOTSTRAP, FormLayout.VERTICAL);
+    public PebbleFormRenderer(String templateName) {
+        this("", templateName, FormTheme.BOOTSTRAP, FormLayout.VERTICAL);
     }
 
-    public PebbleFormRenderer(FormTheme theme, FormLayout layout) {
+    public PebbleFormRenderer(String templatePrefix, String templateName, FormTheme theme, FormLayout layout) {
+        this(new PebbleEngine.Builder()
+                .loader(new ClasspathLoader(PebbleFormRenderer.class.getClassLoader()))
+                .autoEscaping(true)
+                .build(), templatePrefix, templateName, theme, layout);
+    }
+
+    public PebbleFormRenderer(PebbleEngine engine, String templatePrefix, String templateName,
+                              FormTheme theme, FormLayout layout) {
         style = new FormStyle(theme, layout);
+        template = Objects.requireNonNull(engine, "engine").getTemplate(TemplatePaths.resolve(templatePrefix, templateName));
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldType;
 import com.formatic.core.form.SelectRadioOption;
 import com.formatic.render.FormRenderModel;
+import com.formatic.render.FormLayout;
+import com.formatic.render.FormTheme;
 import com.formatic.render.FormRenderer;
 import com.formatic.render.RenderField;
 import org.junit.jupiter.api.Test;
@@ -16,9 +18,25 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PebbleFormRendererTest {
-    private final FormRenderer renderer = new PebbleFormRenderer();
+    private final FormRenderer renderer = new PebbleFormRenderer("formatic/pebble/form.peb");
+
+    @Test
+    void loadsAnApplicationTemplateFromTheConfiguredFolder() {
+        var renderer = new PebbleFormRenderer("example/forms/", "contact.peb",
+                FormTheme.BOOTSTRAP, FormLayout.VERTICAL);
+        assertThat(renderer.render(new FormRenderModel("Contact <form>", "/contact", List.of())))
+                .contains("<h1>Contact &lt;form&gt;</h1>", "action=\"/contact\"")
+                .doesNotContain("Submit");
+    }
+
+    @Test
+    void missingExplicitTemplateDoesNotFallBack() {
+        assertThatThrownBy(() -> new PebbleFormRenderer("example/forms/missing.peb"))
+                .hasMessageContaining("example/forms/missing.peb");
+    }
 
     @Test
     void rendersAllControlTypesWithoutRedisplayingSensitiveValues() {

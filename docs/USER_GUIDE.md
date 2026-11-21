@@ -24,17 +24,17 @@ Spring Boot auto-configuration (FormaticSpringAutoConfiguration)
 Automatic bean registration (handlers, builders)  
 Automatic component scanning
 
-### formatic-render-thymeleaf - Thymeleaf Renderer
+### formatic-spring-boot-starter-thymeleaf - Spring MVC Thymeleaf Integration
 
 Provides the Thymeleaf templates for Bootstrap, Tailwind CSS, and Bulma and adds
-Spring Boot's Thymeleaf starter. Add this module explicitly alongside
-`formatic-spring` to use the bundled forms.
+Spring Boot's Thymeleaf starter. It exposes `formatic-spring` and the standalone
+Thymeleaf renderer, so it is the only Formatic dependency needed for the bundled MVC forms.
 
 ### Starting a new Spring Boot project
 
 Formatic's example application is a demo, not an endpoint provided by the
-library. In your own Java 21+ Spring Boot application, add `formatic-spring` and
-`formatic-render-thymeleaf` as application dependencies. While Formatic is unpublished, use the composite
+library. In your own Java 21+ Spring Boot application, add
+`formatic-spring-boot-starter-thymeleaf` as an application dependency. While Formatic is unpublished, use the composite
 build instructions in the [README installation section](../README.md#-installation);
 after publication, use the published dependency coordinates. With a local
 Formatic checkout at `../formatic`, configure a Gradle application like this:
@@ -60,8 +60,7 @@ java {
 }
 
 dependencies {
-    implementation 'com.formatic:formatic-spring:1.0.0'
-    implementation 'com.formatic:formatic-render-thymeleaf:1.0.0'
+    implementation 'com.formatic:formatic-spring-boot-starter-thymeleaf:1.0.0'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
@@ -448,7 +447,7 @@ HTML input values, supporting both JSON booleans and arrays of selected options.
 Its JavaScript regression tests require Node.js and can be run from the project root:
 
 ```bash
-node --test formatic-render-thymeleaf/src/test/javascript/hybrid-checkbox.test.cjs
+node --test formatic-spring-boot-starter-thymeleaf/src/test/javascript/hybrid-checkbox.test.cjs
 ```
 
 ### Disabled fields and options
@@ -596,7 +595,7 @@ necessary regardless of the frontend approach.
 
 ### Thymeleaf template structure and overrides
 
-Formatic templates are packaged in `formatic-render-thymeleaf` under
+Spring MVC templates are packaged in `formatic-spring-boot-starter-thymeleaf` under
 `src/main/resources/templates/`. The relative path without `.html` is the
 Thymeleaf view name; for example, returning
 `bootstrap/forms/vertical/form-base` from a controller renders
@@ -743,13 +742,15 @@ application/template customization.
 
 Both renderers support `FormTheme.BOOTSTRAP`, `FormTheme.TAILWIND`, and
 `FormTheme.BULMA`, each with `FormLayout.VERTICAL` or `FormLayout.HORIZONTAL`.
-The no-argument constructors still use Bootstrap vertical. The Bootstrap
+Constructors that take only a template name use Bootstrap vertical. The Bootstrap
 horizontal layout puts labels beside controls on wider screens; Tailwind and
 Bulma use responsive two-column field grids. For example:
 
 ```java
-FormRenderer jte = new JteFormRenderer(FormTheme.TAILWIND, FormLayout.HORIZONTAL);
-FormRenderer pebble = new PebbleFormRenderer(FormTheme.BULMA, FormLayout.HORIZONTAL);
+FormRenderer jte = new JteFormRenderer("formatic/", "form.jte",
+        FormTheme.TAILWIND, FormLayout.HORIZONTAL);
+FormRenderer pebble = new PebbleFormRenderer("formatic/pebble/", "form.peb",
+        FormTheme.BULMA, FormLayout.HORIZONTAL);
 ```
 
 `FormTheme` and `FormLayout` are in `com.formatic.render`. Load the chosen CSS
@@ -782,7 +783,7 @@ In a plain Java application, pass core metadata and optional request values to
 the renderer directly:
 
 ```java
-FormRenderer renderer = new JteFormRenderer();
+FormRenderer renderer = new JteFormRenderer("formatic/form.jte");
 String html = renderer.render(new FormRenderModel("Contact", "/contact",
         metadata.stream().map(RenderField::new).toList()));
 ```
@@ -795,8 +796,8 @@ current URL.
 For Spring MVC, call `SpringFormRenderModels.fromBinding(...)` with the form
 metadata, `BindingResult`, `MessageSource`, and request locale. The adapter keeps
 dotted field names and resolved validation errors, including errors on nested
-DTOs. Render the resulting model with JTE and return HTML from your controller
-or embed the fragment in a page. For CSRF-protected applications, supply the
+DTOs. Pass the resulting model to a [named MVC view](#using-jte-or-pebble-as-spring-mvc-views),
+or render it directly as HTML. For CSRF-protected applications, supply the
 framework's token name and value through the model's `hiddenFields` map; the
 renderer does not look up request attributes or add security tokens on its own.
 
@@ -823,7 +824,7 @@ Use the same rendering model as JTE, with
 `com.formatic.render.pebble.PebbleFormRenderer`:
 
 ```java
-FormRenderer renderer = new PebbleFormRenderer();
+FormRenderer renderer = new PebbleFormRenderer("formatic/pebble/form.peb");
 String html = renderer.render(new FormRenderModel("Contact", "/contact",
         metadata.stream().map(RenderField::new).toList()));
 ```
@@ -836,6 +837,100 @@ any CSRF token through `hiddenFields` when required.
 
 Run `./gradlew :formatic-example:bootRun` and open
 `http://localhost:8080/pebble/customer` to try nested DTO binding and validation.
+
+### Choosing your own JTE or Pebble template
+
+Every renderer needs an explicit template name. The bundled templates are still
+available at the names shown above, but neither renderer selects one automatically
+or falls back to one if your selection is missing.
+
+| Engine | Example file in your project | Template name from the loader root |
+|---|---|---|
+| JTE | `src/main/jte/myapp/forms/contact.jte` | `myapp/forms/contact.jte` |
+| Pebble | `src/main/resources/templates/myapp/forms/contact.peb` | `templates/myapp/forms/contact.peb` |
+
+Precompile your own JTE templates with the JTE Gradle or Maven plugin. Pebble
+loads `.peb` files as classpath resources. Both renderers also accept an
+application-provided engine if you need custom loading. Use a unique template
+path rather than overriding a bundled resource by classpath order.
+
+Custom templates receive a `form` variable of type `FormRenderModel`, including
+its `RenderField` values and errors. In JTE, declare
+`@param com.formatic.render.FormRenderModel form` and use `${form.title()}`;
+in Pebble, use `{{ form.title() }}`. Your template controls the markup; it
+doesn't need to import the internal helpers used by the bundled templates.
+
+### Using JTE or Pebble as Spring MVC views
+
+With `formatic-spring` and your chosen renderer on the classpath, optionally
+set the template folder in `application.properties`:
+
+```properties
+formatic.jte.template-prefix=myapp/forms/
+formatic.pebble.template-prefix=templates/myapp/forms/
+```
+
+The prefix is relative to JTE's compiled template root or Pebble's classpath
+loader root. An unset prefix means the loader's root; there is no default
+template property. Register the view by explicitly choosing its template:
+
+```java
+@Bean
+FormRendererViewResolver formViews(FormaticProperties properties) {
+    var renderer = new PebbleFormRenderer(properties.getPebble().getTemplatePrefix(),
+            "contact.peb", FormTheme.BOOTSTRAP, FormLayout.VERTICAL);
+    return new FormRendererViewResolver(Map.of("contact-form", renderer));
+}
+```
+
+For JTE, use `JteFormRenderer`, `properties.getJte().getTemplatePrefix()`, and
+`"contact.jte"` instead. In your MVC controller, add the `FormRenderModel` as
+`form` and return the registered view name (without `@ResponseBody`):
+
+```java
+model.addAttribute(FormRendererViewResolver.FORM_MODEL_ATTRIBUTE, form);
+return "contact-form";
+```
+
+The resolver serves only registered names, so it can coexist with Thymeleaf
+and other MVC view resolvers. It writes the selected renderer's HTML as the
+response; use a full-page template if you want to include your page layout.
+
+### Rendering with standalone Thymeleaf
+
+The `formatic-render-thymeleaf` module renders `FormRenderModel`
+without Spring. The `formatic-spring-boot-starter-thymeleaf` module includes it,
+while retaining the original Spring MVC templates and their override paths.
+For a plain Java application, add only:
+
+```groovy
+implementation 'com.formatic:formatic-render-thymeleaf:1.0.0'
+```
+
+Select a template explicitly. The bundled template supports all three
+`FormTheme` values and both `FormLayout` values:
+
+```java
+FormRenderer renderer = new ThymeleafFormRenderer(
+        "templates/formatic/standalone/", "form.html",
+        FormTheme.BOOTSTRAP, FormLayout.VERTICAL);
+String html = renderer.render(new FormRenderModel("Contact", "/contact",
+        metadata.stream().map(RenderField::new).toList()));
+```
+
+`ThymeleafFormRenderer` is in `com.formatic.render.thymeleaf`. For your own
+template, place an HTML file in `src/main/resources` and provide its classpath
+folder and filename. The standard Thymeleaf dialect receives `form` (a
+`FormRenderModel`) and escapes expressions such as `th:text="${form.title()}"`.
+An application-provided `ITemplateEngine` can be passed to the renderer
+constructor for custom loading. Missing templates fail; there is no fallback.
+
+For Spring MVC, set `formatic.thymeleaf.template-prefix` in
+`application.properties`, register a `ThymeleafFormRenderer` with the
+`FormRendererViewResolver` as shown above, and provide the form model under
+`form`. The example app demonstrates this at `/thymeleaf/customer`. This
+standalone template contract is separate from the existing Spring MVC
+`th:field` templates; their view names and overrides continue to work.
 
 ### Testing the example application
 

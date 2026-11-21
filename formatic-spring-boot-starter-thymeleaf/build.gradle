@@ -1,0 +1,26 @@
+plugins {
+    id 'io.spring.dependency-management'
+}
+
+description = 'Formatic Spring Boot Thymeleaf starter'
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+dependencies {
+    api project(':formatic-render-thymeleaf')
+    api project(':formatic-spring')
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-validation'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+compileTestJava {
+    options.compilerArgs << '-parameters'
+}

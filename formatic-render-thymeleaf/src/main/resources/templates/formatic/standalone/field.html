@@ -1,0 +1,62 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="field(view, style)"
+          th:with="field=${view.metadata()}, type=${view.type().name()}, group=${type == 'RADIO' or (type == 'CHECKBOX' and field.multiple)}, single=${type == 'CHECKBOX' and !group}">
+    <input th:if="${type == 'HIDDEN'}" type="hidden" th:id="${field.id}" th:name="${field.name}" th:value="${view.value()}" th:disabled="${field.disabled}">
+    <div th:if="${type == 'LABEL'}" th:class="${style.labelWrapper(field.outerCssClass)}" th:id="${field.id}" th:text="${field.label}"></div>
+    <th:block th:if="${type != 'HIDDEN' and type != 'LABEL'}">
+        <fieldset th:if="${group}" th:id="${field.id}" th:class="${style.fieldWrapper(field.outerCssClass)}">
+            <legend th:class="${style.labelClass()}" th:text="${field.label}"></legend>
+            <th:block th:insert="~{templates/formatic/standalone/field.html :: body(${view}, ${style}, ${group}, ${single})}"></th:block>
+        </fieldset>
+        <div th:unless="${group}" th:class="${style.fieldWrapper(field.outerCssClass)}">
+            <label th:unless="${single}" th:class="${style.labelClass()}" th:for="${field.id}" th:text="${field.label}"></label>
+            <th:block th:insert="~{templates/formatic/standalone/field.html :: body(${view}, ${style}, ${group}, ${single})}"></th:block>
+        </div>
+    </th:block>
+</th:block>
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="body(view, style, group, single)"
+          th:with="field=${view.metadata()}, type=${view.type().name()}, body=${style.fieldBody(single)}, described=${view.describedBy()}, invalid=${view.invalid()}">
+    <div th:class="${body}" th:remove="${body == null ? 'tag' : 'none'}">
+        <input th:if="${view.needsMarker()}" type="hidden" th:name="${'_' + field.name}" value="on">
+        <th:block th:if="${group}">
+            <div th:each="option : ${view.options()}" th:class="${style.checkWrapper()}" th:with="optionId=${field.id + '_' + option.value}">
+                <input th:type="${type == 'RADIO' ? 'radio' : 'checkbox'}" th:class="${view.controlClass(style)}"
+                       th:id="${optionId}" th:name="${field.name}" th:value="${option.value}"
+                       th:checked="${view.selected(option)}" th:disabled="${field.disabled or option.disabled}"
+                       th:required="${type == 'RADIO' and field.required}"
+                       th:attr="aria-invalid=${invalid ? 'true' : null},aria-describedby=${described}">
+                <label th:class="${style.checkLabel(type == 'RADIO')}" th:for="${optionId}" th:text="${option.label}"></label>
+            </div>
+        </th:block>
+        <div th:if="${single}" th:class="${style.checkWrapper()}">
+            <input type="checkbox" th:class="${view.controlClass(style)}" th:id="${field.id}" th:name="${field.name}"
+                   value="true" th:checked="${view.checked()}" th:required="${field.required}" th:disabled="${field.disabled}"
+                   th:attr="aria-invalid=${invalid ? 'true' : null},aria-describedby=${described}">
+            <label th:class="${style.checkLabel(false)}" th:for="${field.id}" th:text="${field.label}"></label>
+        </div>
+        <th:block th:if="${!group and !single}">
+            <div th:if="${type == 'SELECT'}" th:with="wrapper=${style.selectWrapper(field.multiple, invalid)}"
+                 th:class="${wrapper}" th:remove="${wrapper == null ? 'tag' : 'none'}">
+                <select th:class="${view.controlClass(style)}" th:id="${field.id}" th:name="${field.name}"
+                        th:multiple="${field.multiple}" th:required="${field.required}" th:disabled="${field.disabled}"
+                        th:attr="aria-invalid=${invalid ? 'true' : null},aria-describedby=${described}">
+                    <option th:if="${!field.required and !field.multiple}" value="">Select…</option>
+                    <option th:each="option : ${view.options()}" th:value="${option.value}" th:selected="${view.selected(option)}"
+                            th:disabled="${option.disabled}" th:text="${option.label}"></option>
+                </select>
+            </div>
+            <textarea th:if="${type == 'TEXTAREA'}" th:class="${view.controlClass(style)}" th:id="${field.id}" th:name="${field.name}"
+                      th:required="${field.required}" th:disabled="${field.disabled}" th:readonly="${field.readonly}"
+                      th:attr="rows=${field.rows > 0 ? field.rows : null},cols=${field.cols > 0 ? field.cols : null},minlength=${field.minLength > 0 ? field.minLength : null},maxlength=${field.maxLength >= 0 ? field.maxLength : null},wrap=${field.wrap},placeholder=${field.placeholder},aria-invalid=${invalid ? 'true' : null},aria-describedby=${described}"
+                      th:text="${view.value()}"></textarea>
+            <input th:if="${type != 'SELECT' and type != 'TEXTAREA'}" th:type="${view.inputType()}" th:id="${field.id}"
+                   th:name="${field.name}" th:class="${view.controlClass(style)}"
+                   th:required="${field.required}" th:disabled="${field.disabled}" th:readonly="${field.readonly}"
+                   th:multiple="${(type == 'FILE' or type == 'EMAIL') and field.multiple}"
+                   th:attr="value=${view.value()},minlength=${view.supportsLength() and field.minLength > 0 ? field.minLength : null},maxlength=${view.supportsLength() and field.maxLength >= 0 ? field.maxLength : null},min=${view.min()},max=${view.max()},step=${view.step()},alpha=${type == 'COLOR' and field.alpha ? 'alpha' : null},accept=${type == 'FILE' ? field.accept : null},pattern=${field.pattern},title=${field.title},placeholder=${field.placeholder},aria-invalid=${invalid ? 'true' : null},aria-describedby=${described}">
+        </th:block>
+        <small th:if="${view.hasHelp()}" th:class="${style.helpClass()}" th:id="${field.id + '-help'}" th:text="${field.helpText}"></small>
+        <div th:if="${invalid}" th:class="${style.errorClass()}" th:id="${field.id + '-errors'}" role="alert">
+            <div th:each="error : ${view.field().errors()}" th:text="${error}"></div>
+        </div>
+    </div>
+</th:block>
