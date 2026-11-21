@@ -14,7 +14,7 @@
             <option value="$PROJECT_DIR$/formatic-render-jte" />
             <option value="$PROJECT_DIR$/formatic-render-pebble" />
             <option value="$PROJECT_DIR$/formatic-render-thymeleaf" />
-            <option value="$PROJECT_DIR$/formatic-render-thymeleaf-spring" />
+            <option value="$PROJECT_DIR$/formatic-spring-boot-starter-thymeleaf" />
             <option value="$PROJECT_DIR$/formatic-spring" />
           </set>
         </option>

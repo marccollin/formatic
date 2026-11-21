@@ -2,7 +2,7 @@ plugins {
     id 'io.spring.dependency-management'
 }
 
-description = 'Formatic Spring MVC Thymeleaf integration'
+description = 'Formatic Spring Boot Thymeleaf starter'
 
 dependencyManagement {
     imports {

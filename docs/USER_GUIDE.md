@@ -24,7 +24,7 @@ Spring Boot auto-configuration (FormaticSpringAutoConfiguration)
 Automatic bean registration (handlers, builders)  
 Automatic component scanning
 
-### formatic-render-thymeleaf-spring - Spring MVC Thymeleaf Integration
+### formatic-spring-boot-starter-thymeleaf - Spring MVC Thymeleaf Integration
 
 Provides the Thymeleaf templates for Bootstrap, Tailwind CSS, and Bulma and adds
 Spring Boot's Thymeleaf starter. It exposes `formatic-spring` and the standalone
@@ -34,7 +34,7 @@ Thymeleaf renderer, so it is the only Formatic dependency needed for the bundled
 
 Formatic's example application is a demo, not an endpoint provided by the
 library. In your own Java 21+ Spring Boot application, add
-`formatic-render-thymeleaf-spring` as an application dependency. While Formatic is unpublished, use the composite
+`formatic-spring-boot-starter-thymeleaf` as an application dependency. While Formatic is unpublished, use the composite
 build instructions in the [README installation section](../README.md#-installation);
 after publication, use the published dependency coordinates. With a local
 Formatic checkout at `../formatic`, configure a Gradle application like this:
@@ -60,7 +60,7 @@ java {
 }
 
 dependencies {
-    implementation 'com.formatic:formatic-render-thymeleaf-spring:1.0.0'
+    implementation 'com.formatic:formatic-spring-boot-starter-thymeleaf:1.0.0'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
@@ -447,7 +447,7 @@ HTML input values, supporting both JSON booleans and arrays of selected options.
 Its JavaScript regression tests require Node.js and can be run from the project root:
 
 ```bash
-node --test formatic-render-thymeleaf-spring/src/test/javascript/hybrid-checkbox.test.cjs
+node --test formatic-spring-boot-starter-thymeleaf/src/test/javascript/hybrid-checkbox.test.cjs
 ```
 
 ### Disabled fields and options
@@ -595,7 +595,7 @@ necessary regardless of the frontend approach.
 
 ### Thymeleaf template structure and overrides
 
-Spring MVC templates are packaged in `formatic-render-thymeleaf-spring` under
+Spring MVC templates are packaged in `formatic-spring-boot-starter-thymeleaf` under
 `src/main/resources/templates/`. The relative path without `.html` is the
 Thymeleaf view name; for example, returning
 `bootstrap/forms/vertical/form-base` from a controller renders
@@ -899,7 +899,7 @@ response; use a full-page template if you want to include your page layout.
 ### Rendering with standalone Thymeleaf
 
 The `formatic-render-thymeleaf` module renders `FormRenderModel`
-without Spring. The `formatic-render-thymeleaf-spring` module includes it,
+without Spring. The `formatic-spring-boot-starter-thymeleaf` module includes it,
 while retaining the original Spring MVC templates and their override paths.
 For a plain Java application, add only:
 
