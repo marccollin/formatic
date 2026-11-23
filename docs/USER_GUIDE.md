@@ -699,31 +699,50 @@ Bean Validation constraint messages can use standard message keys, for example
 `@NotBlank(message = "{form.contact.name.required}")`; Spring resolves those
 messages for the active locale when validation runs.
 
-Formatic currently stores annotation labels, help text, and option labels as
-literal strings, and its bundled field templates render them literally (for
-example, `th:text="${field.label}"`). Thymeleaf does not automatically treat
-those values as message keys. To localize them, put message keys in the
-annotations/provider labels:
+Mark a field label as a message key using `#{...}`. Ordinary labels remain
+literal text:
 
 ```java
-@TextInput(label = "form.contact.name")
+@TextInput(label = "#{form.contact.name}")
 private String name;
 ```
 
-Then copy the relevant library fragment to the same relative path in your
-application, for example
-`src/main/resources/templates/bootstrap/forms/vertical/fields/text-field.html`.
-In that copy, change the label expression to resolve a message key and fall back
-to the original literal if no message exists:
+For JTE, Pebble, or standalone Thymeleaf with Spring MVC,
+`SpringFormRenderModels.fromBinding(...)` resolves labels automatically using
+the supplied `MessageSource` and request locale. For the existing Spring MVC
+Thymeleaf templates, localize the metadata before placing it in the model:
 
-```html
-<label th:for="${field.id}"
-       th:text="${#messages.msgOrNull(field.label) ?: field.label}"></label>
+```java
+model.addAttribute("fields", SpringFormFieldLabels.resolve(
+        metadataBuilder.buildMetadata(Contact.class), messageSource, locale));
 ```
 
-Apply the same lookup to help text and option labels where needed. To translate
-the submit button or page heading, customize the form-base template as well;
-they are not field-fragment labels. Spring Boot's
+`SpringFormFieldLabels` is in `com.formatic.spring.render`; inject your
+application's `MessageSource` and accept `Locale` in the controller. Repeat
+the step for GET and POST, including validation failures. The helper returns
+copies and never changes cached metadata, so concurrent requests can use
+different locales.
+
+Without Spring, localize before constructing `RenderField` instances:
+
+```java
+var localized = FormFieldLabels.resolveBundle(metadata, locale, "messages");
+var fields = localized.stream().map(RenderField::new).toList();
+String html = renderer.render(new FormRenderModel("Contact", "/contact", fields));
+```
+
+`FormFieldLabels` is in `com.formatic.core.form`; its `resolve(...)` method also
+accepts a custom `(key, locale) -> Optional<String>` lookup. Resource bundles
+belong in the consuming application's classpath, not the Formatic library.
+When a key or bundle is missing, Formatic logs a warning and uses the
+capitalized last segment of the field's binding name (for example,
+`address.birthDate` becomes `BirthDate`). Malformed markers and unmarked
+labels remain literal.
+
+This feature covers annotation **labels only**. Help text, option labels,
+page headings, `Submit`, and `Select…` still require application or template
+customization. To translate validation errors, use Bean Validation message
+keys as above. Spring Boot's
 default web locale resolution uses the request locale, commonly selected by the
 browser's `Accept-Language` header. You can verify a translation with a request
 such as:
@@ -734,9 +753,8 @@ curl -H 'Accept-Language: fr' http://localhost:8080/contact
 
 If the application needs a different locale-selection policy, configure Spring
 MVC's locale resolver/interceptor and keep the message bundle names aligned with
-that policy. Built-in message-key support for Formatic metadata is a potential
-future enhancement; today, localization of those values is an
-application/template customization.
+that policy. Set `spring.messages.fallback-to-system-locale=false` when default
+bundle fallback should not depend on the server's locale.
 
 ### Choosing a CSS library and layout with JTE or Pebble
 

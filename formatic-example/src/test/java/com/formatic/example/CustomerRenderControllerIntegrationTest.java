@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.containsString;
@@ -75,6 +76,23 @@ class CustomerRenderControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("value=\"Main\"")))
                 .andExpect(content().string(containsString("Customer details received")));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"jte", "pebble", "thymeleaf"})
+    void localizesLabelForEachRequestOnGetAndPost(String engine) throws Exception {
+        mvc.perform(get("/{engine}/customer", engine).locale(Locale.FRENCH))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">Rue</")))
+                .andExpect(content().string(not(containsString("#{customer.street}"))));
+        mvc.perform(post("/{engine}/customer", engine).locale(Locale.FRENCH)
+                        .param("name", "Customer").param("address.street", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">Rue</")))
+                .andExpect(content().string(containsString("Street is required.")));
+        mvc.perform(get("/{engine}/customer", engine).locale(Locale.ENGLISH))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">Street</")));
     }
 
     @ParameterizedTest

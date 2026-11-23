@@ -33,6 +33,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.when;
@@ -91,6 +92,16 @@ class FormaticControllerIntegrationTest {
                 .andExpect(content().string(containsString(">Updated comment</textarea>")))
                 .andExpect(content().string(containsString("value=\"2000-01-02\"")))
                 .andExpect(content().string(containsString("checked=\"checked\"")));
+    }
+
+    @Test
+    void legacyThymeleafViewLocalizesLabelsPerRequest() throws Exception {
+        mockMvc.perform(get("/formfeeded").locale(Locale.FRENCH))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Date de naissance")));
+        mockMvc.perform(get("/formfeeded").locale(Locale.ENGLISH))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Birth date")));
     }
 
     @Test

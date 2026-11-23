@@ -27,7 +27,7 @@ public final class SpringFormRenderModels {
     public static FormRenderModel fromBinding(String title, String action, List<FormFieldMetadata> fields,
                                                BindingResult binding, MessageSource messages, Locale locale,
                                                String successMessage, Map<String, String> hiddenFields) {
-        var renderedFields = fields.stream().map(field -> {
+        var renderedFields = SpringFormFieldLabels.resolve(fields, messages, locale).stream().map(field -> {
             var errors = binding.getFieldErrors(field.getName());
             return new RenderField(field, values(field, binding, errors), errors.stream()
                     .map(error -> messages.getMessage(error, locale)).toList());
