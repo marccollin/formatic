@@ -6,6 +6,7 @@ import com.formatic.core.builder.BytecodeFormFieldMetadataBuilder;
 import com.formatic.core.builder.CompileTimeFormFieldMetadataBuilder;
 import com.formatic.core.builder.ReflectionFormFieldMetadataBuilder;
 import com.formatic.core.form.FormFieldLabels;
+import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.example.dto.Editor;
 import org.junit.jupiter.api.Test;
 
@@ -26,12 +27,12 @@ class GeneratedLabelMetadataTest {
         for (var builder : List.of(reflection, bytecode, generated)) {
             var fields = builder.buildMetadata(Editor.class);
             assertThat(fields).filteredOn(field -> field.getName().equals("birthDate"))
-                    .extracting(field -> field.getLabel()).containsExactly("#{birthDate}");
+                    .extracting(FormFieldMetadata::getLabel).containsExactly("#{birthDate}");
             var localized = FormFieldLabels.resolveBundle(fields, Locale.FRENCH, "messages");
             assertThat(localized).filteredOn(field -> field.getName().equals("birthDate"))
-                    .extracting(field -> field.getLabel()).containsExactly("Date de naissance");
+                    .extracting(FormFieldMetadata::getLabel).containsExactly("Date de naissance");
             assertThat(fields).filteredOn(field -> field.getName().equals("birthDate"))
-                    .extracting(field -> field.getLabel()).containsExactly("#{birthDate}");
+                    .extracting(FormFieldMetadata::getLabel).containsExactly("#{birthDate}");
         }
     }
 }
