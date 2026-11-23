@@ -46,7 +46,7 @@ public class Editor {
     @UrlInput
     private String webSite;
 
-    @DateInput
+    @DateInput(label = "#{birthDate}")
     private LocalDate birthDate;
 
     @DateTimeInput(min = "2025-01-01T09:00", max = "2025-12-31T17:00", step = "60", defaultValue = "2025-03-08T10:30")

@@ -9,8 +9,10 @@ import com.formatic.example.dto.BuilderMode;
 import com.formatic.example.dto.CssLibrary;
 import com.formatic.example.dto.Editor;
 import com.formatic.example.dto.Form;
+import com.formatic.spring.render.SpringFormFieldLabels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 @Controller
 public class FormaticController {
@@ -35,17 +38,19 @@ public class FormaticController {
     private final BytecodeFormFieldMetadataBuilder bytecodeBuilder;
     private final ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder;
     private final CompileTimeFormFieldMetadataBuilder compileTimeFormFieldMetadataBuilder;
+    private final MessageSource messages;
 
     FormaticController(BytecodeFormFieldMetadataBuilder bytecodeBuilder, ReflectionFormFieldMetadataBuilder reflectionFormFieldMetadataBuilder,
-                       CompileTimeFormFieldMetadataBuilder compileTimeFormFieldMetadataBuilder) {
+                       CompileTimeFormFieldMetadataBuilder compileTimeFormFieldMetadataBuilder, MessageSource messages) {
         this.bytecodeBuilder = bytecodeBuilder;
         this.compileTimeFormFieldMetadataBuilder=compileTimeFormFieldMetadataBuilder;
         this.reflectionFormFieldMetadataBuilder = reflectionFormFieldMetadataBuilder;
+        this.messages = messages;
     }
 
     @GetMapping("/form")
     public String showFormNew(@RequestParam("class") String className, @RequestParam("cssLibrary") CssLibrary cssLibrary,
-                              @RequestParam(required = false) BuilderMode mode, Form form, Model model)
+                              @RequestParam(required = false) BuilderMode mode, Form form, Model model, Locale locale)
             throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
             InstantiationException, IllegalAccessException {
         Class<?> formClass = Class.forName(className);
@@ -60,7 +65,7 @@ public class FormaticController {
             formMetadata = compileTimeFormFieldMetadataBuilder.buildMetadata(formClass);
         }
 
-        model.addAttribute("fields", formMetadata);
+        model.addAttribute("fields", SpringFormFieldLabels.resolve(formMetadata, messages, locale));
         model.addAttribute("formName", formClass.getSimpleName());
         model.addAttribute("formData", formClass.getDeclaredConstructor().newInstance());
 
@@ -72,11 +77,11 @@ public class FormaticController {
     }
 
     @GetMapping("/formhybrid/{id}")
-    public String showFormHybrid(@RequestParam("class") String className, Model model, @PathVariable Long id) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public String showFormHybrid(@RequestParam("class") String className, Model model, @PathVariable Long id, Locale locale) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Class<?> formClass = Class.forName(className);
 
         List<FormFieldMetadata> formMetadata = reflectionFormFieldMetadataBuilder.buildMetadata(formClass);
-        model.addAttribute("fields", formMetadata);
+        model.addAttribute("fields", SpringFormFieldLabels.resolve(formMetadata, messages, locale));
         model.addAttribute("formData", formClass.getDeclaredConstructor().newInstance());
         model.addAttribute("editorId", id);
         return "bootstrap/forms/form-base-hybrid";
@@ -84,7 +89,7 @@ public class FormaticController {
 
 
     @GetMapping("/formfeeded")
-    public String showFormValue(Model model) {
+    public String showFormValue(Model model, Locale locale) {
         try {
 
             List<FormFieldMetadata> formMetadata = reflectionFormFieldMetadataBuilder.buildMetadata(Editor.class);
@@ -99,7 +104,7 @@ public class FormaticController {
 
             editorDto.setPaymentMethod("paypal");
 
-            model.addAttribute("fields", formMetadata);
+            model.addAttribute("fields", SpringFormFieldLabels.resolve(formMetadata, messages, locale));
             model.addAttribute("formData", editorDto);
             model.addAttribute("formName", "Form " + Editor.class.getSimpleName());
 
@@ -115,8 +120,8 @@ public class FormaticController {
     }
 
     @PostMapping("/formfeeded")
-    public String submitFormValue(@ModelAttribute("formData") Editor editor, BindingResult bindingResult, Model model) {
-        model.addAttribute("fields", reflectionFormFieldMetadataBuilder.buildMetadata(Editor.class));
+    public String submitFormValue(@ModelAttribute("formData") Editor editor, BindingResult bindingResult, Model model, Locale locale) {
+        model.addAttribute("fields", SpringFormFieldLabels.resolve(reflectionFormFieldMetadataBuilder.buildMetadata(Editor.class), messages, locale));
         model.addAttribute("formName", "Form " + Editor.class.getSimpleName());
         if (!bindingResult.hasErrors()) {
             model.addAttribute("formSuccess", "Form submitted successfully. This demo does not save changes.");

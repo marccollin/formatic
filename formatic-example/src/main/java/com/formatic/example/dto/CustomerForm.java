@@ -19,7 +19,7 @@ public class CustomerForm {
     public void setAddress(Address address) { this.address = address; }
 
     public static class Address {
-        @TextInput(label = "Street", required = true)
+        @TextInput(label = "#{customer.street}", required = true)
         @NotBlank(message = "Street is required.")
         private String street;
 
