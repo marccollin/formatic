@@ -56,9 +56,17 @@ dependencies {
 | `formatic-render-api` | Plain Java HTML rendering contract | Exposes `formatic-core` metadata; does not depend on Spring or a template engine. |
 | `formatic-render-jte` | Precompiled JTE renderer for Bootstrap, Tailwind CSS, and Bulma (vertical and horizontal) | Uses the rendering API and does not require Spring. |
 | `formatic-render-pebble` | Pebble renderer for Bootstrap, Tailwind CSS, and Bulma (vertical and horizontal) | Uses the rendering API and brings in Pebble, without Spring. |
+| `formatic-schema-json` | Strict JSON Schema Draft 2020-12 export from form metadata | Exposes core and Jackson; uses NetworkNT to validate defaults and choices. Does not depend on Spring or an HTML engine. |
+| `formatic-schema-rjsf` | Combined JSON Schema and RJSF UI schema | Exposes the JSON Schema module; maps widgets and presentation without Spring or HTML engines. |
 | `formatic-example` | Demo application and usage examples | Not required by applications using Formatic. |
 
 With Gradle's published module metadata, `formatic-spring`'s implementation dependencies are available at runtime, but are not part of its compile-time API. Use Spring Boot's dependency management (for example, its Gradle plugin or BOM) to align Spring dependency versions. The configuration processor is a build-time annotation processor, not a runtime integration requirement.
+
+For JSON Schema export and its supported subset, see the
+[JSON support guide](docs/JSON_SUPPORT.md#using-the-json-schema-exporter).
+The running example exposes the customer definition at
+`GET /api/forms/customer`, returning framework-neutral `{schema, ui}` with localized field
+labels. A frontend demo and JSON submission endpoint are not implemented yet.
 
 For a separate Gradle project, add the Formatic checkout as a composite build in `settings.gradle` (adjust the path as needed):
 

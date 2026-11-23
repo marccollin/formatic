@@ -14,8 +14,10 @@
             <option value="$PROJECT_DIR$/formatic-render-jte" />
             <option value="$PROJECT_DIR$/formatic-render-pebble" />
             <option value="$PROJECT_DIR$/formatic-render-thymeleaf" />
-            <option value="$PROJECT_DIR$/formatic-spring-boot-starter-thymeleaf" />
+            <option value="$PROJECT_DIR$/formatic-schema-json" />
+            <option value="$PROJECT_DIR$/formatic-schema-rjsf" />
             <option value="$PROJECT_DIR$/formatic-spring" />
+            <option value="$PROJECT_DIR$/formatic-spring-boot-starter-thymeleaf" />
           </set>
         </option>
       </GradleProjectSettings>

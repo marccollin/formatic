@@ -3,6 +3,7 @@ package com.formatic.spring.thymeleaf;
 import com.formatic.core.annotation.NumberInput;
 import com.formatic.core.annotation.handler.NumberInputHandler;
 import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.FormFieldType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.thymeleaf.context.Context;
@@ -54,6 +55,33 @@ class NumberFieldTemplateTest {
         assertConstraint(html, "step", step);
         assertThat(html).contains("type=\"number\"", "value=\"1.25\"")
                 .doesNotContain("NaN", "Infinity");
+    }
+
+    @ParameterizedTest
+    @MethodSource("constraints")
+    void manuallyConstructedFieldsUseTheSameConstraintSemantics(String layout, double min, double max, double step)
+            throws Exception {
+        String template;
+        try (var resource = getClass().getResourceAsStream("/templates/" + layout + "/fields/number-field.html")) {
+            assertThat(resource).isNotNull();
+            template = new String(resource.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        var field = new FormFieldMetadata("amount", FormFieldType.NUMBER, "Amount", 1);
+        var context = new Context();
+        context.setVariable("field", field);
+        context.setVariable("formData", new NumberForm());
+        var engine = new SpringTemplateEngine();
+        engine.setTemplateResolver(new StringTemplateResolver());
+        String source = "<div th:object=\"${formData}\">" + template + "</div>";
+        assertThat(engine.process(source, context)).doesNotContain(" min=", " max=", " step=");
+
+        field.setMin(min);
+        field.setMax(max);
+        field.setStep(step);
+        String html = engine.process(source, context);
+        assertConstraint(html, "min", min);
+        assertConstraint(html, "max", max);
+        assertConstraint(html, "step", step);
     }
 
     private void assertConstraint(String html, String attribute, double value) {

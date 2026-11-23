@@ -48,6 +48,7 @@ public class SelectInputHandler extends BaseFormFieldHandler<SelectInput> {
         }
 
         metadata.setMultiple(annotation.multiple());
+        metadata.setDefaultValue(annotation.defaultValue());
 
     }
 

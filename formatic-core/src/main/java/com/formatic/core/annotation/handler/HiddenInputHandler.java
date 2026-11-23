@@ -3,6 +3,7 @@ package com.formatic.core.annotation.handler;
 import com.formatic.core.annotation.HiddenInput;
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormFieldType;
+import com.formatic.core.form.FormDataTypes;
 
 import java.lang.reflect.Field;
 
@@ -39,6 +40,7 @@ public class HiddenInputHandler implements FormFieldAnnotationHandler<HiddenInpu
         metadata.setType(FormFieldType.HIDDEN);
         metadata.setDefaultValue(annotation.defaultValue());
 
+        FormDataTypes.infer(metadata, field.getGenericType());
         return metadata;
     }
 }

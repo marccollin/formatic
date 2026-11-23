@@ -14,6 +14,8 @@ public class FormFieldMetadata {
     private String name;
     private FieldIdStyle idStyle = FieldIdStyle.DOT;
     private FormFieldType type;
+    private FormDataType dataType;
+    private FormDataType itemDataType;
     private String label;
     private boolean readonly;
     private boolean required;
@@ -29,6 +31,7 @@ public class FormFieldMetadata {
     private String pattern;
     private String errorMessage;
     private String defaultValue;
+    private FormDataValue typedDefaultValue;
 
     private String title;
 
@@ -47,11 +50,11 @@ public class FormFieldMetadata {
     private boolean disabled;
     private boolean alpha;
 
-    private double min;
-    private double max;
-    private double step;
-    private int minLength;
-    private int maxLength;
+    private double min = Double.NaN;
+    private double max = Double.NaN;
+    private double step = Double.NaN;
+    private int minLength = -1;
+    private int maxLength = -1;
     private int rows;
     private int cols;
     private String wrap;
@@ -78,6 +81,8 @@ public class FormFieldMetadata {
         this.name = source.name;
         this.idStyle = source.idStyle;
         this.type = source.type;
+        this.dataType = source.dataType;
+        this.itemDataType = source.itemDataType;
         this.label = source.label;
         this.readonly = source.readonly;
         this.required = source.required;
@@ -91,6 +96,7 @@ public class FormFieldMetadata {
         this.pattern = source.pattern;
         this.errorMessage = source.errorMessage;
         this.defaultValue = source.defaultValue;
+        this.typedDefaultValue = source.typedDefaultValue;
         this.title = source.title;
         this.accept = source.accept;
         this.minDate = source.minDate;
@@ -216,6 +222,24 @@ public class FormFieldMetadata {
 
     public void setType(FormFieldType type) {
         this.type = type;
+    }
+
+    /** Null means the data type is unknown or requires an explicit mapping. */
+    public FormDataType getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(FormDataType dataType) {
+        this.dataType = dataType;
+    }
+
+    /** Scalar item kind for arrays; null means unknown or not applicable. */
+    public FormDataType getItemDataType() {
+        return itemDataType;
+    }
+
+    public void setItemDataType(FormDataType itemDataType) {
+        this.itemDataType = itemDataType;
     }
 
     public String getLabel() {
@@ -353,6 +377,15 @@ public class FormFieldMetadata {
 
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
+    }
+
+    /** Optional schema default, independent of the legacy HTML default string. */
+    public FormDataValue getTypedDefaultValue() {
+        return typedDefaultValue;
+    }
+
+    public void setTypedDefaultValue(FormDataValue typedDefaultValue) {
+        this.typedDefaultValue = typedDefaultValue;
     }
 
     public String getTitle() {

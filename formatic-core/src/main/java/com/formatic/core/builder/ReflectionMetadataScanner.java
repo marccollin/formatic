@@ -5,6 +5,7 @@ import com.formatic.core.annotation.handler.FormFieldAnnotationHandler;
 import com.formatic.core.form.ConstraintValidationException;
 import com.formatic.core.form.FormConstraintValidator;
 import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.FormDataTypes;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -51,6 +52,7 @@ final class ReflectionMetadataScanner {
             } else if (handler != null) {
                 FormFieldMetadata metadata = handler.handle(field);
                 if (metadata != null) {
+                    FormDataTypes.infer(metadata, field.getGenericType());
                     metadata.setName(prefix + metadata.getName());
                     FormConstraintValidator.validate(metadata, root + "." + prefix + field.getName());
                     local.add(metadata);

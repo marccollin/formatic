@@ -2,6 +2,43 @@
 
 This guide covers Formatic's annotations, constraints, rendering options, and example application. For setup and a minimal first form, start with the [README](../README.md).
 
+JSON support is being designed separately from HTML rendering. Core now provides
+`FormDefinition` to wrap a title and prepared field metadata. The
+[proposed JSON contract](JSON_SUPPORT.md) describes schema output, frontend UI
+schema, limitations, and HTML compatibility risks. The optional
+`formatic-schema-json` module now exports a supported subset of Draft 2020-12;
+`formatic-schema-rjsf` adds frontend UI schema. See
+[exporter usage](JSON_SUPPORT.md#using-the-json-schema-exporter).
+
+For a framework-neutral API, `DefaultJsonFormExporter` returns `{schema, ui}`
+with a versioned ordered field list; the example `/api/forms/customer` now uses
+this format instead of RJSF's `{schema, uiSchema}`. React, Angular, and Vue adapters
+can translate the same neutral document. See the
+[neutral UI contract](JSON_SUPPORT.md#framework-neutral-ui-contract) for semantics
+and migration. The RJSF exporter remains optional and unchanged.
+
+The JSON exporter includes email/URI formats, plain phone strings, six-digit hex
+colors, and calendar-valid date/local time strings. Files, labels, temporal
+bounds/step, and alpha colors remain unsupported. Client validators must enable
+format assertions; HTML rendering is unaffected by these JSON-only mappings.
+
+Field metadata also carries `dataType` and, for arrays, `itemDataType`, independent
+of its HTML widget `type`. Builders infer supported Java value kinds; custom
+handlers may provide an explicit mapping. Unknown kinds remain null and do not
+block HTML rendering. Existing string options and defaults are unchanged.
+
+**Constraint default correction:** manually constructed `FormFieldMetadata`
+now uses `Double.NaN` for absent numeric bounds/step and `-1` for absent length
+limits, matching annotation defaults. HTML no longer receives accidental zero
+constraints. Set intended zero bounds explicitly. See the
+[compatibility and migration guide](JSON_SUPPORT.md#html-compatibility-and-migration).
+
+**Default extraction correction:** select `defaultValue` and simple-checkbox
+`defaultChecked=true` now populate metadata in both runtime and generated
+builders. Unbound standalone controls use these defaults; bound values retain
+precedence. Password annotation defaults remain suppressed. The
+[JSON contract](JSON_SUPPORT.md) explains typed defaults and collection limitations.
+
 ## Modular Architecture
 ### 🎯 formatic-core - Core Module
 

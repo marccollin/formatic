@@ -2,6 +2,7 @@ package com.formatic.core.annotation.handler;
 
 import com.formatic.core.annotation.CommonFieldAttributes;
 import com.formatic.core.form.FormFieldMetadata;
+import com.formatic.core.form.FormDataTypes;
 import com.formatic.core.utils.StringUtils;
 
 import java.lang.annotation.Annotation;
@@ -49,6 +50,7 @@ public abstract class BaseFormFieldHandler<T extends Annotation>
         //Processing specific attributes
         processSpecificAttributes(annotation, metadata, field);
 
+        FormDataTypes.infer(metadata, field.getGenericType());
         return metadata;
     }
 

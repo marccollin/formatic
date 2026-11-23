@@ -24,6 +24,41 @@ class PebbleFormRendererTest {
     private final FormRenderer renderer = new PebbleFormRenderer("formatic/pebble/form.peb");
 
     @Test
+    void usesMetadataDefaultsOnlyForUnboundControls() {
+        var checkbox = new FormFieldMetadata("enabled", FormFieldType.CHECKBOX, "Enabled", 1);
+        checkbox.setDefaultValue("true");
+        var select = new FormFieldMetadata("choice", FormFieldType.SELECT, "Choice", 2);
+        select.setOptions(List.of(new SelectRadioOption("first", "First"), new SelectRadioOption("second", "Second")));
+        select.setDefaultValue("second");
+        String initial = renderer.render(new FormRenderModel(null, "", List.of(
+                new RenderField(checkbox), new RenderField(select))));
+        assertThat(initial).containsPattern("checked(?:=\"checked\")?")
+                .containsPattern("value=\"second\"\\s+selected");
+        String bound = renderer.render(new FormRenderModel(null, "", List.of(
+                new RenderField(checkbox, List.of("false"), List.of()),
+                new RenderField(select, List.of("first"), List.of()))));
+        assertThat(bound).doesNotContainPattern("checked(?:=\"checked\")?")
+                .containsPattern("value=\"first\"\\s+selected")
+                .doesNotContainPattern("value=\"second\"\\s+selected");
+    }
+
+    @Test
+    void omitsAbsentConstraintsButPreservesExplicitZero() {
+        var number = new FormFieldMetadata("amount", FormFieldType.NUMBER, "Amount", 1);
+        var text = new FormFieldMetadata("name", FormFieldType.TEXT, "Name", 2);
+        var form = new FormRenderModel(null, "", List.of(new RenderField(number), new RenderField(text)));
+        assertThat(renderer.render(form)).doesNotContain(" min=", " max=", " step=", " minlength=", " maxlength=");
+
+        number.setMin(0);
+        number.setMax(0);
+        number.setStep(1);
+        text.setMinLength(2);
+        text.setMaxLength(0);
+        assertThat(renderer.render(form)).contains("min=\"0.0\"", "max=\"0.0\"", "step=\"1.0\"",
+                "minlength=\"2\"", "maxlength=\"0\"");
+    }
+
+    @Test
     void loadsAnApplicationTemplateFromTheConfiguredFolder() {
         var renderer = new PebbleFormRenderer("example/forms/", "contact.peb",
                 FormTheme.BOOTSTRAP, FormLayout.VERTICAL);

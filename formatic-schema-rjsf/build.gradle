@@ -1,0 +1,8 @@
+description = 'Formatic RJSF UI Schema Adapter'
+
+dependencies {
+    api project(':formatic-schema-json')
+    testImplementation platform("org.mockito:mockito-bom:${mockitoBomVersion}")
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

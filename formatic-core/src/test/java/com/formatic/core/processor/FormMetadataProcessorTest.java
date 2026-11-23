@@ -61,7 +61,11 @@ class FormMetadataProcessorTest {
                         @NestedForm private Location location;
                         @FileInput(accept = ".pdf", multiple = true, disabled = true) private Object file;
                         @CheckboxInput(options = {"sport:Sport"}) private java.util.List<String> interests;
-                        @SelectInput(options = {"Paris:Paris", "London:London"}, required = true) private String city;
+                        @SelectInput(options = {"Paris:Paris", "London:London"}, required = true,
+                            defaultValue = "Paris") private String city;
+                        @CheckboxInput(defaultChecked = true) private boolean subscribed;
+                        @CheckboxInput(defaultChecked = true) private String enabled;
+                        @CheckboxInput private Boolean optional;
                         @RadioInput(options = {"visa:Visa", "cash:Cash"}, defaultValue = "cash") private String payment;
                     }
                     public static class Location {
@@ -152,6 +156,29 @@ class FormMetadataProcessorTest {
             assertThat(task.call()).isFalse();
             assertThat(diagnostics.getDiagnostics().toString()).contains("fixture.Invalid.address.street");
         }
+    }
+
+    @Test
+    void generatedDataKindsMatchRuntimeInference() throws Exception {
+        assertGeneratedMetadataMatchesReflection("DataKinds", """
+                package fixture;
+                import com.formatic.core.annotation.TextInput;
+                public class DataKinds<T> {
+                    @TextInput private String text;
+                    @TextInput private int count;
+                    @TextInput private java.math.BigDecimal amount;
+                    @TextInput private Boolean checked;
+                    @TextInput private Choice choice;
+                    @TextInput private java.util.List<Long> numbers;
+                    @TextInput private String[] names;
+                    @TextInput private java.util.List<?> unknownItems;
+                    @TextInput private java.util.List rawItems;
+                    @TextInput private T[] genericItems;
+                    @TextInput private java.util.Map<String, String> unsupported;
+                    enum Choice { FIRST, SECOND }
+                }
+                """, new TextInputHandler(), List.of("text", "count", "amount", "checked",
+                "choice", "numbers", "names", "unknownItems", "rawItems", "genericItems", "unsupported"));
     }
 
     @Test

@@ -3,12 +3,16 @@ package com.formatic.core.processor;
 import com.formatic.core.form.FormFieldMetadata;
 import com.formatic.core.form.FormConstraintValidator;
 import com.formatic.core.form.ConstraintValidationException;
+import com.formatic.core.form.FormDataType;
+import com.formatic.core.form.FormDataTypes;
 import com.palantir.javapoet.*;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
 import java.io.IOException;
@@ -29,6 +33,36 @@ public class FormMetadataProcessor extends AbstractProcessor {
 
     //Using a Map to generate the file only once per analyzed class
     private final Map<String, Boolean> generatedClasses = new HashMap<>();
+
+    private void generateDataTypeSetters(MethodSpec.Builder builder, String metadata, TypeMirror type) {
+        TypeMirror item = null;
+        if (type instanceof ArrayType array) {
+            builder.addStatement("$N.setDataType($T.ARRAY)", metadata, FormDataType.class);
+            item = array.getComponentType();
+        } else if (type instanceof DeclaredType declared
+                && declared.asElement() instanceof TypeElement element
+                && isAssignableTo(element, "java.util.Collection")) {
+            builder.addStatement("$N.setDataType($T.ARRAY)", metadata, FormDataType.class);
+            if (FormDataTypes.hasScalarItemArgument(element.getQualifiedName().toString())
+                    && declared.getTypeArguments().size() == 1) {
+                item = declared.getTypeArguments().getFirst();
+            }
+        } else {
+            scalarDataType(type).ifPresent(kind ->
+                    builder.addStatement("$N.setDataType($T.$L)", metadata, FormDataType.class, kind.name()));
+        }
+        if (item != null) {
+            scalarDataType(item).ifPresent(kind ->
+                    builder.addStatement("$N.setItemDataType($T.$L)", metadata, FormDataType.class, kind.name()));
+        }
+    }
+
+    private Optional<FormDataType> scalarDataType(TypeMirror type) {
+        if (type instanceof DeclaredType declared && declared.asElement() instanceof TypeElement element) {
+            return FormDataTypes.scalar(element.getQualifiedName().toString(), element.getKind() == ElementKind.ENUM);
+        }
+        return FormDataTypes.scalar(type.toString(), false);
+    }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -214,6 +248,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
                 buildMethodBuilder.addStatement("$T $N = new $T()", formFieldMetadataClass, fieldName + "Meta", formFieldMetadataClass);
                 buildMethodBuilder.addStatement("$N.setName($S)", fieldName + "Meta", propertyName);
                 buildMethodBuilder.addStatement("$N.setOrder($L)", fieldName + "Meta", orderCounter);
+                generateDataTypeSetters(buildMethodBuilder, metaObjectName, field.asType());
 
                 //Initializing annotation values (Map<String, AnnotationValue>)
                 Map<String, AnnotationValue> values = getAnnotationValues(annotationMirror);
@@ -450,7 +485,14 @@ public class FormMetadataProcessor extends AbstractProcessor {
         buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, FORM_FIELD_TYPE_CLASS, formFieldType);
         generateCommonFieldSetters(buildMethodBuilder, metaObjectName, values);
         if (field.asType().toString().equals("boolean") || field.asType().toString().equals("java.lang.Boolean")) {
+            if (getAnnotationValue(values, "defaultChecked", false)) {
+                buildMethodBuilder.addStatement("$N.setDefaultValue($S)", metaObjectName, "true");
+            }
             return;
+        }
+        if (field.asType().toString().equals("java.lang.String")
+                && getAnnotationValue(values, "defaultChecked", false)) {
+            buildMethodBuilder.addStatement("$N.setDefaultValue($S)", metaObjectName, "true");
         }
         boolean multiple = field.asType() instanceof DeclaredType declared
                 && declared.asElement() instanceof TypeElement type && isAssignableTo(type, "java.util.Collection");
@@ -533,9 +575,7 @@ public class FormMetadataProcessor extends AbstractProcessor {
         buildMethodBuilder.addStatement("$N.setType($T.$N)", metaObjectName, FORM_FIELD_TYPE_CLASS, formFieldType);
 
         generateCommonFieldSetters(buildMethodBuilder, metaObjectName, values);
-        if (annotationSimpleName.equals("RadioInput")) {
-            buildMethodBuilder.addStatement("$N.setDefaultValue($S)", metaObjectName, getAnnotationValue(values, "defaultValue", ""));
-        }
+        buildMethodBuilder.addStatement("$N.setDefaultValue($S)", metaObjectName, getAnnotationValue(values, "defaultValue", ""));
         String optionsProvider = getAnnotationValue(values, "optionsProvider", null);
 
         AnnotationValue optionsValue = values.get("options");

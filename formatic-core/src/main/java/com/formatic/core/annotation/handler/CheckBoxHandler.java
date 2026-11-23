@@ -73,6 +73,9 @@ public class CheckBoxHandler extends BaseFormFieldHandler<CheckboxInput> {
     private void configureSimpleCheckbox(FormFieldMetadata metadata, CheckboxInput annotation) {
         //For a simple boolean, no options are needed
         metadata.setMultiple(false);
+        if (annotation.defaultChecked()) {
+            metadata.setDefaultValue("true");
+        }
 
         //"If options are defined for a boolean, they can be ignored or an exception can be thrown
         if (annotation.options().length > 0 || StringUtils.hasText(annotation.optionsProvider())) {
@@ -122,6 +125,9 @@ public class CheckBoxHandler extends BaseFormFieldHandler<CheckboxInput> {
         } else {
             //String without options = simple checkbox with 'true'/'false' value
             metadata.setMultiple(false);
+            if (annotation.defaultChecked()) {
+                metadata.setDefaultValue("true");
+            }
         }
     }
 
