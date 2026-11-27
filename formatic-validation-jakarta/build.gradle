@@ -1,0 +1,12 @@
+description = 'Formatic Jakarta Bean Validation Bridge'
+
+dependencies {
+    api project(':formatic-core')
+    api 'jakarta.validation:jakarta.validation-api:3.0.2'
+    testImplementation 'org.hibernate.validator:hibernate-validator:8.0.2.Final'
+    testRuntimeOnly 'org.glassfish:jakarta.el:4.0.2'
+    testRuntimeOnly "org.slf4j:slf4j-api:${slf4jVersion}"
+    testImplementation platform("org.mockito:mockito-bom:${mockitoBomVersion}")
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

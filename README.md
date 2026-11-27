@@ -33,6 +33,11 @@ http://localhost:8080/form?class=com.formatic.example.dto.Editor&cssLibrary=BOOT
 
 The [Running the Example](#-running-the-example) section has more sample URLs.
 
+To try Formatic-derived server validation, open
+[`http://localhost:8080/validated-contact`](http://localhost:8080/validated-contact).
+The same DTO is also accepted as JSON at `POST /api/validated-contact`; see
+the [validation example](docs/USER_GUIDE.md#runnable-validation-example).
+
 ## 📦 Installation
 
 Formatic artifacts are not currently published to Maven Central or another Maven repository, so the coordinates below are not yet resolvable from a repository. Until publication, use the Gradle project dependency or composite build.
@@ -58,6 +63,7 @@ dependencies {
 | `formatic-render-pebble` | Pebble renderer for Bootstrap, Tailwind CSS, and Bulma (vertical and horizontal) | Uses the rendering API and brings in Pebble, without Spring. |
 | `formatic-schema-json` | Strict JSON Schema Draft 2020-12 export from form metadata | Exposes core and Jackson; uses NetworkNT to validate defaults and choices. Does not depend on Spring or an HTML engine. |
 | `formatic-schema-rjsf` | Combined JSON Schema and RJSF UI schema | Exposes the JSON Schema module; maps widgets and presentation without Spring or HTML engines. |
+| `formatic-validation-jakarta` | Opt-in server-side validation of Formatic constraints through `@FormaticValidated` | Exposes core and Jakarta Validation API; applications supply a validation provider. Supports required, text/phone lengths, a portable HTML pattern subset, numeric and local date/time bounds/steps, typed static choices, and email/absolute-URI/hex-color syntax. |
 | `formatic-example` | Demo application and usage examples | Not required by applications using Formatic. |
 
 With Gradle's published module metadata, `formatic-spring`'s implementation dependencies are available at runtime, but are not part of its compile-time API. Use Spring Boot's dependency management (for example, its Gradle plugin or BOM) to align Spring dependency versions. The configuration processor is a build-time annotation processor, not a runtime integration requirement.
@@ -67,6 +73,9 @@ For JSON Schema export and its supported subset, see the
 The running example exposes the customer definition at
 `GET /api/forms/customer`, returning framework-neutral `{schema, ui}` with localized field
 labels. A frontend demo and JSON submission endpoint are not implemented yet.
+
+For server-side checks from the same annotations, see
+[`@FormaticValidated`](docs/USER_GUIDE.md#server-side-validation-with-formaticvalidated).
 
 For a separate Gradle project, add the Formatic checkout as a composite build in `settings.gradle` (adjust the path as needed):
 

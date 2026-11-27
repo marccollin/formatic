@@ -13,6 +13,7 @@ dependencies {
     implementation project(':formatic-render-jte')
     implementation project(':formatic-render-pebble')
     implementation project(':formatic-schema-json')
+    implementation project(':formatic-validation-jakarta')
 
     // Spring Boot for Spring examples
     implementation 'org.springframework.boot:spring-boot-starter-web'

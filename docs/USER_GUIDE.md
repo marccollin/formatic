@@ -39,6 +39,308 @@ builders. Unbound standalone controls use these defaults; bound values retain
 precedence. Password annotation defaults remain suppressed. The
 [JSON contract](JSON_SUPPORT.md) explains typed defaults and collection limitations.
 
+## Server-side validation with @FormaticValidated
+
+The optional `formatic-validation-jakarta` module bridges supported Formatic
+constraints into Jakarta Bean Validation. In this repository's Gradle build:
+
+```groovy
+dependencies {
+    implementation project(':formatic-validation-jakarta')
+    // Spring applications also need a provider, e.g. spring-boot-starter-validation.
+}
+```
+
+```java
+import com.formatic.core.annotation.TextInput;
+import com.formatic.validation.jakarta.FormaticValidated;
+
+@FormaticValidated
+public class ContactForm {
+    @TextInput(required = true, minLength = 2, maxLength = 20)
+    private String name;
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+}
+```
+
+No duplicate `@Size` or `@NotNull` declaration is needed for these supported
+rules. Existing DTOs are not automatically opted in. Activate the usual Jakarta
+validation lifecycle, for example `@Valid @ModelAttribute ContactForm` for HTML
+submissions or `@Valid @RequestBody ContactForm` for JSON submissions. Standard
+Spring `BindingResult` receives field errors, usable by Thymeleaf, JTE, and
+Pebble. JSON clients need an application-defined response mapping for those
+errors. This module does not add endpoints, exception handlers, or persistence.
+
+### Runnable validation example
+
+Start the example application with `./gradlew :formatic-example:bootRun`, then
+open `http://localhost:8080/validated-contact`. Its
+`ValidatedContactForm` uses `@FormaticValidated` and Formatic annotations
+without duplicate Jakarta field constraints. The controller redisplays
+server-side field errors and submitted values; valid submissions are not saved.
+The optional phone field accepts international formats without a fixed mask.
+
+The same DTO is validated for JSON submissions:
+
+```sh
+curl -i http://localhost:8080/api/validated-contact \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"A","email":"invalid","phone":"+33 1 23 45 67 89"}'
+```
+
+An invalid DTO returns HTTP 400 and an example response such as
+`{"accepted":false,"errors":[{"field":"email","message":"Must be a valid email address."},...]}`.
+A valid DTO returns `{"accepted":true,"errors":[]}`. Field order is not
+guaranteed. This response is an example application contract, not a built-in
+Formatic API; malformed JSON and binding errors use Spring's usual handling.
+
+### Supported initial rules
+
+| Surface | Server behavior |
+|---|---|
+| TEXT, TEXTAREA, PASSWORD | Required and explicit minimum/maximum length; supported pattern subset on TEXT/PASSWORD |
+| EMAIL, URL | Required, explicit lengths, single email / absolute URI syntax |
+| PHONE | Required and explicit lengths; no implicit telephone format |
+| COLOR | Required and six-digit hexadecimal syntax; alpha unsupported |
+| NUMBER, RANGE | Required, finite numeric values, explicit numeric bounds and step |
+| Boolean CHECKBOX | Required means checked (`true`) |
+| SELECT, RADIO, multiple CHECKBOX | Required presence and typed static-option membership |
+| DATE, TIME, DATETIME_LOCAL | Required, local calendar/clock validity, explicit inclusive bounds and step |
+| HIDDEN | Required presence; not authorization |
+| `@NestedForm` | Validate flattened child fields, including when a parent is null |
+
+Required text rejects null/empty strings, but whitespace counts as present,
+matching HTML rather than `@NotBlank`. Optional empty text skips length checks.
+Optional null numbers skip bounds; zero is a value, not absence. Text fields
+must use `CharSequence`; numeric controls must use numeric Java fields.
+Metadata configuration is checked even when submission values are empty.
+
+Lengths count UTF-16 code units, as HTML does. JSON Schema counts Unicode code
+points, so supplementary characters can have different lengths across these
+two standards. Full client/server validation parity is not claimed.
+Only explicit numeric bounds and steps are checked; implicit browser range/step
+defaults are not inferred. Explicit step must be positive and finite. Alignment
+uses decimal arithmetic with base `min`, otherwise the legacy metadata
+`defaultValue` if supplied, otherwise zero. Typed JSON defaults do not change
+the HTML step base. A malformed default used as a step base is a configuration
+error, even for an optional null submission. Bounds take precedence over defaults
+when choosing the base.
+
+This models a stable metadata-based HTML value attribute. A template that emits
+a different bound value attribute can change the browser's step base when no
+`min` is supplied. For consistent browser/server checks, set an explicit `min`
+when using step, or keep the emitted value base aligned with the metadata.
+JSON Schema export still rejects explicit step: nonzero-base alignment cannot
+be represented by simply emitting `multipleOf`.
+
+### Date and local-time validation
+
+`@DateInput`, `@TimeInput`, and `@DateTimeInput` now validate submitted strings
+or their matching Java types (`LocalDate`, `LocalTime`, and `LocalDateTime`).
+Other types, including `Instant`, offset/zoned types, and legacy `Date`, are
+configuration errors rather than implicitly converted timezones.
+
+Nonempty strings must be valid HTML-style positive-year dates or local clock
+values. Date strings support four-or-more-digit positive years, including years
+beyond Java's `LocalDate` range. Time strings use `HH:mm[:ss[.fraction]]` with
+1-3 fractional digits. Local date-time accepts a `T` or single space separator
+and never converts to UTC. Invalid leap days, year zero, leap seconds, offsets,
+surrounding whitespace, and precision finer than milliseconds are rejected.
+Typed values follow the same positive-year and millisecond-precision policy.
+
+Explicit min/max bounds are inclusive. Time ranges where min exceeds max cross
+midnight: min `22:00`, max `06:00` accepts midnight but rejects noon. Equal
+min/max allows only that exact time. Local date-time comparisons include the
+date, so they do not wrap. Configuration bounds must use the existing metadata
+syntax (including `T` for local date-time) and satisfy the same supported
+precision. Bounds declared for a different temporal control are errors.
+
+Explicit temporal `step` uses days for dates and seconds for time/local date-time,
+with exact decimal alignment. Positive fractional steps are supported within
+the existing metadata's finite positive-number contract; submitted clocks still
+have at most millisecond precision. `"any"` disables alignment, and omitted
+steps do not enforce browser defaults. The base is `min`, otherwise the legacy
+metadata `defaultValue`, otherwise `1970-01-01`, midnight, or
+`1970-01-01T00:00` respectively. Typed JSON defaults do not change this base.
+A malformed default used by an active step is a configuration error, even for
+null submissions; a valid `min` takes precedence. No timezone or DST conversion
+is involved. Overnight time bounds wrap, but alignment uses the plain clock
+difference from the base, without adding a day: min `22:00`, step `18000`
+(five hours) accepts `02:00` but not midnight.
+
+As with numeric steps, templates emitting a different bound value attribute
+can change the browser's base. Set an explicit `min` when consistent alignment
+is required. JSON Schema export still rejects temporal steps.
+
+Optional null/empty values skip validation, but malformed configuration still fails. Spring's
+binding/Jackson configuration must parse typed fields before validation; for
+example use `@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)` for HTML `LocalDate`
+binding. This does not change rendering or add temporal bounds to JSON Schema.
+JSON export retains its separately documented four-digit-year and `T`-separator
+contract; exact cross-output parity is not claimed for these extended values.
+
+Disabled/read-only flags do not bypass validation, and hidden fields are not
+trusted. Parsing/type conversion failures belong to the binding layer, before
+this validator. DTO defaults and metadata defaults do not replace submitted
+values. Validation does not trim, coerce, or mutate the submission.
+
+### Static choice validation
+
+`@SelectInput`, `@RadioInput`, and collection/array `@CheckboxInput` fields
+validate against their static `options`. Each nonempty submitted selection must
+match an allowed value. Multiple selects must declare `multiple = true` and use
+a collection or array with a known scalar item type. Radios are scalar.
+Required multiple choices reject empty collections/arrays. Optional null or
+empty values skip membership checks; an empty scalar string is treated as absent.
+
+Options use the existing `value:label` syntax and whitespace trimming. Matching
+preserves value kinds: numeric choices accept numbers, not numeric strings;
+boolean choices accept booleans. Decimal comparison ignores scale, and enum
+choices use enum names. Known Java string-mapped types such as UUID and local
+dates use their `toString()` representation, which must match the option exactly.
+Null items and forged values produce `{formatic.choice}` field errors.
+Repeated allowed selections are accepted; unlike JSON Schema's `uniqueItems`,
+this validator checks membership rather than uniqueness.
+
+Missing static options, unknown value/item types, malformed or duplicate typed
+option values, and mismatched multiplicity are configuration errors, even for
+null submissions. A boolean checkbox must not declare choice options.
+Dynamic `optionsProvider` declarations are explicitly rejected, not invoked;
+application-specific context and authorization checks remain separate.
+Array validation is supported here but does not extend an HTML renderer's
+supported checkbox binding types.
+
+### Email, URL, phone, and color validation
+
+These controls require `CharSequence` Java fields. Nonempty email values use
+HTML's single-address syntax, not the broader Jakarta `@Email` or RFC mailbox
+grammar. Local domains such as `user@localhost` are accepted; quoted mailboxes,
+comma-separated lists, and Unicode domain labels are rejected. Use ASCII
+punycode labels for internationalized domains. This checks syntax only, not
+mailbox existence.
+
+URL values must parse as absolute `java.net.URI` values. Relative paths, missing
+schemes, spaces, and malformed percent escapes are rejected. Schemes are not
+restricted to HTTP(S): `mailto:` and `urn:` are valid. Java URI parsing is not
+the browser's WHATWG URL parser or a guarantee of JSON Schema `uri` parity.
+Applications must separately enforce allowed schemes/hosts and authorization
+before following submitted URLs; validation performs no network requests.
+
+Phone controls follow HTML `type="tel"`: no universal phone-number format is
+assumed. Required presence and explicit lengths are checked, but arbitrary
+nonempty text remains valid. Add an application Jakarta business constraint
+for a country-specific or E.164 policy. A supported Formatic `pattern` can
+also restrict the accepted syntax.
+
+Colors accept exactly `#` followed by six case-insensitive hexadecimal digits.
+Short hex, named colors, CSS functions, and alpha colors are unsupported;
+`alpha = true` is a declaration error even for null submissions.
+This intentionally retains the existing JSON export's six-digit color contract,
+not the newer browser CSS color capabilities.
+
+Optional null/empty values skip format checks. Required empty values produce
+`formatic.required`. Explicit email/URL/phone lengths count UTF-16 code units.
+Unlike browsers, validation does not trim whitespace, strip newlines, or
+replace invalid color values with black. It does not change rendering or JSON
+Schema export; their sanitization and format semantics can differ.
+
+### HTML pattern validation
+
+The Jakarta bridge and core validator support a conservative subset of HTML
+Unicode-set (`v`-flag) patterns on text, password, email, URL, and phone inputs.
+For example, `@PhoneInput(pattern = "[0-9]{3}-[0-9]{3}-[0-9]{4}")` validates
+the entire nonempty value, not just a substring. A separate required check
+handles empty values; the empty annotation default means no pattern.
+An email or URL must also satisfy its independent format rule.
+
+Supported syntax consists of printable ASCII literals, `.`, ASCII character
+classes using letters, digits, underscores and ranges (including negation),
+`\d`, `\D`, `\w`, `\W`, escaped regex punctuation, capturing/noncapturing
+groups, `|`, and greedy or lazy `*`, `+`, `?`, `{n}`, `{n,}`, `{n,m}`.
+Dot excludes the four JavaScript line terminators, and digit/word escapes use
+ASCII semantics. Groups are treated as noncapturing because backreferences
+are not supported. Patterns are limited to 4,096 characters, 32 nested groups,
+and repetition counts of at most 10,000.
+
+Anchors, lookarounds, backreferences, Unicode property escapes, `\s`, literal
+non-ASCII characters, class escapes, Unicode-set operations, and other syntax
+outside that subset are rejected with a field-specific configuration error,
+even for optional empty submissions. This is intentionally more restrictive
+than browsers, which ignore an invalid pattern. It prevents accepting values
+under a silently different server rule. Existing patterns outside this subset
+must be rewritten or left off DTOs using `@FormaticValidated`.
+
+Patterns come from trusted application metadata, not request data. As with
+Java regex generally, avoid ambiguous nested repetitions: the subset does not
+guarantee protection from excessive backtracking on untrusted input. Apply
+appropriate input-size limits before validation. Browser input sanitization
+can also differ; this validator matches the submitted value without mutation.
+
+JSON Schema export **still rejects patterns**, including supported server-side
+patterns; its separate translation target has not been implemented. The Java
+and JavaScript `v` test vectors are shared in core; run
+`node formatic-core/src/test/scripts/check-html-pattern-vectors.js` with a
+Node version supporting `v` to compare them against JavaScript.
+`node formatic-core/src/test/scripts/check-html-pattern-browser.js` also
+checks the vectors through Chromium HTML input validation (`CHROME_BIN`
+overrides the default `google-chrome` executable); cases sanitized by text
+inputs are checked only by the JavaScript regex script.
+
+### Nested paths, groups, and messages
+
+Put `@FormaticValidated` on the root DTO. It owns traversal through
+`@NestedForm`; do not also annotate its nested DTOs with `@FormaticValidated`,
+which is rejected to avoid duplicate Formatic checks. Ordinary `@Valid` on
+children may still run other Jakarta constraints.
+
+Violations use real Java property paths such as `address.street`. An annotation
+`name` override remains the metadata binding name, but does not rename Jakarta
+property nodes. Clients that rename JSON properties separately need their own
+error-path mapping.
+
+`groups` and `payload` are standard Jakarta constraint attributes. All Formatic
+field checks run as part of the class-level constraint's selected group.
+Additional Jakarta business constraints continue running normally. Null root
+values are valid for this class-level constraint; require a non-null root using
+normal request binding or `@NotNull`.
+
+Default message templates are `{formatic.required}`, `{formatic.minLength}`,
+`{formatic.maxLength}`, `{formatic.min}`, `{formatic.max}`, and
+`{formatic.number}`, and `{formatic.step}`. Applications may translate these keys through their Jakarta
+message interpolation setup. The supplied English messages are generic; the
+shared core `FormValueViolation` also supplies rule codes and descriptive text.
+Temporal templates are `{formatic.temporal}`, `{formatic.temporalMin}`,
+`{formatic.temporalMax}`, `{formatic.timeRange}`, and `{formatic.temporalStep}`.
+String format templates are `{formatic.email}`, `{formatic.url}`, and
+`{formatic.color}`; direct core callers supplying non-character values receive
+`formatic.format`. The Jakarta bridge rejects incompatible Java field types
+as declaration errors.
+Pattern mismatches use `{formatic.pattern}`.
+A field's nonempty `errorMessage` overrides the Jakarta message as literal text,
+not an expression. The class-level fallback message is replaced by field errors.
+
+### Explicit limitations
+
+This first bridge supports built-in text, textarea, password, number, range,
+hidden, checkbox, static select/radio, email/URL/phone/color, and date/local-time handlers.
+Dynamic providers, alpha colors, files, custom input
+annotations/handlers, and patterns outside the subset above are not implemented yet.
+Unsupported controls or active rules cause `ConstraintDeclarationException`,
+not an apparently valid submission. Do not enable the root constraint on a DTO
+using those features until the corresponding support is added.
+
+The framework-independent `FormValueValidator` in core can also validate a
+prepared metadata list with an application-supplied path-to-value function.
+It returns immutable lists of `FormValueViolation` without retaining rejected
+values. The Jakarta bridge caches metadata/access plans only, rereading DTO
+values for each invocation. It does not generate another DTO or modify bytecode,
+and does not depend on Spring or the JSON exporters.
+
+POST and PUT can share this validation policy for complete submissions. PATCH
+needs a separate presence-aware policy and is not supported as partial validation.
+
 ## Modular Architecture
 ### 🎯 formatic-core - Core Module
 

@@ -18,6 +18,7 @@
             <option value="$PROJECT_DIR$/formatic-schema-rjsf" />
             <option value="$PROJECT_DIR$/formatic-spring" />
             <option value="$PROJECT_DIR$/formatic-spring-boot-starter-thymeleaf" />
+            <option value="$PROJECT_DIR$/formatic-validation-jakarta" />
           </set>
         </option>
       </GradleProjectSettings>

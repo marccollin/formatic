@@ -1,0 +1,27 @@
+[A-Za-z][0-9][A-Za-z] [0-9][A-Za-z][0-9]	A1A 1A1	true
+[A-Za-z][0-9][A-Za-z] [0-9][A-Za-z][0-9]	A1A 1A11	false
+[0-9]{3}-[0-9]{3}-[0-9]{4}	514-272-2323	true
+[0-9]{3}-[0-9]{3}-[0-9]{4}	x514-272-2323	false
+(ab|c)+	abcab	true
+(ab|c)+	abx	false
+\d{2,3}	123	true
+\d{2,3}	U+0661	false
+\w+	a_Z9	true
+\w+	U+00E9	false
+\D+	U+0661	true
+\W+	U+1F600	true
+.	U+0085	true
+.	U+2028	false
+.	U+1F600	true
+[^0-9]	U+1F600	true
+[a-z]{2,4}?	abc	true
+foo|bar	foobar	false
+foo|bar	bar	true
+ab{2,}	abbbb	true
+ab{2,}	ab	false
+\(ab\)	(ab)	true
+file\.txt	file.txt	true
+file\.txt	file-txt	false
+.	U+000A	false
+.	U+2029	false
+[^0-9]	U+000A	true

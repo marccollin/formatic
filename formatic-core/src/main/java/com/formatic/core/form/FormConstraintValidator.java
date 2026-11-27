@@ -119,7 +119,7 @@ public final class FormConstraintValidator {
         }
     }
 
-    private static DateValue parseDate(String location, String attribute, String value) {
+    static DateValue parseDate(String location, String attribute, String value) {
         if (value == null || value.isEmpty()) return null;
         Matcher match = DATE.matcher(value);
         if (!match.matches()) {
@@ -147,7 +147,7 @@ public final class FormConstraintValidator {
         throw new ConstraintValidationException(location + ": " + attribute + " " + rule + "; received " + value);
     }
 
-    private record DateValue(BigInteger year, int month, int day) implements Comparable<DateValue> {
+    record DateValue(BigInteger year, int month, int day) implements Comparable<DateValue> {
         @Override
         public int compareTo(DateValue other) {
             int yearComparison = year.compareTo(other.year);
